@@ -79,7 +79,7 @@ def load_file(engine, directory, cls, validate=True):
         engine.execute(table.delete())
         i = 0
         for row in reader:
-            records.append(cls.clean_dict(row))
+            records.append(cls.make_record(row))
             i += 1
             # commit every 10,000 records to the database to manage memory usage
             if i >= 10000:

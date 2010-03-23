@@ -20,6 +20,12 @@ class Base(object):
         return '%s.txt' %(cls.__tablename__)
 
     @classmethod
+    def make_record(cls, row):
+        row = cls.clean_dict(row)
+        return row
+
+
+    @classmethod
     def clean_dict(cls, attrs):
         for k, v in attrs.items():
             if v is None or v.strip() == '' or (k not in cls.__table__.c):
