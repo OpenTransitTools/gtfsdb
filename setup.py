@@ -12,12 +12,12 @@ setup(name='gtfsdb',
       include_package_data=True,
       zip_safe=False,
       install_requires=(
-        'GeoAlchemy',
-        'SQLAlchemy >= 0.5',
+        'GeoAlchemy>=0.1',
+        'SQLAlchemy>=0.5.8,<=0.5.999',
       ),
       extras_require = {
-        'oracle': ['cx_Oracle'],
-        'postgres': ['psycopg2'],
+        'oracle': ['cx_Oracle>=5.0.3'],
+        'postgres': ['psycopg2>=2.0.14'],
       },
       entry_points={
         'console_scripts': [
