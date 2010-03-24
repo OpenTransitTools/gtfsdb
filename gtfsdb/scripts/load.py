@@ -1,19 +1,27 @@
-import csv
-from gtfsdb import *
+from gtfsdb import (
+    Agency,
+    Calendar,
+    CalendarDate,
+    FareAttribute,
+    FareRule,
+    Frequency,
+    model,
+    Pattern,
+    Route,
+    RouteType,
+    Shape,
+    Stop,
+    StopTime,
+    Transfer,
+    Trip,
+    unzip_gtfs,
+)
 from optparse import OptionParser
-import os
 import pkg_resources
 import shutil
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-import sys
 import time
 import ConfigParser
-
-
-def create_session(engine):
-    Session = sessionmaker(bind=engine)
-    return Session()
 
 
 def get_default_config(options):
@@ -64,36 +72,6 @@ def init_parser():
     return options
 
 
-def load_file(engine, directory, cls, validate=True):
-    records = []
-    file_path = '%s/%s' %(directory, cls.get_filename())
-    if os.path.exists(file_path):
-        start_time = time.time()
-        file = open(file_path)
-        reader =  csv.DictReader(file)
-        if validate:
-            cls.validate(reader.fieldnames)
-        s = ' %s ' %(cls.get_filename())
-        sys.stdout.write(s)
-        table = cls.__table__
-        engine.execute(table.delete())
-        i = 0
-        for row in reader:
-            records.append(cls.clean_dict(row))
-            i += 1
-            # commit every 10,000 records to the database to manage memory usage
-            if i >= 10000:
-                engine.execute(table.insert(), records)
-                sys.stdout.write('*')
-                records = []
-                i = 0
-        if len(records) > 0:
-            engine.execute(table.insert(), records)
-        file.close()
-        processing_time = time.time() - start_time
-        print ' (%.0f seconds)' %(processing_time)
-
-
 def main():
     options = init_parser()
     engine = create_engine(options.database)
@@ -105,19 +83,20 @@ def main():
     data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
     # load GTFS data files, due to foreign key constraints
     # these files need to be loaded in the appropriate order
-    load_file(engine, gtfs_directory, Agency)
-    load_file(engine, gtfs_directory, Calendar)
-    load_file(engine, gtfs_directory, CalendarDate)
-    load_file(engine, data_directory, RouteType, False)
-    load_file(engine, gtfs_directory, Route)
-    load_file(engine, gtfs_directory, Stop)
-    load_file(engine, gtfs_directory, Transfer)
-    load_file(engine, gtfs_directory, Shape)
-    load_file(engine, gtfs_directory, Trip)
-    load_file(engine, gtfs_directory, StopTime)
-    load_file(engine, gtfs_directory, Frequency)
-    load_file(engine, gtfs_directory, FareAttribute)
-    load_file(engine, gtfs_directory, FareRule)
+    Agency.load(engine, gtfs_directory)
+    Calendar.load(engine, gtfs_directory)
+    CalendarDate.load(engine, gtfs_directory)
+    RouteType.load(engine, data_directory, False)
+    Route.load(engine, gtfs_directory)
+    Stop.load(engine, gtfs_directory)
+    Transfer.load(engine, gtfs_directory)
+    Shape.load(engine, gtfs_directory)
+    Trip.load(engine, gtfs_directory)
+    StopTime.load(engine, gtfs_directory)
+    Frequency.load(engine, gtfs_directory)
+    FareAttribute.load(engine, gtfs_directory)
+    FareRule.load(engine, gtfs_directory)
+    Pattern.load(engine)
     shutil.rmtree(gtfs_directory)
 
 

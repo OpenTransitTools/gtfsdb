@@ -1,5 +1,7 @@
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
+
+from .trip import Trip
 
 
 class Frequency(DeclarativeBase):
@@ -7,8 +9,7 @@ class Frequency(DeclarativeBase):
 
     required_fields = ['trip_id', 'start_time', 'end_time', 'headway_secs']
 
-    trip_id = Column(String)
-    start_time = Column(String)
+    trip_id = Column(String, ForeignKey(Trip.trip_id), primary_key=True)
+    start_time = Column(String, primary_key=True)
     end_time = Column(String)
     headway_secs = Column(Integer)
-

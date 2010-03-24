@@ -1,5 +1,7 @@
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
+
+from .route import Route
 
 
 class Trip(DeclarativeBase):
@@ -10,8 +12,8 @@ class Trip(DeclarativeBase):
                        'block_id', 'shape_id']
     proposed_fields = ['trip_bikes_allowed']
 
-    route_id = Column(String)
-    service_id = Column(String)
+    route_id = Column(String, ForeignKey(Route.route_id), nullable=False)
+    service_id = Column(String, nullable=False)
     trip_id = Column(String, primary_key=True)
     trip_headsign = Column(String)
     trip_short_name = Column(String)

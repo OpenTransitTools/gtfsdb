@@ -12,16 +12,16 @@ class Calendar(DeclarativeBase):
                        'thursday', 'friday', 'saturday', 'sunday',
                        'start_date', 'end_date']
 
-    service_id = Column(String)
-    monday = Column(Boolean)
-    tuesday = Column(Boolean)
-    wednesday = Column(Boolean)
-    thursday = Column(Boolean)
-    friday = Column(Boolean)
-    saturday = Column(Boolean)
-    sunday = Column(Boolean)
-    start_date = Column(Date)
-    end_date = Column(Date)
+    service_id = Column(String, primary_key=True)
+    monday = Column(Boolean, nullable=False)
+    tuesday = Column(Boolean, nullable=False)
+    wednesday = Column(Boolean, nullable=False)
+    thursday = Column(Boolean, nullable=False)
+    friday = Column(Boolean, nullable=False)
+    saturday = Column(Boolean, nullable=False)
+    sunday = Column(Boolean, nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
 
 
 class CalendarDate(DeclarativeBase):
@@ -29,6 +29,6 @@ class CalendarDate(DeclarativeBase):
 
     required_fields = ['service_id', 'date', 'exception_type']
 
-    service_id = Column(String)
-    date = Column(Date)
-    exception_type = Column(Integer)
+    service_id = Column(String, primary_key=True)
+    date = Column(Date, primary_key=True)
+    exception_type = Column(Integer, nullable=False)
