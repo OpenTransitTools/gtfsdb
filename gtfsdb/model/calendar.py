@@ -1,5 +1,7 @@
+import datetime
 from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Boolean, Column, Date, Integer, String
+from sqlalchemy.orm import sessionmaker
 
 
 __all__ = ['Calendar', 'CalendarDate', 'UniversalCalendar']
@@ -33,6 +35,38 @@ class Calendar(DeclarativeBase):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
 
+    def weekday_list(self):
+        list = []
+        if self.monday:
+            list.append(0)
+        if self.tuesday:
+            list.append(1)
+        if self.wednesday:
+            list.append(2)
+        if self.thursday:
+            list.append(3)
+        if self.friday:
+            list.append(4)
+        if self.saturday:
+            list.append(5)
+        if self.sunday:
+            list.append(6)
+        return list
+
+    def to_date_list(self):
+        date_list = []
+        d = self.start_date
+        delta = datetime.timedelta(days=1)
+        weekdays = self.weekday_list()
+        while d <= self.end_date:
+            if d.weekday() in weekdays:
+                dict = {}
+                dict['service_id'] = self.service_id
+                dict['date'] = d
+                date_list.append(dict)
+            d += delta
+        return date_list
+
 
 
 class CalendarDate(DeclarativeBase):
@@ -59,5 +93,33 @@ class UniversalCalendar(DeclarativeBase):
         return None
 
     @classmethod
+    def from_calendar_date(cls, calendar_date):
+        uc = cls()
+        uc.service_id = calendar_date.service_id
+        uc.date = calendar_date.date
+        return uc
+
+    @classmethod
     def load(cls, engine):
         print ' - %s' %(cls.__tablename__)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        q = session.query(Calendar)
+        for calendar in q:
+            rows = calendar.to_date_list()
+            for row in rows:
+                uc = cls(**row)
+                session.add(uc)
+        session.commit()
+        q = session.query(CalendarDate)
+        for calendar_date in q:
+            if calendar_date.exception_type == 1:
+                uc = cls.from_calendar_date(calendar_date)
+                session.merge(uc)
+            if calendar_date.exception_type == 2:
+                d = cls.__table__.delete()
+                d = d.where(cls.__table__.c.service_id == calendar_date.service_id)
+                d = d.where(cls.__table__.c.date == calendar_date.date)
+                engine.execute(d)
+        session.commit()
+        session.close()
