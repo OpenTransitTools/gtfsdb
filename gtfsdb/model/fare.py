@@ -15,8 +15,13 @@ __all__ = ['FareAttribute', 'FareRule']
 class FareAttribute(DeclarativeBase):
     __tablename__ = 'fare_attributes'
 
-    required_fields = ['fare_id', 'price', 'currency_type', 'payment_method',
-        'transfers']
+    required_fields = [
+        'fare_id',
+        'price',
+        'currency_type',
+        'payment_method',
+        'transfers'
+    ]
     optional_fields = ['transfer_duration']
     proposed_fields = ['agency_id']
 

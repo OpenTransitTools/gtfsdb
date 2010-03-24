@@ -14,6 +14,7 @@ from gtfsdb import (
     StopTime,
     Transfer,
     Trip,
+    UniversalCalendar,
     unzip_gtfs,
 )
 from optparse import OptionParser
@@ -81,12 +82,15 @@ def main():
         model.DeclarativeBase.metadata.create_all(bind=engine)
     gtfs_directory = unzip_gtfs(options.filename)
     data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
+
+    # load lookup tables first
+    RouteType.load(engine, data_directory, False)
+
     # load GTFS data files, due to foreign key constraints
     # these files need to be loaded in the appropriate order
     Agency.load(engine, gtfs_directory)
     Calendar.load(engine, gtfs_directory)
     CalendarDate.load(engine, gtfs_directory)
-    RouteType.load(engine, data_directory, False)
     Route.load(engine, gtfs_directory)
     Stop.load(engine, gtfs_directory)
     Transfer.load(engine, gtfs_directory)
@@ -96,8 +100,12 @@ def main():
     Frequency.load(engine, gtfs_directory)
     FareAttribute.load(engine, gtfs_directory)
     FareRule.load(engine, gtfs_directory)
-    Pattern.load(engine)
     shutil.rmtree(gtfs_directory)
+    
+    # load additional transformation tables
+    print time.strftime(' begin transformation: %H:%M:%S', time.localtime())
+    UniversalCalendar.load(engine)
+    Pattern.load(engine)
 
 
 if __name__ == '__main__':

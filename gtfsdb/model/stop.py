@@ -28,5 +28,9 @@ class Stop(DeclarativeBase):
     
     @classmethod
     def add_geom_to_dict(cls, row):
-        wkt = 'SRID=%s;POINT(%s %s)'% (SRID, row['stop_lon'], row['stop_lat'])
+        wkt = 'SRID=%s;POINT(%s %s)' %(
+            SRID,
+            row['stop_lon'],
+            row['stop_lat']
+        )
         row['geom'] = WKTSpatialElement(wkt)

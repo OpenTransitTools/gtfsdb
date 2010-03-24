@@ -5,10 +5,19 @@ from sqlalchemy import Boolean, Column, Integer, Numeric, Sequence, String
 class StopTime(DeclarativeBase):
     __tablename__ = 'stop_times'
     
-    required_fields = ['trip_id', 'arrival_time', 'departure_time',
-                       'stop_id', 'stop_sequence']
-    optional_fields = ['stop_headsign', 'pickup_type', 'drop_off_type',
-                       'shape_dist_traveled']
+    required_fields = [
+        'trip_id',
+        'arrival_time',
+        'departure_time',
+        'stop_id',
+        'stop_sequence'
+    ]
+    optional_fields = [
+        'stop_headsign',
+        'pickup_type',
+        'drop_off_type',
+        'shape_dist_traveled'
+    ]
     proposed_fields = ['timepoint']
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
