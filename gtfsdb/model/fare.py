@@ -1,5 +1,12 @@
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Column, Integer, Numeric, String
+from sqlalchemy import (
+    Column,
+    ForeignKey,
+    Integer,
+    Numeric,
+    Sequence,
+    String,
+)
 
 
 __all__ = ['FareAttribute', 'FareRule']
@@ -13,10 +20,10 @@ class FareAttribute(DeclarativeBase):
     optional_fields = ['transfer_duration']
     proposed_fields = ['agency_id']
 
-    fare_id = Column(String)
-    price = Column(Numeric(10,2))
-    currency_type = Column(String)
-    payment_method = Column(Integer)
+    fare_id = Column(String, primary_key=True)
+    price = Column(Numeric(10,2), nullable=False)
+    currency_type = Column(String, nullable=False)
+    payment_method = Column(Integer, nullable=False)
     transfers = Column(Integer)
     transfer_duration = Column(Integer)
 
@@ -29,7 +36,8 @@ class FareRule(DeclarativeBase):
     optional_fields = ['route_id', 'origin_id', 'destination_id', 'contains_id']
     proposed_fields = ['service_id']
 
-    fare_id = Column(String)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True)
+    fare_id = Column(String, ForeignKey(FareAttribute.fare_id), nullable=False)
     route_id = Column(String)
     origin_id = Column(String)
     destination_id = Column(String)
