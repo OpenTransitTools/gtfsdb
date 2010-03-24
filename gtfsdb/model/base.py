@@ -6,6 +6,10 @@ import time
 
 class Base(object):
 
+    required_fields = []
+    optional_fields = []
+    proposed_fields = []
+
     @classmethod
     def from_dict(cls, attrs):
         clean_dict = cls.make_record(attrs)
@@ -26,7 +30,7 @@ class Base(object):
             reader =  csv.DictReader(file)
             if validate:
                 cls.validate(reader.fieldnames)
-            s = ' %s ' %(cls.get_filename())
+            s = ' - %s ' %(cls.get_filename())
             sys.stdout.write(s)
             table = cls.__table__
             engine.execute(table.delete())
@@ -63,24 +67,12 @@ class Base(object):
 
     @classmethod
     def validate(cls, fieldnames):
-        try:
-            required_fields = cls.required_fields
-        except AttributeError:
-            required_fields = []
-        try:
-            optional_fields = cls.optional_fields
-        except AttributeError:
-            optional_fields = []
-        try:
-            proposed_fields = cls.proposed_fields
-        except AttributeError:
-            proposed_fields = []
-        all_fields = required_fields + optional_fields + proposed_fields
+        all_fields = cls.required_fields + cls.optional_fields + cls.proposed_fields
 
         # required fields
         fields = None
-        if required_fields and fieldnames:
-            fields = set(required_fields) - set(fieldnames)
+        if cls.required_fields and fieldnames:
+            fields = set(cls.required_fields) - set(fieldnames)
         if fields:
             missing_required_fields = list(fields)
             if missing_required_fields:

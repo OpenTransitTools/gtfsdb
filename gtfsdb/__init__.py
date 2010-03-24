@@ -1,7 +1,7 @@
 __import__('pkg_resources').declare_namespace(__name__)
 
 from .model.agency import Agency
-from .model.calendar import Calendar, CalendarDate
+from .model.calendar import Calendar, CalendarDate, UniversalCalendar
 from .model.fare import FareAttribute, FareRule
 from .model.frequency import Frequency
 from .model.route import Route, RouteType
