@@ -1,6 +1,6 @@
 from gtfsdb.model import DeclarativeBase, SRID
 from geoalchemy import GeometryColumn, GeometryDDL, Point, WKTSpatialElement
-from sqlalchemy import Column, Integer, Numeric, String
+from sqlalchemy import Column, Index, Integer, Numeric, String
 
 
 class Stop(DeclarativeBase):
@@ -34,3 +34,5 @@ class Stop(DeclarativeBase):
             row['stop_lat']
         )
         row['geom'] = WKTSpatialElement(wkt)
+
+Index('%s_ix1' %(Stop.__tablename__), Stop.location_type)

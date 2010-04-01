@@ -2,6 +2,7 @@ from gtfsdb.model import DeclarativeBase
 from sqlalchemy import (
     Column,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     Sequence,
@@ -48,3 +49,5 @@ class FareRule(DeclarativeBase):
     destination_id = Column(String)
     contains_id = Column(String)
     service_id = Column(String)
+
+Index('%s_ix1' %(FareRule.__tablename__), FareRule.fare_id)

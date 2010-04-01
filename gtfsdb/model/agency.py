@@ -1,5 +1,5 @@
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Column, Integer, Sequence, String
+from sqlalchemy import Column, Index, Integer, Sequence, String
 
 
 class Agency(DeclarativeBase):
@@ -18,3 +18,4 @@ class Agency(DeclarativeBase):
     agency_phone = Column(String)
     agency_fare_url = Column(String)
 
+Index('%s_ix1' %(Agency.__tablename__), Agency.agency_id)

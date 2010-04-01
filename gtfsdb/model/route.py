@@ -1,5 +1,5 @@
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Index, Integer, String
 
 
 __all__ = ['RouteType', 'Route']
@@ -43,3 +43,6 @@ class Route(DeclarativeBase):
     route_url = Column(String)
     route_color = Column(String(6))
     route_text_color = Column(String(6))
+
+Index('%s_ix1' %(Route.__tablename__), Route.agency_id)
+Index('%s_ix2' %(Route.__tablename__), Route.route_type)
