@@ -1,5 +1,6 @@
+import sys
+import time
 from gtfsdb.model import DeclarativeBase, SRID
-
 from geoalchemy import GeometryColumn, GeometryDDL, Point, LineString, WKTSpatialElement
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import sessionmaker
@@ -7,7 +8,6 @@ from sqlalchemy.sql import func
 
 
 __all__ = ['Pattern', 'Shape']
-
 
 
 class Pattern(DeclarativeBase):
@@ -35,8 +35,9 @@ class Pattern(DeclarativeBase):
 
     @classmethod
     def load(cls, engine):
-        #start_time = time.time()
-        print ' - %s' %(cls.__tablename__)
+        start_time = time.time()
+        s = ' - %s' %(cls.__tablename__)
+        sys.stdout.write(s)
         Session = sessionmaker(bind=engine)
         session = Session()
         q = session.query(
@@ -56,7 +57,8 @@ class Pattern(DeclarativeBase):
             session.add(pattern)
         session.commit()
         session.close()
-
+        processing_time = time.time() - start_time
+        print ' (%.0f seconds)' %(processing_time)
 
 
 class Shape(DeclarativeBase):

@@ -1,11 +1,12 @@
 import datetime
+import sys
+import time
 from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Boolean, Column, Date, Index, Integer, String
 from sqlalchemy.orm import sessionmaker
 
 
 __all__ = ['Calendar', 'CalendarDate', 'UniversalCalendar']
-
 
 
 class Calendar(DeclarativeBase):
@@ -70,7 +71,6 @@ class Calendar(DeclarativeBase):
 Index('%s_ix1' %(Calendar.__tablename__), Calendar.start_date, Calendar.end_date)
 
 
-
 class CalendarDate(DeclarativeBase):
     __tablename__ = 'calendar_dates'
 
@@ -79,7 +79,6 @@ class CalendarDate(DeclarativeBase):
     service_id = Column(String, primary_key=True)
     date = Column(Date, primary_key=True)
     exception_type = Column(Integer, nullable=False)
-
 
 
 class UniversalCalendar(DeclarativeBase):
@@ -103,7 +102,9 @@ class UniversalCalendar(DeclarativeBase):
 
     @classmethod
     def load(cls, engine):
-        print ' - %s' %(cls.__tablename__)
+        start_time = time.time()
+        s = ' - %s' %(cls.__tablename__)
+        sys.stdout.write(s)
         Session = sessionmaker(bind=engine)
         session = Session()
         q = session.query(Calendar)
@@ -125,5 +126,7 @@ class UniversalCalendar(DeclarativeBase):
                 engine.execute(d)
         session.commit()
         session.close()
+        processing_time = time.time() - start_time
+        print ' (%.0f seconds)' %(processing_time)
 
 Index('%s_ix1' %(UniversalCalendar.__tablename__), UniversalCalendar.date)
