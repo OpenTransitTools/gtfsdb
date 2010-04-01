@@ -1,0 +1,28 @@
+<dataStore>
+  <id>DataStoreInfoImpl--67c2acb7:127b83f52d2:-7ffe</id>
+  <name>gtfs</name>
+  <description>gtfs data</description>
+  <type>PostGIS</type>
+  <enabled>true</enabled>
+  <workspace>
+    <id>WorkspaceInfoImpl--67c2acb7:127b83f52d2:-8000</id>
+  </workspace>
+  <connectionParameters>
+    <entry key="Connection timeout">20</entry>
+    <entry key="port">5432</entry>
+    <entry key="dbtype">postgis</entry>
+    <entry key="host">localhost</entry>
+    <entry key="validate connections">false</entry>
+    <entry key="max connections">10</entry>
+    <entry key="database">postgres</entry>
+    <entry key="namespace">http://gtfsdb.com</entry>
+    <entry key="schema">public</entry>
+    <entry key="Loose bbox">true</entry>
+    <entry key="Expose primary keys">true</entry>
+    <entry key="fetch size">1000</entry>
+    <entry key="Max open prepared statements">50</entry>
+    <entry key="preparedStatements">false</entry>
+    <entry key="user">postgres</entry>
+    <entry key="min connections">1</entry>
+  </connectionParameters>
+</dataStore>
