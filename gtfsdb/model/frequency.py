@@ -1,6 +1,5 @@
 from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Column, ForeignKey, Integer, String
-
 from .trip import Trip
 
 
