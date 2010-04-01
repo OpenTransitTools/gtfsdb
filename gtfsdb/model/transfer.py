@@ -1,5 +1,5 @@
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Column, Integer, Sequence, String
+from sqlalchemy import Column, Index, Integer, Sequence, String
 
 
 class Transfer(DeclarativeBase):
@@ -13,3 +13,5 @@ class Transfer(DeclarativeBase):
     to_stop_id = Column(String)
     transfer_type = Column(Integer, default=0)
     min_transfer_time = Column(Integer)
+
+Index('%s_ix1' %(Transfer.__tablename__), Transfer.transfer_type)

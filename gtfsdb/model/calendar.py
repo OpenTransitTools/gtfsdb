@@ -1,6 +1,6 @@
 import datetime
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Boolean, Column, Date, Integer, String
+from sqlalchemy import Boolean, Column, Date, Index, Integer, String
 from sqlalchemy.orm import sessionmaker
 
 
@@ -67,6 +67,8 @@ class Calendar(DeclarativeBase):
             d += delta
         return date_list
 
+Index('%s_ix1' %(Calendar.__tablename__), Calendar.start_date, Calendar.end_date)
+
 
 
 class CalendarDate(DeclarativeBase):
@@ -123,3 +125,5 @@ class UniversalCalendar(DeclarativeBase):
                 engine.execute(d)
         session.commit()
         session.close()
+
+Index('%s_ix1' %(UniversalCalendar.__tablename__), UniversalCalendar.date)
