@@ -1,6 +1,6 @@
 __import__('pkg_resources').declare_namespace(__name__)
 
-from .base import Base
+from gtfsdb.model.base import Base
 from sqlalchemy.ext.declarative import declarative_base
 
 

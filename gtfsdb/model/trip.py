@@ -1,8 +1,8 @@
 from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relation
-from .shape import Pattern
-from .route import Route
+from gtfsdb.model.shape import Pattern
+from gtfsdb.model.route import Route
 
 
 class Trip(DeclarativeBase):

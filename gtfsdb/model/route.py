@@ -47,8 +47,8 @@ class Route(DeclarativeBase):
     route_text_color = Column(String(6))
 
     def load_geometry(self, session):
-        from .shape import Pattern
-        from .trip import Trip
+        from gtfsdb.model.shape import Pattern
+        from gtfsdb.model.trip import Trip
         if hasattr(self, 'geom'):
             s = func.st_simplify(Pattern.geom, 0.1)
             s = func.st_union(s)
