@@ -1,6 +1,7 @@
 from gtfsdb.model import DeclarativeBase
-from geoalchemy import GeometryColumn, GeometryDDL, LineString
+from geoalchemy import GeometryColumn, GeometryDDL, MultiLineString
 from sqlalchemy import Column, ForeignKey, Index, Integer, String
+from sqlalchemy.sql import func
 
 
 __all__ = ['RouteType', 'Route']
@@ -45,9 +46,21 @@ class Route(DeclarativeBase):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
 
+    def load_geometry(self, session):
+        from .shape import Pattern
+        from .trip import Trip
+        if hasattr(self, 'geom'):
+            s = func.st_simplify(Pattern.geom, 0.1)
+            s = func.st_union(s)
+            s = func.multi(s)
+            s = func.astext(s).label('geom')
+            q = session.query(s)
+            q = q.filter(Pattern.trips.any((Trip.route == self)))
+            self.geom = q.first().geom
+
     @classmethod
     def add_geometry_column(cls):
-        cls.geom = GeometryColumn(LineString(2))
+        cls.geom = GeometryColumn(MultiLineString(2))
         GeometryDDL(cls.__table__)
 
 Index('%s_ix1' %(Route.__tablename__), Route.agency_id)
