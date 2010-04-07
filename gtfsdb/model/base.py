@@ -57,7 +57,7 @@ class Base(object):
             if v is None or v.strip() == '' or (k not in cls.__table__.c):
                 del row[k]
         # add geometry to dict
-        if hasattr(cls, 'geom'):
+        if hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
         return row
 

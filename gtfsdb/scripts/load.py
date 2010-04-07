@@ -21,6 +21,7 @@ from optparse import OptionParser
 import pkg_resources
 import shutil
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import time
 import ConfigParser
 
@@ -86,8 +87,8 @@ def main():
     # load lookup tables first
     RouteType.load(engine, data_directory, False)
 
-    # load GTFS data files, due to foreign key constraints
-    # these files need to be loaded in the appropriate order
+    # load GTFS data files & transform/derive additional data
+    # due to foreign key constraints these files need to be loaded in the appropriate order
     Agency.load(engine, gtfs_directory)
     Calendar.load(engine, gtfs_directory)
     CalendarDate.load(engine, gtfs_directory)
@@ -95,18 +96,27 @@ def main():
     Stop.load(engine, gtfs_directory)
     Transfer.load(engine, gtfs_directory)
     Shape.load(engine, gtfs_directory)
+    Pattern.load(engine)
     Trip.load(engine, gtfs_directory)
     StopTime.load(engine, gtfs_directory)
     Frequency.load(engine, gtfs_directory)
     FareAttribute.load(engine, gtfs_directory)
     FareRule.load(engine, gtfs_directory)
     shutil.rmtree(gtfs_directory)
-    
-    # load additional transformation tables
-    print time.strftime(' begin transformation: %H:%M:%S', time.localtime())
     UniversalCalendar.load(engine)
-    Pattern.load(engine)
 
+    # load derived geometries
+    # currently only written for postgresql
+    dialect_name = engine.url.get_dialect().name
+    if options.geospatial and dialect_name == 'postgres':
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        q = session.query(Route)
+        for route in q:
+            route.load_geometry(session)
+            session.merge(route)
+        session.commit()
+        session.close()
 
 if __name__ == '__main__':
     start_seconds = time.time()

@@ -1,5 +1,7 @@
 from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relation
+from .shape import Pattern
 from .route import Route
 
 
@@ -23,6 +25,10 @@ class Trip(DeclarativeBase):
     trip_short_name = Column(String)
     direction_id = Column(Integer)
     block_id = Column(String)
-    shape_id= Column(String)
+    shape_id= Column(String, ForeignKey(Pattern.shape_id), nullable=True)
     trip_type = Column(String)
     trip_bikes_allowed = Column(Integer)
+
+    route = relation(Route)
+    pattern = relation(Pattern, backref='trips')
+
