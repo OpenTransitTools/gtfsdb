@@ -1,4 +1,5 @@
 import csv
+import datetime
 import os
 import sys
 import time
@@ -19,7 +20,7 @@ class Base(object):
     @classmethod
     def get_filename(cls):
         return '%s.txt' %(cls.__tablename__)
-    
+
     @classmethod
     def load(cls, engine, directory=None, validate=True):
         records = []
@@ -54,8 +55,12 @@ class Base(object):
     def make_record(cls, row):
         # clean dict
         for k, v in row.items():
-            if v is None or v.strip() == '' or (k not in cls.__table__.c):
+            if isinstance(v, basestring):
+                v = v.strip()
+            if (not v) or (k not in cls.__table__.c):
                 del row[k]
+            elif k.endswith('date'):
+                row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
         # add geometry to dict
         if hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
