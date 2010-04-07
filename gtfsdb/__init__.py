@@ -38,12 +38,9 @@ def unzip_gtfs(url_to_zip):
     """Unzip known GTFS files from URL/directory to temp directory."""
     start_time = time()
     temp_directory = tempfile.mkdtemp()
-    try:
-        file_handle = urlopen(url_to_zip)
-        zipdata = StringIO(file_handle.read())
-        file_handle.close()
-    except URLError:
-        zipdata = url_to_zip
+    file_handle = urlopen(url_to_zip)
+    zipdata = StringIO(file_handle.read())
+    file_handle.close()
     zip = zipfile.ZipFile(zipdata)
     files = list(set(zip.namelist()).intersection(set(model.files)))
     extractall(zip, temp_directory, files)
