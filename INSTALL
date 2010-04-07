@@ -18,7 +18,7 @@ Dependencies:
 Install Steps (on Windows):
 ---------------------------
     0. Have a db - docs and examples assume Postgres/PostGIS installed
-       http://www.postgresql.org/download/windows 
+       http://www.postgresql.org/download/windows
        http://postgis.refractions.net/download/windows/
 
     1. Python25 - http://www.python.org/download/releases/2.5.4/ (python-2.5.4.msi)
@@ -37,28 +37,9 @@ Install Steps (on Windows):
     5. Check out gtfsdb from trunk with Mercurial
 
     6. cd top level of gtfsdb tree
-    
+
     7. python setup.py install
 
     8. python gtfsdb/scripts/load.py
 
 NOTE: version of SqlAlchemy must be lower than the 0.6 beta that's out there for GeoAlchemy to work (that screwed us up)
-
-
-+++++++++++++++++
-IGNORE THIS STUFF
-+++++++++++++++++
-
-To install this package, run the following command in your favorite terminal
-application::
-
-   easy_install -f http://dev.trimet.org/pypi/dist/ gtfsdb
-
-
-To install with requirements for PostgreSQL/PostGIS, run this:
-
-   easy_install -f http://dev.trimet.org/pypi/dist/ gtfsdb[postgres]
-
-for Oracle:
-
-   easy_install -f http://dev.trimet.org/pypi/dist/ gtfsdb[oracle]
