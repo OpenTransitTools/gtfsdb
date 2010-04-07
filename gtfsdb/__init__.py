@@ -14,7 +14,7 @@ from gtfsdb.model.trip import Trip
 from StringIO import StringIO
 import tempfile
 from time import time
-from urllib2 import urlopen, URLError
+from urllib import urlopen
 import zipfile
 from zipfile import ZipFile
 
