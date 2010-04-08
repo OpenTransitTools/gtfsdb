@@ -1,0 +1,13 @@
+++++++++++
+GTFSDB
+++++++++++
+
+
+Command line run of application using gtfsdb/data/default.cfg:
+
+  gtfsdb/scripts/load.py
+
+
+Example load of GTFS sample feed on default install of PostgreSQL with PostGIS enabled:
+
+  gtfsdb/scripts/load.py -f http://code.google.com/transit/spec/sample-feed.zip -c -d postgres://postgres@localhost -g

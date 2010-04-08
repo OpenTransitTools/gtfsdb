@@ -1,0 +1,26 @@
+The geoserver directory contains a starter data directory for geoserver, which works 
+with existing gtfsdb data.
+
+
+The geoserver/data directory assumes the following about the database and data:
+  - PostGIS is the database where the GTFS data resides.
+  - DB user (login role) 'postgres' exits, and does not require a password.
+  - DB name is 'postgres'.
+  - Schema holding the GTFS data is named 'public'
+  - PostGIS is running & available on localhost:5432
+  - Since GeoServer layers requrie a defined BBOX for the extent of the data, the 
+    settings are currently defined for Portland, OR (TriMet)
+  - NOTE: assumptions made above are easily edited to fit your environment via the GeoServer UI
+
+
+How to go from nothing to GeoServer serving your gtfsdb data in 8 easy steps:
+-----------------------------------------------------------------------------
+  0. Install GTFSDB and load a dataset into PostGIS with the 'geospatial=True' option (see gtfsdb's default.cfg)
+  1. Install TOMCAT (5.5 or above -- 6.* recommended)
+  2. cd <tomcat>/webapps
+  3. wget http://gridlock.openplans.org/geoserver/2.0.x/geoserver-2.0.x-latest-war.zip
+  4. unzip geoserver-2.0.x-latest-war.zip
+  5. cd ../bin
+  6. export JAVA_OPTS="-DGEOSERVER_DATA_DIR=<your path to>/gtfsdb/geoserver/data"
+  7. startup.sh
+  8. http://localhost:8080/geoserver
