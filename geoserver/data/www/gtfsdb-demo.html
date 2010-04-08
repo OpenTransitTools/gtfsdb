@@ -73,7 +73,8 @@
     </style>
     <script defer="defer" type="text/javascript">
     var map, infocontrols, highlightlayer;
-    var geoserver_url = "/geoserver/wms"
+    var wms_url = "/geoserver/wms"
+    var wfs_url = "/geoserver/wfs"
     var lon = -122.67;
     var lon = -13655780; // sph merc
     var lat = 45.51;
@@ -121,18 +122,19 @@
 */
 
         var lConfig = {transparent:true, format:'image/png8', srs:proj};
-        lConfig.layers = 'gtfsdb:stops';
-        var stops = new OpenLayers.Layer.WMS("Stops",
-            geoserver_url,
+        var bConfig = {isBaseLayer:false, projection:proj, singleTile:true, ratio:1.65}
+        lConfig.layers = 'gtfsdb:routes';
+        var routes = new OpenLayers.Layer.WMS("Routes",
+            wms_url,
             lConfig,
-            {isBaseLayer: false, projection:proj}
+            bConfig
         );
 
-        lConfig.layers = 'gtfsdb:patterns';
-        var patterns = new OpenLayers.Layer.WMS("Patterns",
-            geoserver_url,
+        lConfig.layers = 'gtfsdb:stops';
+        var stops = new OpenLayers.Layer.WMS("Stops",
+            wms_url,
             lConfig,
-            {isBaseLayer: false}
+            bConfig
         );
 
         highlightLayer = new OpenLayers.Layer.Vector("Highlighted Features", {
@@ -143,26 +145,14 @@
 
         infoControls = {
             click: new OpenLayers.Control.WMSGetFeatureInfo({
-                url:    geoserver_url,
+                url:    wms_url,
                 title:  'Identify features by clicking',
-                layers: [stops, patterns],
-                queryVisible: true
-            }),
-            hover: new OpenLayers.Control.WMSGetFeatureInfo({
-                url: 'http://demo.opengeo.org/geoserver/wms', 
-                title: 'Identify features by clicking',
-                layers: [stops],
-                hover: true,
-                // defining a custom format options here
-                formatOptions: {
-                    typeName: 'water_bodies', 
-                    featureNS: 'http://www.openplans.org/topp'
-                },
+                layers: [stops, routes],
                 queryVisible: true
             })
         }
 
-        map.addLayers([/*yahoo, yahooHi,*/ ve, veHi, patterns, stops, highlightLayer]); 
+        map.addLayers([/*yahoo, yahooHi,*/ ve, veHi, routes, stops, highlightLayer]); 
         for (var i in infoControls) { 
             infoControls[i].events.register("getfeatureinfo", this, showInfo);
             map.addControl(infoControls[i]); 
@@ -171,6 +161,9 @@
 
         infoControls.click.activate();
         map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);
+
+	// TODO - zoom to the first stop in our list
+        // /geoserver/wfs?request=GetFeature&version=1.1.0&propertyName=&BBOX=-180,-90,180,90,EPSG:4326&MAXFEATURES=1&typeName=gtfsdb:stops
     }
 
     function showInfo(evt) {
