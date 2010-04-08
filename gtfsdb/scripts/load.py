@@ -17,13 +17,14 @@ from gtfsdb import (
     UniversalCalendar,
     unzip_gtfs,
 )
+import ConfigParser
 from optparse import OptionParser
 import pkg_resources
 import shutil
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import sys
 import time
-import ConfigParser
 
 
 def get_default_config(options):
@@ -109,6 +110,9 @@ def main():
     # currently only written for postgresql
     dialect_name = engine.url.get_dialect().name
     if options.geospatial and dialect_name == 'postgres':
+        s = ' - %s geom' %(Route.__tablename__)
+        sys.stdout.write(s)
+        start_seconds = time.time()
         Session = sessionmaker(bind=engine)
         session = Session()
         q = session.query(Route)
@@ -117,6 +121,9 @@ def main():
             session.merge(route)
         session.commit()
         session.close()
+        process_time = time.time() - start_seconds
+        print ' (%.0f seconds)' %(process_time)
+
 
 if __name__ == '__main__':
     start_seconds = time.time()

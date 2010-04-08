@@ -50,10 +50,9 @@ class Route(DeclarativeBase):
         from gtfsdb.model.shape import Pattern
         from gtfsdb.model.trip import Trip
         if hasattr(self, 'geom'):
-            s = func.st_simplify(Pattern.geom, 0.1)
-            s = func.st_union(s)
-            s = func.multi(s)
-            s = func.astext(s).label('geom')
+            s = func.st_collect(Pattern.geom)
+            s = func.st_multi(s)
+            s = func.st_astext(s).label('geom')
             q = session.query(s)
             q = q.filter(Pattern.trips.any((Trip.route == self)))
             self.geom = q.first().geom
