@@ -1,0 +1,148 @@
+  <property name="debug.switch"        value="on"   />
+  <property name="otimize.switch"      value="off"  />
+  <property name="deprecation.switch"  value="on"   />
+  <property name="target.jvm"          value="1.5"   />
+  <property name="source.jvm"          value="1.5"   />
+
+  <target name="compile-trimet" description="Compile java files in the SRC directory">
+    <antcall target="compile">
+       <param name="src-exclude" value=""/> 
+    </antcall>
+    <antcall target="config-copier">
+       <param name="directory" value="${config.dir}/pan-web"/>
+       <param name="flat"      value="true"/>       
+    </antcall>
+  </target>
+
+  <target name="compile-external" description="Compile SRC *.java files -- but w/out trying to build trimet.org java files.">
+    <antcall target="compile">
+       <param name="src-exclude" value="**/trimet/**/*.java"/>
+    </antcall>
+    <antcall target="config-copier">
+       <param name="directory" value="${config.dir}/generic"/>
+       <param name="flat"      value="true"/>       
+    </antcall>
+  </target>
+
+  <target name="compile" description="Compile java files in the SRC directory">
+    <echo message="${src-exclude}" />
+
+    <antcall target="artifact-copier">
+       <param name="directory" value="${src.dir}"/>
+       <param name="flat"      value="false"/>
+    </antcall>
+    <antcall target="config-copier">
+       <param name="directory" value="${config.dir}"/>
+       <param name="flat"      value="true"/>       
+    </antcall>
+    <antcall target="image-copier">
+       <param name="directory" value="${src.dir}"/>
+       <param name="flat"      value="true"/>       
+    </antcall>
+
+    <!-- COMPILE SOURCE -->
+    <javac debug="${debug.switch}" 
+           optimize="${otimize.switch}" 
+           deprecation="${deprecation.switch}" 
+           fork="true" 
+           memoryMaximumSize="800m"
+           srcdir="${src.dir}"
+	       destdir="${build.classes.dir}"
+           source="${source.jvm}"
+           target="${target.jvm}"	           
+    >
+            <include name="**/*.java"/>
+            <exclude name="${src-exclude}"/>
+            <compilerarg value="-Xlint"/>
+            <classpath refid="lib.class.path" />
+    </javac>
+
+    <!-- COMPILE TEST -->
+    <javac debug="${debug.switch}" 
+           optimize="${otimize.switch}" 
+           deprecation="${deprecation.switch}" 
+           fork="true" 
+           memoryMaximumSize="800m"               
+           srcdir="${test.dir}"
+	       destdir="${build.classes.dir}"
+           source="${source.jvm}"
+           target="${target.jvm}"	           
+    >
+            <include name="**/*.java"/>
+            <exclude name="${src-exclude}"/>
+            <compilerarg value="-Xlint"/>
+            <classpath refid="lib.class.path" />
+    </javac>
+  </target>
+
+  <target name="compile-gensrc" description="Compile Generate Source from Hibernate Business Domain Model">
+        <javac debug="${debug.switch}" 
+               optimize="${otimize.switch}" 
+               deprecation="${deprecation.switch}" 
+               fork="true" 
+               memoryMaximumSize="800m"
+  	           srcdir="${build.gen-src.dir}"
+               destdir="${build.classes.dir}"
+               source="${source.jvm}"
+               target="${target.jvm}"	           
+        >
+         <classpath refid="lib.class.path" />
+         <include name="**/*.java"/>
+      </javac>
+  </target>
+
+
+   <!-- ANTLR -->
+   <target name="antlr" depends="init">
+       <antlr target="${grammer.file}"
+              outputdirectory="${build.gen-src.dir}"
+       />
+   </target>
+
+   
+  <target name="config-copier">
+	<copy todir="${build.classes.dir}"
+          overwrite="true"
+	      flatten="${flat}"
+        >
+	   <fileset dir="${directory}">
+             <include name="*.properties"/>
+             <include name="*.build.xml"/>
+             <include name="*.cfg.xml"/>
+             <include name="ehcache.xml"/>
+             <exclude name="**/.svn/"/>
+	   </fileset>
+	</copy>
+  </target>   
+
+  <target name="image-copier">
+	<copy todir="${build.classes.dir}"
+          overwrite="true"
+	      flatten="${flat}"
+        >
+	   <fileset dir="${directory}">
+             <include name="**/*.jpg"/>
+             <include name="**/*.gif"/>
+             <include name="**/*.png"/>
+             <exclude name="**/.svn/"/>
+	   </fileset>
+	</copy>
+  </target>   
+  
+  <target name="artifact-copier">
+	<copy todir="${build.classes.dir}"
+          overwrite="true"	
+	      flatten="${flat}"
+    >
+	   <fileset dir="${directory}">
+           <include name="**/schedule/**/*.txt"/>
+           <include name="**/*.properties"/>           
+           <include name="**/*.csv"/>
+           <include name="**/*.ftl"/>           
+           <include name="**/mapping.xml"/>
+           <exclude name="**/.svn/"/>
+           <exclude name="**/trimet/ttpub/configure/**"/>
+           <exclude name="**/templates/"/>           
+	   </fileset>
+	</copy>
+  </target>   

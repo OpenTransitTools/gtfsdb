@@ -1,0 +1,7 @@
+  <target name="unit-test" description="Runs junit tests from the TEST directory">
+    <junit fork="yes" haltonfailure="yes">
+      <classpath refid="lib.class.path" />
+      <formatter type="brief" usefile="false" />
+      <test name="tests.unit.ConfigureTest" />
+    </junit>
+  </target>

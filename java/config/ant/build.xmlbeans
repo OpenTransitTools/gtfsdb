@@ -1,0 +1,25 @@
+   <!-- =================================================================== -->
+   <!-- Run XML BEANS                                                       -->
+   <!-- =================================================================== -->
+   <target 
+      name="xmlbeans" 
+      description="Run XML BEANS" 
+      depends="init"
+   >
+      <taskdef 
+          name="xmlbean" 
+          classpathref="lib.class.path"
+          classname="org.apache.xmlbeans.impl.tool.XMLBean" 
+      />
+
+      <xmlbean 
+          classgendir="${build.classes.dir}" 
+          srconly="true"
+          srcgendir="${build.gen-src.dir}" 
+          noupa="true"
+          download="true"
+      >
+          <fileset dir="${src.dir}" includes="**/*.xsd"/>
+      </xmlbean>
+
+   </target>

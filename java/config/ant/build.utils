@@ -1,0 +1,177 @@
+   <target name="doc" description="Generate Java Docs">
+     <javadoc packagenames="org.*"
+             sourcepath="${src.dir}"
+             defaultexcludes="yes"
+             destdir="${apidoc.dir}"
+             author="true"
+             version="true"
+             use="true"
+             windowtitle="${ant.project.name}">
+      <classpath refid="lib.class.path" />
+      <doctitle><![CDATA[<h1>${ant.project.name}</h1>]]></doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2006 Trimet. All Rights Reserved.</i>]]></bottom>
+      <tag name="todo" scope="all" description="To do:"/>
+      <tag name="TODO" scope="all" description="To do:"/>
+     </javadoc>
+   </target>
+
+
+   <target name="delete-classes-dir">
+      <delete dir="${build.classes.dir}"/>
+   </target>
+   
+   
+   <target name="init">
+      <mkdir dir="${build.classes.dir}"/>
+      <mkdir dir="${build.gen-src.dir}"/>
+      <mkdir dir="${gwt.www.dir}"/>      
+   </target>
+
+
+   <target name="clean-compile">
+      <delete file="${war.file}"/>
+      <delete file="${cmdline.zip}"/>
+      <delete dir="${build.classes.dir}"/>
+      <delete dir=".gwt-cache"/>
+      <delete>
+        <fileset dir="." includes="**/*.class" />
+        <fileset dir="." includes="**/*.log"   />
+        <fileset dir="." includes="**/velocity.log.**"   />
+        <fileset dir="." includes="**/result.txt" />
+        <fileset dir="." includes="**/*-prefs.properties" />
+        <fileset dir="." includes="**/*~"      defaultexcludes="no" />
+        <fileset dir="." includes="**/*#"      defaultexcludes="no" />
+      </delete>
+   </target>
+   
+   <target name="clean" description="Clean all generated stuff" depends="clean-compile">
+      <delete dir="${apidoc.dir}"/>
+      <delete dir="${build.dir}"/>
+   </target>
+
+
+    <!-- create a code snap-shot for building external to TriMet -->
+    <target name="zip-external" description="create a code snap-shot for building external to TriMet">
+        <property name="table.dir"      value="${project.dir}/src/org/timetablepublisher/table"/>
+        <property name="cfg.dir"        value="${project.dir}/config"/>        
+        <property name="build.file"     value="${project.dir}/build.xml"/>
+        <property name="factory.file"   value="${table.dir}/TimeTableFactory.java"/>
+        <property name="hibernate.file" value="${cfg.dir}/hibernate.cfg.xml"/>
+        <property name="htm.dir"        value="${project.dir}/src/org/timetablepublisher/view/web/html"/>                
+        <tstamp/>
+        <zip destfile="../${project.dir}_${DSTAMP}-${TSTAMP}.zip"
+             basedir=".."
+             includes="${project.dir}/**"
+             excludes="**/**TRANS*,**/T*.properties,**/build.web,**/*.zip,**/.svn,**/.settings/**,**/.externalToolBuilders/**,${hibernate.file},${build.file},${factory.file}"
+        >
+           <zipfileset dir="${config.dir}/generic" includes="build.xml"             prefix="${project.dir}"/>
+           <zipfileset dir="${config.dir}/generic" includes="build.web"             prefix="${cfg.dir}/ant"/>
+           <zipfileset dir="${config.dir}/generic" includes="TimeTableFactory.java" prefix="${table.dir}"/>
+           <zipfileset dir="${config.dir}/generic" includes="*.cfg.xml"             prefix="${cfg.dir}"/>
+           <zipfileset dir="${config.dir}/generic" includes="T*.properties"         prefix="${cfg.dir}"/>
+        </zip>
+    </target>    
+
+
+    <!-- BACKUP -->
+    <target name="backup">
+        <tstamp/>
+        <zip destfile="../${project.dir}_${DSTAMP}-${TSTAMP}.zip"
+             basedir=".."
+             includes="${project.dir}/**"
+             excludes="**/*.zip"
+        />
+    </target>    
+
+    <!-- FIX: make sure we aren't poluting our files with any TAB & CF -->
+    <!-- NOT: kind of dangerous, since tabs are not always set to 4 spaces -->
+    <target name="fix">
+	<fixcrlf srcdir="${src.dir}"
+	     tab="remove"
+	     tablength="4"
+	     eol="lf"
+	     javafiles="yes"
+         includes="**/*.jsp,**/*.xml,**/*.xsd,**/*.java"
+	 />
+    </target>    
+
+
+    <!-- OSS LICENSE APPEND: iterate through source, appending a comment about the license -->
+    <!-- NOTE: kind of dangerous, since tabs are not always set to 4 spaces -->
+    <target name="OSSLicenseAppend">
+       <replace 
+         dir="${src.dir}"
+         includes="**/*.jsp,**/*.java"
+       >
+         <replacetoken><![CDATA[/**
+ *  Copyright 2007 TriMet, released under a modified Mozilla 1.1 license.
+ *  Please see http://timetablepublisher.org/downloads/list
+ *  (TriMet OSS License.htm) for the full text of the license.
+ */
+]]></replacetoken>
+         <replacevalue><![CDATA[/**
+ *  Copyright 2007 TriMet, released under a modified Mozilla 1.1 license.
+ *  Please see http://timetablepublisher.org/downloads/list
+ *  (TriMet OSS License.htm) for the full text of the license.
+ */
+]]></replacevalue>       
+       </replace>
+    </target>
+    
+    
+   <!-- ==================================================================== -->
+   <!-- Validate the generated xml mapping documents                         -->
+   <!-- ==================================================================== -->
+   <target name="validate">
+      <xmlvalidate failonerror="no" lenient="no" warn="yes">
+      	 <fileset dir="${build.gen-src.dir}/${package-name}.hibernate" includes="*.xml" />
+      </xmlvalidate>
+   </target>
+   
+
+   <!-- =================================================================== -->
+   <!-- Makes sure that the JDBC driver is on the classpath                 -->
+   <!-- =================================================================== -->
+   <target name="check-driver-present">
+      <available file="${database.driver.file}" type="file" property="driver.present"/>
+   </target>
+
+   <target name="panic-if-driver-not-present" unless="driver.present">
+      <fail>
+      The JDBC driver you have specified by including one of the files in ${basedir}/config/database
+      doesn't exist. You have to download this driver separately and put it in ${database.driver.file}
+      Please make sure you're using a version that is equal or superior to the one we looked for.
+      If you name the driver jar file differently, please update the database.driver.file property
+      in the ${basedir}/config/database/xxx.xml file accordingly.
+      </fail>
+   </target>
+
+
+  <!-- ================================================================== -->
+  <!-- J A R                                                              -->
+  <!-- ================================================================== -->
+  <target name="jar" description="Creates the project JAR file (standalone API)">
+    <!-- JAR CREATION -->
+    <jar destfile="${build.dir}/${jar.file}" 
+         basedir="${build.classes.dir}"
+         excludes="**/*Test.class,hibernate.cfg.xml"
+         includes="**/*.class,**/*.properties,**/*.xml,**/*.java"
+    />
+  </target>
+
+
+  <!-- ================================================================== -->
+  <!-- COPY SRC                                                           -->
+  <!-- ================================================================== -->
+  <target name="copy-src" description="Copies the src files into the build directory (good for jar files)">
+    <!-- NORMAL CP: will put all files into their respective directory -->
+	<copy todir="${build.classes.dir}"
+          overwrite="true"	
+	      flatten="false"
+    >
+	   <fileset dir="${src.dir}">
+           <exclude name="**/.svn/"/>           
+	   </fileset>
+	</copy>
+  </target>
+

@@ -1,0 +1,61 @@
+  <!-- ================================================================== -->
+  <!-- Command Line Exe                                                   -->
+  <!-- Create A ZIP file that contains the Executable CMD LINE APP        -->
+  <!-- ================================================================== -->
+  <target name="cmdline-external" description="cmdline app for external partners">
+      <delete file="${cmdline.zip}"/>
+      <zip destfile="${cmdline.zip}"
+           basedir="."
+           includes="${jar.file}"
+           excludes="**/*.zip"
+           update="true"
+      >	  
+         <zipfileset dir="${config.dir}/generic"  prefix="${zip-dir}"        includes="hibernate.cfg.xml"/>
+         <zipfileset dir="${config.dir}/generic"  prefix="${zip-dir}"        includes="TimeTableProperties.properties"/>
+         <zipfileset dir="${config.dir}"          prefix="${zip-dir}"        includes="logger.*.properties"/>
+         <zipfileset dir="${lib.dir}"             prefix="${zip-dir}/lib"    excludes="**j2ee**,**junit**,**xmlbeans**,**velocity**,**tools**"  />
+         <zipfileset dir="${build.dir}"           prefix="${zip-dir}/lib"    includes="${jar.file}"  />
+         <zipfileset dir="${src.dir}"             prefix="${zip-dir}"        includes="**/wsdot/schedule/**" />
+         <zipfileset dir="${src.dir}"             prefix="${zip-dir}/images" includes="**/*.jpg" />         
+         <zipfileset dir="${src.dir}/scripts"     prefix="${zip-dir}"        includes="**/*.bat,**/*.sh,**/*.rb" />
+         <zipfileset dir="${src.dir}/templates"   prefix="${zip-dir}/templates"/>
+         <zipfileset dir="${src.dir}/org/timetablepublisher/view/web/html/js/" prefix="${zip-dir}/templates/include/" includes="google-keys.js"/>          
+      </zip>
+  </target>
+
+  <target name="cmdline-trimet" description="Create the ZIP file for the CMD Line App" depends="ttjar">
+      <property name="zip-dir" value="ttpublisher"/>
+      <delete file="${cmdline.zip}"/>
+      <zip destfile="${cmdline.zip}"
+           basedir="."
+           includes="${jar.file}"
+           excludes="**/*.zip"
+           update="true"
+      >	  
+         <zipfileset dir="${config.dir}/pan-web"  prefix="${zip-dir}"        includes="TimeTableProperties.properties"/>
+         <zipfileset dir="${config.dir}"          prefix="${zip-dir}"        includes="hibernate*.cfg.xml"/>
+         <zipfileset dir="${config.dir}"          prefix="${zip-dir}"        includes="logger.*.properties"/>
+         <zipfileset dir="${lib.dir}"             prefix="${zip-dir}/lib"    excludes="**j2ee**,**junit**,**xmlbeans**,**velocity**,**tools**"  />
+         <zipfileset dir="${build.dir}"           prefix="${zip-dir}/lib"    includes="${jar.file}"  />
+         <zipfileset dir="${src.dir}"             prefix="${zip-dir}/images" includes="**/*.jpg" />         
+         <zipfileset dir="${src.dir}/scripts"     prefix="${zip-dir}"        includes="**/*.bat,**/*.sh,**/*.rb" />
+         <zipfileset dir="${src.dir}/templates/include"       prefix="${zip-dir}/templates/include"/>
+         <zipfileset dir="${src.dir}/templates/trimet"        prefix="${zip-dir}/templates/trimet"/>
+         <zipfileset dir="${src.dir}/templates/testTemplates" prefix="${zip-dir}/templates/testTemplates"/> 
+         <zipfileset dir="${src.dir}/org/timetablepublisher/view/web/html/js/" prefix="${zip-dir}/templates/include/" includes="google-keys.js"/> 
+      </zip>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- J A R                                                              -->
+  <!-- ================================================================== -->
+  <target name="ttjar" description="Creates the ttpub.jar JAR file (standalone application)">
+    <delete file="${build.dir}/${jar.file}"/>
+    
+    <!-- JAR CREATION -->
+    <jar destfile="${build.dir}/${jar.file}" 
+         basedir="${build.classes.dir}"
+         excludes="**/*Test.class,hibernate.cfg.xml"
+         includes="**/*.class,**/*.properties,**/*.xml"
+    />
+  </target>
