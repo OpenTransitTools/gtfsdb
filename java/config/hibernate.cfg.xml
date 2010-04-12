@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.dialect">org.hibernate.dialect.Oracle9Dialect</property>
+        <property name="hibernate.connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
+        <property name="hibernate.connection.url">jdbc:oracle:thin:@[your machine]:1521:[your database]</property>
+        <property name="hibernate.default_schema">[your schema]</property>
+        <property name="hibernate.connection.username">[your username]</property>
+        <property name="hibernate.connection.password">[your password]</property>
+
+        <!-- configuration pool via c3p0
+             @see: http://www.hibernate.org/214.html
+                   http://www.mchange.com/projects/c3p0/index.html#appendix_a
+        --> 
+        <property name="c3p0.acquire_increment">1</property>
+        <property name="c3p0.min_size">1</property>
+        <property name="c3p0.max_size">15</property>
+        <property name="c3p0.max_statements">0</property>     <!-- statment caching off -->
+        <property name="c3p0.idle_test_period">300</property> <!-- seconds -->
+        <property name="c3p0.timeout">50000</property>        <!-- expire idle sessions after 14 hours -->
+
+        <!-- 2nd level cache - see: http://www.devx.com/dbzone/Article/29685/0/page/2 -->
+        <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+    </session-factory>
+</hibernate-configuration>

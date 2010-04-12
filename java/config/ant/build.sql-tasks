@@ -1,0 +1,20 @@
+   <!-- =================================================================== -->
+   <!-- Create tables                                                       -->
+   <!-- =================================================================== -->
+   <target 
+      name="rebuild-database" 
+      depends="init,check-driver-present,panic-if-driver-not-present" 
+      description="Create tables"
+   >
+      <echo>Creating tables using URL ${database.url}</echo>
+      <sql
+         classpath="${database.driver.file}"
+         driver="${database.driver}"
+         url="${database.url}"
+         userid="${database.userid}"
+         password="${database.password}"
+         src="${database.script.file}"
+         print="true"
+         output="result.txt"
+      />
+   </target>
