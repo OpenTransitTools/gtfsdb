@@ -34,21 +34,26 @@ def get_default_config(options):
     config.read(filename)
 
     section = 'options'
-    options.create = config.getboolean(section, 'create')
     options.database = config.get(section, 'database')
-    options.filename = config.get(section, 'filename')
-    options.geospatial = config.getboolean(section, 'geospatial')
+    if config.has_option(section, 'create'):
+        options.create = config.getboolean(section, 'create')
+    if config.has_option(section, 'filename'):
+        options.filename = config.get(section, 'filename')
+    if config.has_option(section, 'geospatial'):
+        options.geospatial = config.getboolean(section, 'geospatial')
     if config.has_option(section, 'schema'):
         options.schema = config.get(section, 'schema')
-    else:
-        options.schema = None
-    
     return options
 
 
 def init_parser():
     parser = OptionParser()
-    parser.set_defaults(create=False, schema=None, geospatial=False)
+    parser.set_defaults(
+        create=False,
+        filename='http://code.google.com/transit/spec/sample-feed.zip',
+        geospatial=False,
+        schema=None
+    )
     parser.add_option(
         "-c", "--create", action="store_true", dest="create",
         help="Create database tables"
