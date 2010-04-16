@@ -1,3 +1,4 @@
+import codecs
 import csv
 import datetime
 import os
@@ -27,7 +28,7 @@ class Base(object):
         file_path = '%s/%s' %(directory, cls.get_filename())
         if os.path.exists(file_path):
             start_time = time.time()
-            file = open(file_path)
+            file = codecs.open(file_path, 'r', 'utf-8-sig')
             reader =  csv.DictReader(file)
             if validate:
                 cls.validate(reader.fieldnames)
