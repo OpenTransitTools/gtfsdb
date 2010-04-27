@@ -1,84 +1,47 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE project [
-    <!ENTITY utils         SYSTEM "./ant/build.utils"         >
-    <!ENTITY compile       SYSTEM "./ant/build.compile"       >
-    <!ENTITY web           SYSTEM "./config/ant/build.web"    >
-    <!ENTITY test          SYSTEM "./ant/build.test"          >
-    <!ENTITY cmdline       SYSTEM "./ant/build.cmdline"       >
-    <!ENTITY xmlbeans      SYSTEM "./ant/build.xmlbeans"      >
-    <!ENTITY antlr         SYSTEM "./ant/build.antlr"         >
-    <!ENTITY minimize      SYSTEM "./ant/build.minimize"      >
+    <!ENTITY utils         SYSTEM "./config/ant/build.utils"         >
+    <!ENTITY compile       SYSTEM "./config/ant/build.compile"       >
+    <!ENTITY test          SYSTEM "./config/ant/build.test"          >
+    <!ENTITY hibernate     SYSTEM "./config/ant/build.hbm2java"      >
 ]>
 
-<project name="maps" default="clean-most-war" basedir=".">
+<project name="gtfsdb" default="clean-most" basedir=".">
     <property name="project.dir"                    value="${ant.project.name}"/>
-    <property name="xml.sub.dir"                    value="model/xml"/>
-    <property name="webtp.package-name"             value="org.trimet.webtp"/>
-    <property name="webtp.project-package-path"     value="org/trimet/webtp"/>
-    <property name="webtp.db-package-path"          value="${webtp.project-package-path}/db"/>
-    <property name="webtp.db-package-name"          value="${webtp.package-name}.db"/>
-    <property name="webtp.xml-package-path"         value="${webtp.project-package-path}/${xml.sub.dir}"/>
-    <property name="webtp.ws-package-path"          value="${webtp.project-package-path}/ws"/>
-    <property name="webtp.parser-package-path"      value="${webtp.project-package-path}/atis/parser"/>
-    <property name="maps.package-name"              value="org.trimet.${ant.project.name}"/>
-    <property name="maps.project-package-path"      value="org/trimet/${ant.project.name}"/>
-    <property name="gui"                            value="false"/>	
 
     <property name="build.dir"                      value="${basedir}/build"/>
     <property name="build.gen-src.dir"              value="${build.dir}/gen-src"/>
     <property name="build.classes.dir"              value="${build.dir}/classes"/>
 
     <property name="config.dir"                     value="${basedir}/config"/>
+    <property name="src.dir"                        value="${basedir}/src"/>
+    <property name="test.dir"                       value="${basedir}/test"/>
     <property name="lib.dir"                        value="${basedir}/lib"/>
     <property name="doc.dir"                        value="${basedir}/doc"/> 
     <property name="apidoc.dir"                     value="${doc.dir}/api"/> 
-    <property name="src.dir"                        value="${basedir}/src"/>
     <property name="test.dir"                       value="${basedir}/tests "/>	
-    <property name="schema.dir"                     value="${src.dir}/${webtp.xml-package-path}"/>
-    <property name="public.dir"                     value="${src.dir}/${maps.project-package-path}/view/public/"/>
-    <property name="build.public.dir"               value="${build.dir}/${maps.project-package-path}/view/public/"/>
-    <property name="templates.dir"                  value="${src.dir}/${maps.project-package-path}/view/templates"/>
+    <property name="src.exclude"                    value=""/>
+
+    <!-- hibernate hba2java config -->
+    <property name="config.file"                    value="${config.dir}/hibernate.cfg.xml"/>
+    <property name="reveng.file"                    value="${config.dir}/hibernate.reveng.xml"/>
+    <property name="package-name"                   value="com.gtfsdb.db"/>
+    <property name="package-path"                   value="com/gtfsdb/db"/>
+
     <property name="war.file"                       value="${project.dir}.war"/>
-    <property name="cmdline.zip"                    value="../${project.dir}-cmdline.zip"/>   
-    <property name="jar.file"                       value="${project.dir}.jar"/>
-    <property name="grammer.file"                   value="${src.dir}/${webtp.parser-package-path}/atis.g"/>
-    <property name="parts"                          value="../parts"/>
-    <property name="params4j"                       value="../params4j"/>
-    <property name="parts.build"                    value="${parts}/build"/>
-    <property name="params4j.build"                 value="${params4j}/build"/>
-    <property name="gwt.www.dir"                    value="${build.dir}/www"/>
-
-    <property name="js.dir"                         value="${public.dir}/js/"/>
-    <property name="css.dir"                        value="${public.dir}/css/"/>
-    <property name="build.js.dir"                   value="${build.public.dir}/js/"/>
-    <property name="build.css.dir"                  value="${build.public.dir}/css/"/>
-    <property name="all-css.file"                   value="tm-all.css"/>
-    <property name="all-tm-js.file"                 value="tm-all.js"/>
-
-    <!-- For Mimize & Compress of .JS files used in this project, thus needs to change when new .js files are added -->
-    <property name="first.js.files"    value="locale/TripConstantsEN.js,utils/Constants.js,trimet/utils/Constants.js"/>
-    <property name="exclude.css.files" value="**/ext_ie.css"/>
 
     <path id="lib.class.path">
-      <pathelement path="${parts.build}/parts.jar"/>
-      <pathelement path="${params4j.build}/params4j.jar"/>
       <pathelement path="${build.classes.dir}"/>
       <fileset dir="${lib.dir}">
-         <include name="**/*.jar"/>
-      </fileset>
-      <fileset dir="${parts}/lib">
          <include name="**/*.jar"/>
       </fileset>
     </path>
 
     &utils;
     &compile;
-    &web;
     &test;
-    &xmlbeans;
-    &antlr;
-    &minimize;
+    &hibernate;
 
     <!-- EXECUTE THE CLIENT - these routines run a command line version of the Trip Planner WS -->
     <target name="run-but-compile-first" description="Execute Simple Client" depends="compile,run"/>
@@ -89,31 +52,11 @@
         classpathref="lib.class.path"
        >
            <arg value="34 Lambert"/>
-<!--
-controllers.ws.TripPlannerContainerWS
-
-        classname="${package-name}.controllers.ws.GeoCoderContainerWS"
-           <arg value="GeoCode"/>
-           <arg value="./${project-package-path}/atis"/>
-           classname="${package-name}.ws.TripPlannerContainerWS"
-           classname="${package-name}.atis.RunAtisCore"
-           <arg value="834 SE Lambert Street"/>
-           <arg value="4830 Center Street"/>
-           <arg value="TripPlan"/>           
-           <arg value="WalkingDirections"/>
-           <arg value="GeoCode"/>
-	 -->
       </java>
     </target>    
 
-    <target name="xsuper" description="Execute Parts, Params4j and Clean Most War">
-       <ant inheritAll="false" target="clean-most-jar" dir="${parts}"/>
-       <ant inheritAll="false" target="clean-most-jar" dir="${params4j}"/>
-       <antcall target="clean-most-war"/>
-    </target>
-	
-    <target name="clean-most"     description="Development Build Routine"    depends="clean, most"/>
-    <target name="clean-most-war" description="Typical Build Routine"        depends="clean, most, war"/>
-    <target name="most"    description="Generate source and compile everything."          depends="xmlbeans, antlr, compile-gensrc, compile"/>
-    <target name="all"     description="Compile Everything, Create War, Create javadocs"  depends="clean, most, doc"/>
+    <target name="clean-most"     description="Development Build Routine"    depends="clean, most, unit-test"/>
+    <target name="clean-most-war" description="Typical Build Routine"        depends="clean-most"/>
+    <target name="most"  description="Generate source and compile everything."  depends="hbm2java,compile-gensrc, compile"/>
+    <target name="all"   description="Compile Everything, Create War, Create javadocs"  depends="clean, most, doc"/>
 </project>

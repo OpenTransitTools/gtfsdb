@@ -47,9 +47,9 @@
            fork="true" 
            memoryMaximumSize="800m"
            srcdir="${src.dir}"
-	       destdir="${build.classes.dir}"
+           destdir="${build.classes.dir}"
            source="${source.jvm}"
-           target="${target.jvm}"	           
+           target="${target.jvm}"                  
     >
             <include name="**/*.java"/>
             <exclude name="${src-exclude}"/>
@@ -64,9 +64,9 @@
            fork="true" 
            memoryMaximumSize="800m"               
            srcdir="${test.dir}"
-	       destdir="${build.classes.dir}"
+           destdir="${build.classes.dir}"
            source="${source.jvm}"
-           target="${target.jvm}"	           
+           target="${target.jvm}"                  
     >
             <include name="**/*.java"/>
             <exclude name="${src-exclude}"/>
@@ -81,60 +81,52 @@
                deprecation="${deprecation.switch}" 
                fork="true" 
                memoryMaximumSize="800m"
-  	           srcdir="${build.gen-src.dir}"
+               srcdir="${build.gen-src.dir}"
                destdir="${build.classes.dir}"
                source="${source.jvm}"
-               target="${target.jvm}"	           
+               target="${target.jvm}"              
         >
          <classpath refid="lib.class.path" />
          <include name="**/*.java"/>
       </javac>
   </target>
 
-
-   <!-- ANTLR -->
-   <target name="antlr" depends="init">
-       <antlr target="${grammer.file}"
-              outputdirectory="${build.gen-src.dir}"
-       />
-   </target>
-
    
   <target name="config-copier">
-	<copy todir="${build.classes.dir}"
+        <copy todir="${build.classes.dir}"
           overwrite="true"
-	      flatten="${flat}"
+          flatten="${flat}"
         >
-	   <fileset dir="${directory}">
+           <fileset dir="${directory}">
              <include name="*.properties"/>
              <include name="*.build.xml"/>
              <include name="*.cfg.xml"/>
              <include name="ehcache.xml"/>
              <exclude name="**/.svn/"/>
-	   </fileset>
-	</copy>
+           </fileset>
+        </copy>
   </target>   
 
   <target name="image-copier">
-	<copy todir="${build.classes.dir}"
+        <copy todir="${build.classes.dir}"
           overwrite="true"
-	      flatten="${flat}"
+          flatten="${flat}"
         >
-	   <fileset dir="${directory}">
+           <fileset dir="${directory}">
              <include name="**/*.jpg"/>
              <include name="**/*.gif"/>
              <include name="**/*.png"/>
              <exclude name="**/.svn/"/>
-	   </fileset>
-	</copy>
+           </fileset>
+        </copy>
   </target>   
   
   <target name="artifact-copier">
-	<copy todir="${build.classes.dir}"
-          overwrite="true"	
-	      flatten="${flat}"
+        <copy todir="${build.classes.dir}"
+          overwrite="true"      
+          flatten="${flat}"
     >
-	   <fileset dir="${directory}">
+           <fileset dir="${directory}">
            <include name="**/schedule/**/*.txt"/>
            <include name="**/*.properties"/>           
            <include name="**/*.csv"/>
@@ -143,6 +135,6 @@
            <exclude name="**/.svn/"/>
            <exclude name="**/trimet/ttpub/configure/**"/>
            <exclude name="**/templates/"/>           
-	   </fileset>
-	</copy>
-  </target>   
+           </fileset>
+        </copy>
+  </target>

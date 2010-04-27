@@ -1,4 +1,3 @@
-
 <target name="hbm2java">
     <taskdef
        name="hibernatetool"
@@ -7,9 +6,9 @@
     />
     <hibernatetool destdir="${build.gen-src.dir}"> 
       <jdbcconfiguration 
-          packagename="${db-package-name}"
-          configurationfile="${config.dir}/hibernate-TRANS.cfg.xml"
-          revengfile="${config.dir}/hibernate.reveng.xml"
+          packagename="${package-name}"
+          configurationfile="${config.file}"
+          revengfile="${reveng.file}"
       />
       <hbm2java jdk5="true" />
       <hbm2hbmxml/>
@@ -23,12 +22,11 @@
    <antcall target="add-writeable-cache"/>   
 -->   
    <antcall target="add-read-only-cache"/>
-   
    <antcall target="default-timestamp"/>
 </target>
 
 <target name="default-timestamp" >
-     <replace dir="${build.classes.dir}/${db-package-path}" includes="Os*.hbm.xml" >
+     <replace dir="${build.classes.dir}/${package-path}" includes="Os*.hbm.xml" >
           <replacetoken><![CDATA[type="timestamp"]]></replacetoken>
           <replacevalue><![CDATA[type="timestamp" insert="false" update="false"]]></replacevalue>
      </replace>
@@ -36,19 +34,19 @@
 
 <!-- description="Use ANT's replace to add cache tags to the .hbm files"  -->
 <target name="add-read-only-cache" >
-     <replace dir="${build.classes.dir}/${db-package-path}" includes="*.hbm.xml">
+     <replace dir="${build.classes.dir}/${package-path}" includes="*.hbm.xml">
           <replacetoken><![CDATA[<composite-id name]]></replacetoken>
           <replacevalue><![CDATA[<cache usage="read-only"/>
         <composite-id name]]></replacevalue>
      </replace>
    	
-     <replace dir="${build.classes.dir}/${db-package-path}" includes="*.hbm.xml">
+     <replace dir="${build.classes.dir}/${package-path}" includes="*.hbm.xml">
           <replacetoken><![CDATA[<id name]]></replacetoken>
           <replacevalue><![CDATA[<cache usage="read-only"/>
         <id name]]></replacevalue>
      </replace>
 
-     <replace dir="${build.classes.dir}/${db-package-path}" includes="*.hbm.xml">
+     <replace dir="${build.classes.dir}/${package-path}" includes="*.hbm.xml">
           <replacetoken><![CDATA[<key>]]></replacetoken>
           <replacevalue><![CDATA[<cache usage="read-only"/>
             <key>]]></replacevalue>
@@ -57,19 +55,19 @@
 
 <!-- description="Use ANT's replace to add cache tags to the .hbm files"  -->
 <target name="add-writeable-cache" depends="copy-hbm">
-     <replace dir="${build.classes.dir}/${db-package-path}" includes="*.hbm.xml">
+     <replace dir="${build.classes.dir}/${package-path}" includes="*.hbm.xml">
           <replacetoken><![CDATA[<composite-id name]]></replacetoken>
           <replacevalue><![CDATA[<cache usage="read-write"/>
         <composite-id name]]></replacevalue>
      </replace>
    	
-     <replace dir="${build.classes.dir}/${db-package-path}" includes="*.hbm.xml">
+     <replace dir="${build.classes.dir}/${package-path}" includes="*.hbm.xml">
           <replacetoken><![CDATA[<id name]]></replacetoken>
           <replacevalue><![CDATA[<cache usage="read-write"/>
         <id name]]></replacevalue>
      </replace>
 
-     <replace dir="${build.classes.dir}/${db-package-path}" includes="*.hbm.xml" >
+     <replace dir="${build.classes.dir}/${package-path}" includes="*.hbm.xml" >
           <replacetoken><![CDATA[<key>]]></replacetoken>
           <replacevalue><![CDATA[<cache usage="read-write"/>
             <key>]]></replacevalue>
