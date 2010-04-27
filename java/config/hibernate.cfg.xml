@@ -4,12 +4,21 @@
     "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
+        <property name="hibernate.default_schema">public</property>
+        <property name="hibernate.connection.username">postgres</property>
+        <property name="hibernate.connection.password"></property>
+
+        <!-- POSTGRES -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/postgres</property>
+
+        <!-- ORACLE -->
+<!--    
         <property name="hibernate.dialect">org.hibernate.dialect.Oracle9Dialect</property>
         <property name="hibernate.connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
         <property name="hibernate.connection.url">jdbc:oracle:thin:@[your machine]:1521:[your database]</property>
-        <property name="hibernate.default_schema">[your schema]</property>
-        <property name="hibernate.connection.username">[your username]</property>
-        <property name="hibernate.connection.password">[your password]</property>
+-->
 
         <!-- configuration pool via c3p0
              @see: http://www.hibernate.org/214.html

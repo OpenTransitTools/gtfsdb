@@ -1,178 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "lib/hibernate-build-tools/hibernate-reverse-engineering-3.0.dtd" >
 
-
 <hibernate-reverse-engineering>
-  <table-filter match-name="LOCATION"/>
-  <table-filter match-name="LOCATION_AMENITY"/>
-  <table-filter match-name="AMENITY_CODE_DESCRIPTION"/>
 
-  <table-filter match-name="ROUTE_DEF"/>
-  <table-filter match-name="ROUTE_STOP_DEF"/>
-  <table-filter match-name="ROUTE_DIRECTION_DEF"/>
-
-  <table-filter match-name="STOP_DISTANCE"/>
-  <table-filter match-name="TRAIN"/>
-  <table-filter match-name="TRIP"/>
-  <table-filter match-name="SCHEDULED_STOP_TIME"/>  
-
-  <table-filter match-name="MESSAGE_CODE_DESCRIPTION"/>
-
-<!-- 
-  <table-filter match-name="ROUTE"/>
-  <table-filter match-name="ROUTE_DIRECTION"/>
-  <table-filter match-name="ROUTE_STOP"/>
-  
-  <table-filter match-name="SCHEDULE_CALENDAR"/>
-  <table-filter match-name="SCHEDULE_DEVIATION"/>
-  <table-filter match-name="SCHEDULE_DEVIATION_HIST"/>
- -->
-
-  
-  <!-- NOTE: BELOW ARE WORKAROUNDS TO OVERRIDE Hib Tools DEFAULTS 
-  
-       These are the mappings for existing TRANS tables.
-       NOTE: that I've excluded a lot of columns from the reveng.  This was done to
-             keep the binding between the database and this code as lightweight as possible.
-   -->  
-  
-  <table name="LOCATION">
-
-        <!--
-            <column name="LONGITUDE"                     exclude="" />
-            <column name="LATITUDE"                      exclude="" />
-            <column name="PUBLIC_LOCATION_DESCRIPTION"   exclude="" />
-            <column name="PASSENGER_ACCESS_CODE"         exclude="" />
-            <column name="PREFERRED_TRANSFER"            exclude="" />
-            <column name="STREET_DIRECTION"              exclude="" />
-            <column name="ZONE"                          exclude="" />
-            <column name="RELATIVE_POSITION"             exclude="" />
-        -->
-            <column name="ASA_STREET_PREFIX"          exclude="true" />
-            <column name="ASA_CROSS_STREET_PREFIX"    exclude="true" />
-            <column name="HIGH_ACTIVITY_STOP_FLAG"    exclude="true" />
-            <column name="LOCATION"                   exclude="true" />
-            <column name="INTERSECTION"               exclude="true" />
-            <column name="ACCESSIBLE"                 exclude="true" />
-            <column name="HUB_TYPE"                   exclude="true" />
-            <column name="X_COORDINATE"               exclude="true" />
-            <column name="Y_COORDINATE"               exclude="true" />
-            <column name="JURISDICTION"               exclude="true" />
-            <column name="ZIP"                        exclude="true" />
-            <column name="ZIP_PLUS_4"                 exclude="true" />
-            <column name="SERVICE_AREA"               exclude="true" />
-            <column name="LAST_USER"                  exclude="true" />
-            <column name="LAST_TIMESTAMP"             exclude="true" />
-            <column name="LAST_MOVED"                 exclude="true" />
-            <column name="ARBITER_TIMESTAMP"          exclude="true" />
-            <column name="REPLICATION_SITE"           exclude="true" />
-            <column name="LAST_SITE_VISIT"            exclude="true" />
-            <column name="LOCATION_TYPE_CODE"         exclude="true" />
-            <column name="MOTOR_VEH_SPEED_POSTED"     exclude="true" />
-            <column name="MOTOR_VEH_EQUIPMENT_TYPE"   exclude="true" />
-            <column name="LRV_SPEED_TYPE_MAXIMUM"     exclude="true" />
-            <column name="LRV_EQUIPMENT_TYPE"         exclude="true" />
-            <column name="LINE_SECTION"               exclude="true" />
-            <column name="NUMBER_TRACKS_AT_CROSSING"  exclude="true" />
-            <column name="ASA_PREFIX"                 exclude="true" />
-            <column name="ASA_PREFIX_INCLUDE_FLAG"    exclude="true" />
-            <column name="ASA_TEXT_STREET"            exclude="true" />
-            <column name="ASA_TEXT_CROSS_STREET"      exclude="true" />
-            <column name="ASA_AUDIO_STREET"           exclude="true" />
-            <column name="ASA_AUDIO_CROSS_STREET"     exclude="true" />
-            <column name="ASA_TEXT_JOIN_SYMBOL"       exclude="true" />
-            <column name="ASA_AUDIO_JOIN_SYMBOL"      exclude="true" />
-            <column name="USE_GPS_FLAG"               exclude="true" />
-            <column name="CENTERLINE_X_COORDINATE"    exclude="true" />
-            <column name="CENTERLINE_Y_COORDINATE"    exclude="true" />
-            <column name="CENTERLINE_LONGITUDE"       exclude="true" />
-            <column name="CENTERLINE_LATITUDE"        exclude="true" />
-
-            <column name="ASA_EXTERNAL_AUDIO_VOLUME"  exclude="true" />
-            <column name="ASA_EXTERNAL_AUDIO_FLAG"    exclude="true" />
-            <column name="SUPERVISORY_DISTRICT"       exclude="true" />
-            <column name="LAND_USE_CODE"              exclude="true" />
-  </table>
-  <table name="LOCATION_AMENITY">
-            <column name="TRIMET_OWNED_FLAG"          exclude="true" />
-            <column name="OBSTRUCTION_FLAG"           exclude="true" />
-            <column name="SPONSOR_ID"                 exclude="true" />
-            <column name="CONDITION_CODE"             exclude="true" />
-            <column name="LOCATION_AMENITY_REMARKS"   exclude="true" />
-            <column name="LAST_USER"                  exclude="true" />
-            <column name="LAST_TIMESTAMP"             exclude="true" />
-            <column name="FUND_SOURCE_CODE"           exclude="true" />
-            <column name="ART_GLASS_CODE"             exclude="true" />
-            <column name="DAY_CODE"                   exclude="true" />
-            <column name="ARBITER_TIMESTAMP"          exclude="true" />
-            <column name="REPLICATION_SITE"           exclude="true" />
-            <column name="AMENITY_ADD_DATE"           exclude="true" />
-            <column name="INSTALLATION_INSTRUCTION"   exclude="true" />
-            <column name="REPAIR_INSTRUCTION"         exclude="true" />
-            <column name="EDITOR_INSTRUCTION"         exclude="true" />
-            <column name="PUBLISHED_CONTENT"          exclude="true" />    
-            <column name="BCID_TYPE_CODE"             exclude="true" />
-  </table>
-  <table name="AMENITY_CODE_DESCRIPTION">
-  <!-- 
-        <column name="TRIP_PLANNING_DESCRIPTION" exclude="" />
-   -->
-      <column name="AGENCY_INTEREST_FLAG"      exclude="true" />
-      <column name="OBSTRUCTION_FLAG"          exclude="true" />
-      <column name="LANDMARK_TYPE"             exclude="true" />
-      <column name="MAINTENANCE_TRACKING_CODE" exclude="true" />
-      <column name="LAST_USER"                 exclude="true" />
-      <column name="LAST_TIMESTAMP"            exclude="true" />
-      <column name="ARBITER_TIMESTAMP"         exclude="true" />
-      <column name="REPLICATION_SITE"          exclude="true" />
-  </table>  
-  <table name="TRIP">
-    <column name="DIRECTION" property="dir" type="int" />
-<!--  
-       <column name="TRAIN"                         exclude="" />
-       <column name="TRIP_ORIGIN_DESCRIPTION"       exclude="" />
-       <column name="TRIP_DESTINATION_DESCRIPTION"  exclude="" />
-       <column name="TRIP_BEGIN_TIME"               exclude="true" />
-       <column name="TRIP_END_TIME"                 exclude="true" />
-       <column name="VARIANT_SERVICE_KEY"           exclude="true" />
+<!--
+  <schema-selection match-schema="public schema (or something...default set in hmb.xml, so not needed)"/>
 -->
-       <column name="ACCESSIBLE"                    exclude="true" />
-       <column name="TRAIN_PIECE"                   exclude="true" />
-       <column name="ARBITER_TIMESTAMP"             exclude="true" />
-       <column name="REPLICATION_SITE"              exclude="true" />    
+  <table-filter match-name="agency"/>
+  <table-filter match-name="calendar"/>
+  <table-filter match-name="calendar_dates"/>
+  <table-filter match-name="fare_attributes"/>
+  <table-filter match-name="fare_rules"/>
+  <table-filter match-name="frequencies"/>
+  <table-filter match-name="patterns"/>
+  <table-filter match-name="route_type"/>
+  <table-filter match-name="routes"/>
+  <table-filter match-name="stop_times"/>
+  <table-filter match-name="stops"/>
+  <table-filter match-name="transfers"/>
+  <table-filter match-name="trips"/>
+  <table-filter match-name="universal_calendar"/>
+
+  <table name="Patterns">
+    <column name="geom" exclude="true" />
   </table>
-  <table name="ROUTE">
-    <column name="ARBITER_TIMESTAMP"    exclude="true" />  
-  </table>
-  <table name="ROUTE_DEF" class="org.trimet.ttpub.db.Route">
-  	<column name="ARBITER_TIMESTAMP" exclude="true" />
-  </table>
-  <table name="ROUTE_DIRECTION">
-    <column name="DIRECTION" property="dir" type="int" />
-    <column name="ARBITER_TIMESTAMP"        exclude="true" />  
-  </table>
-  <table name="ROUTE_DIRECTION_DEF" class="org.trimet.ttpub.db.RouteDirection">
-    <column name="ARBITER_TIMESTAMP"    exclude="true" />  
-    <column name="DIRECTION" property="dir" type="int" />
-  </table>
-  <table name="ROUTE_STOP">
-    <column name="ARBITER_TIMESTAMP"    exclude="true" />
-    <column name="TRANSIT_TRACKER_FLAG" exclude="true" />
-    <column name="DIRECTION"            property="dir"    type="int" />
-    <column name="STOP_SEQUENCE_NUMBER" property="colSeq" type="int" />
-  </table>
-  <table name="ROUTE_STOP_DEF" class="org.trimet.ttpub.db.RouteStop">
-    <column name="ARBITER_TIMESTAMP"       exclude="true" />  
-    <column name="DIRECTION"               property="dir"    type="int" />
-    <column name="STOP_SEQUENCE_NUMBER"    property="colSeq" type="int" /> 
-    <column name="ASA_EXTERNAL_AUDIO_FLAG" exclude="true" />
-    <column name="TRANSIT_TRACKER_FLAG"    exclude="true" />
-  </table>
-  <table name="SCHEDULED_STOP_TIME">
-    <column name="DIRECTION" property="dir" type="int" />
-  </table>
-  <table name="STOP_DISTANCE">
-    <column name="DIRECTION" property="dir" type="int" />
-    <column name="ARBITER_TIMESTAMP"        exclude="true" />  
-  </table>
+
+<!--
+  <schema-selection match-schema="another schema (maybe 2nd agency ...)"/>
+-->
+
 </hibernate-reverse-engineering>

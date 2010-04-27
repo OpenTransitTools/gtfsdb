@@ -24,7 +24,6 @@
    <target name="init">
       <mkdir dir="${build.classes.dir}"/>
       <mkdir dir="${build.gen-src.dir}"/>
-      <mkdir dir="${gwt.www.dir}"/>      
    </target>
 
 
@@ -32,7 +31,6 @@
       <delete file="${war.file}"/>
       <delete file="${cmdline.zip}"/>
       <delete dir="${build.classes.dir}"/>
-      <delete dir=".gwt-cache"/>
       <delete>
         <fileset dir="." includes="**/*.class" />
         <fileset dir="." includes="**/*.log"   />
