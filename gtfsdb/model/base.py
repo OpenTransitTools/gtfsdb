@@ -1,9 +1,9 @@
-import codecs
 import csv
 import datetime
 import os
 import sys
 import time
+from gtfsdb import util
 
 
 class Base(object):
@@ -28,8 +28,9 @@ class Base(object):
         file_path = '%s/%s' %(directory, cls.get_filename())
         if os.path.exists(file_path):
             start_time = time.time()
-            file = codecs.open(file_path, 'r', 'utf-8-sig')
-            reader =  csv.DictReader(file)
+            file = open(file_path, 'r')
+            utf8_file = util.UTF8Recoder(file, 'utf-8-sig')
+            reader = csv.DictReader(utf8_file)
             if validate:
                 cls.validate(reader.fieldnames)
             s = ' - %s ' %(cls.get_filename())
