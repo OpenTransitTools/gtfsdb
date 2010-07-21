@@ -7,8 +7,8 @@ Dependencies:
     Python25 or Python26
     setup tools (easy_install)
     psycopg
-    "SqlAlchemy <= 0.5.8"
-    GeoAlchemy
+    "SqlAlchemy >= 0.6"
+    "GeoAlchemy >= 0.3"
     Database:
         PostgreSQL (PostGIS for Geo tables) - preferred
         Oracle - tested
@@ -29,17 +29,10 @@ Install Steps (on Windows):
 
     3. Install Psygopg2 (from binary):  http://www.stickpeople.com/projects/python/win-psycopg/
 
-    4. Install GeoAlchemy
-       a. Open a Command Prompt window
-       b. easy_install -D "SqlAlchemy <= 0.5.8"
-       c. easy_install GeoAlchemy
+    4. Check out gtfsdb from trunk with Mercurial
 
-    5. Check out gtfsdb from trunk with Mercurial
+    5. cd top level of gtfsdb tree
 
-    6. cd top level of gtfsdb tree
+    6. python setup.py install
 
-    7. python setup.py install
-
-    8. python gtfsdb/scripts/load.py
-
-NOTE: version of SqlAlchemy must be lower than the 0.6 beta that's out there for GeoAlchemy to work (that screwed us up)
+    7. python gtfsdb/scripts/load.py

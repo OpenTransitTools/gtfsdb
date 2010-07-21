@@ -12,8 +12,8 @@ setup(name='gtfsdb',
       include_package_data=True,
       zip_safe=False,
       install_requires=(
-        'GeoAlchemy>=0.1',
-        'SQLAlchemy>=0.5.8,<=0.5.999',
+        'GeoAlchemy>=0.4.1',
+        'SQLAlchemy>=0.6.1',
       ),
       extras_require = {
         'oracle': ['cx_Oracle>=5.0.3'],
