@@ -59,8 +59,10 @@ class Base(object):
         for k, v in row.items():
             if isinstance(v, basestring):
                 v = v.strip()
-            if (not v) or (k not in cls.__table__.c):
+            if (k not in cls.__table__.c):
                 del row[k]
+            elif not v:
+                row[k] = None
             elif k.endswith('date'):
                 row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
         # add geometry to dict
