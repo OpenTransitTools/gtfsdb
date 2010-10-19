@@ -3,6 +3,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relation
 from gtfsdb.model.shape import Pattern
 from gtfsdb.model.route import Route
+from gtfsdb.model.calendar import UniversalCalendar
 
 
 class Trip(DeclarativeBase):
@@ -31,4 +32,10 @@ class Trip(DeclarativeBase):
 
     route = relation(Route)
     pattern = relation(Pattern, backref='trips')
-
+    universal_calendar = relation(
+        UniversalCalendar,
+        primaryjoin=((service_id == UniversalCalendar.service_id)),
+        foreign_keys=(service_id),
+        viewonly=True,
+        backref='trips'
+    )
