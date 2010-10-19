@@ -1,5 +1,8 @@
+from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, Numeric, String
+from sqlalchemy.orm import relation
+
 from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Boolean, Column, Index, Integer, Numeric, String
+from gtfsdb.model.trip import Trip
 
 
 class StopTime(DeclarativeBase):
@@ -20,7 +23,7 @@ class StopTime(DeclarativeBase):
     ]
     proposed_fields = ['timepoint']
 
-    trip_id = Column(String, primary_key=True)
+    trip_id = Column(String, ForeignKey(Trip.trip_id), primary_key=True)
     arrival_time = Column(String)
     departure_time = Column(String)
     stop_id = Column(String, nullable=False)
@@ -30,6 +33,8 @@ class StopTime(DeclarativeBase):
     drop_off_type = Column(Integer, default=0)
     shape_dist_traveled = Column(Numeric(20,10))
     timepoint = Column(Boolean, default=False)
+
+    trip = relation(Trip, backref='stop_times')
 
     def __init__(self, *args, **kwargs):
         super(StopTime, self).__init__(*args, **kwargs)
