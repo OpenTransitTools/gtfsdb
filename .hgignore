@@ -9,3 +9,8 @@ syntax: glob
 *.pyo
 .svn
 nbproject
+
+syntax: regexp
+\.project$
+syntax: regexp
+\.pydevproject$
