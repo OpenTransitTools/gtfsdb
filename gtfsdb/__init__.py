@@ -18,21 +18,6 @@ from urllib import urlopen
 import zipfile
 from zipfile import ZipFile
 
-#
-# from py-2.6 - rewritten locally for 2.6 compatibility
-#
-def extractall(zip, path=None, members=None, pwd=None):
-        if members is None:
-            members = self.namelist()
-        for zipinfo in members:
-            p = zipinfo
-            if path != None:
-                p = path + "/" + zipinfo
-            bs = zip.read(zipinfo)
-            fp = open(p, 'w')
-            fp.write(bs)
-            fp.close()
-
 
 def unzip_gtfs(url_to_zip):
     """Unzip known GTFS files from URL/directory to temp directory."""
@@ -43,7 +28,7 @@ def unzip_gtfs(url_to_zip):
     file_handle.close()
     zip = zipfile.ZipFile(zipdata)
     files = list(set(zip.namelist()).intersection(set(model.files)))
-    extractall(zip, temp_directory, files)
+    zip.extractall(temp_directory, files)
     processing_time = time() - start_time
     print ' %s (%.0f seconds)' %(url_to_zip, processing_time)
     return temp_directory
