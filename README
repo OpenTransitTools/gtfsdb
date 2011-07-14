@@ -1,13 +1,54 @@
-++++++++++
 GTFSDB
-++++++++++
+++++++
 
+Supported Databases
+===================
 
-Command line run of application using gtfsdb/data/default.cfg:
+- PostgreSQL (PostGIS for Geo tables) - preferred
+- Oracle - tested
+- MySQL  - not yet tested
+- SQLite - not yet tested
 
-  gtfsdb/scripts/load.py
+Installation
+============
 
+All
+---
 
-Example load of GTFS sample feed on default install of PostgreSQL with PostGIS enabled:
+- Install PostgreSQL (and PostGIS) or some other SQLAlchemy-supported RDBMS
+- Install Distribute (or setuptools)
+  - http://pypi.python.org/pypi/distribute#installation-instructions
 
-  gtfsdb/scripts/load.py -f http://code.google.com/transit/spec/sample-feed.zip -c -d postgres://postgres@localhost -g
+Linux
+-----
+
+Clone the gtfsdb repository, then run `easy_install .` at the top level. Or,
+set up a virtualenv and run `python setup.py develop`.
+
+Windows
+-------
+
+- Have a database--the docs and examples assume Postgres & PostGIS are
+  installed
+  - http://www.postgresql.org/download/windows
+  - http://postgis.refractions.net/download/windows/
+- Install Python 2.6 or 2.7 using an installer from python.org
+- Install Psygopg2 using installer
+  - http://www.stickpeople.com/projects/python/win-psycopg/
+- Clone gtfsdb repository
+- cd to top level of gtfsdb tree
+- `python setup.py install` or `python setup.py develop`
+
+Usage
+=====
+
+Command line run of application using gtfsdb/data/default.cfg::
+
+    python gtfsdb/scripts/load.py
+
+Example load of GTFS sample feed on default install of PostgreSQL with
+PostGIS enabled::
+
+    python gtfsdb/scripts/load.py -f \
+        http://code.google.com/transit/spec/sample-feed.zip \
+        -c -d postgres://postgres@localhost -g
