@@ -1,3 +1,12 @@
+import ConfigParser
+from optparse import OptionParser
+import pkg_resources
+import shutil
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import sys
+import time
+
 from gtfsdb import (
     Agency,
     Calendar,
@@ -15,16 +24,8 @@ from gtfsdb import (
     Transfer,
     Trip,
     UniversalCalendar,
-    unzip_gtfs,
 )
-import ConfigParser
-from optparse import OptionParser
-import pkg_resources
-import shutil
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-import sys
-import time
+from gtfsdb.util import unzip_gtfs
 
 
 def get_default_config(options):
