@@ -1,5 +1,3 @@
-__import__('pkg_resources').declare_namespace(__name__)
-
 from gtfsdb.model.agency import Agency
 from gtfsdb.model.calendar import Calendar, CalendarDate, UniversalCalendar
 from gtfsdb.model.fare import FareAttribute, FareRule

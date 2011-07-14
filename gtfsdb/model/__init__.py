@@ -1,5 +1,3 @@
-__import__('pkg_resources').declare_namespace(__name__)
-
 from gtfsdb.model.base import Base
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -18,7 +16,7 @@ SRID = 4326
 
 
 class ModelIterator:
-    
+
     def __iter__(self):
         for cls in DeclarativeBase.__subclasses__():
             yield cls
