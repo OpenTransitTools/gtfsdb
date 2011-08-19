@@ -14,12 +14,12 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=(
-      'GeoAlchemy>=0.4.1',
-      'SQLAlchemy>=0.6.1',
+      'GeoAlchemy>=0.6',
+      'SQLAlchemy>=0.7.2',
     ),
     extras_require = {
-      'oracle': ['cx_Oracle>=5.0.3'],
-      'postgres': ['psycopg2>=2.0.14'],
+      'oracle': ['cx_Oracle>=5.1'],
+      'postgresql': ['psycopg2>=2.4.2'],
     },
     entry_points={
       'console_scripts': [
