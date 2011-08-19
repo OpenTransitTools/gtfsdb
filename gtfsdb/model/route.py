@@ -3,6 +3,8 @@ from geoalchemy import GeometryColumn, GeometryDDL, MultiLineString
 from sqlalchemy import Column, ForeignKey, Index, Integer, String
 from sqlalchemy.sql import func
 
+from .agency import Agency
+
 
 __all__ = ['RouteType', 'Route']
 
@@ -32,16 +34,11 @@ class Route(DeclarativeBase):
         'route_text_color'
     ]
 
-    route_id = Column(String, primary_key=True)
-    agency_id = Column(String)
+    route_id = Column(String, primary_key=True, nullable=False)
+    agency_id = Column(String, ForeignKey(Agency.agency_id), nullable=True)
     route_short_name = Column(String)
     route_long_name = Column(String)
-    route_desc = Column(String)
-    route_type = Column(
-        Integer,
-        ForeignKey(RouteType.route_type),
-        nullable=False
-    )
+    route_type = Column(Integer, ForeignKey(RouteType.route_type), nullable=False)
     route_url = Column(String)
     route_color = Column(String(6))
     route_text_color = Column(String(6))

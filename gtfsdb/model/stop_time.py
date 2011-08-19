@@ -23,11 +23,11 @@ class StopTime(DeclarativeBase):
     ]
     proposed_fields = ['timepoint']
 
-    trip_id = Column(String, ForeignKey(Trip.trip_id), primary_key=True)
+    trip_id = Column(String, ForeignKey(Trip.trip_id), primary_key=True, nullable=False)
     arrival_time = Column(String)
     departure_time = Column(String)
     stop_id = Column(String, nullable=False)
-    stop_sequence = Column(Integer, primary_key=True)
+    stop_sequence = Column(Integer, primary_key=True, nullable=False)
     stop_headsign = Column(String)
     pickup_type = Column(Integer, default=0)
     drop_off_type = Column(Integer, default=0)
