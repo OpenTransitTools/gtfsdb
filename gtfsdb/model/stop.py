@@ -10,7 +10,7 @@ class Stop(DeclarativeBase):
     optional_fields = ['stop_code', 'stop_desc', 'zone_id', 'stop_url',
                        'location_type', 'parent_station']
 
-    stop_id = Column(String, primary_key=True)
+    stop_id = Column(String, primary_key=True, nullable=False)
     stop_code = Column(String)
     stop_name = Column(String, nullable=False)
     stop_desc = Column(String)

@@ -25,7 +25,7 @@ class Calendar(DeclarativeBase):
         'end_date'
     ]
 
-    service_id = Column(String, primary_key=True)
+    service_id = Column(String, primary_key=True, nullable=False)
     monday = Column(Boolean, nullable=False)
     tuesday = Column(Boolean, nullable=False)
     wednesday = Column(Boolean, nullable=False)
@@ -77,9 +77,17 @@ class CalendarDate(DeclarativeBase):
     required_fields = ['service_id', 'date', 'exception_type']
 
     service_id = Column(String, primary_key=True)
-    date = Column(Date, primary_key=True)
+    date = Column(Date, primary_key=True, index=True)
     exception_type = Column(Integer, nullable=False)
 
+    @property
+    def is_addition(self):
+        return self.exception_type == 1
+
+    @property
+    def is_removal(self):
+        return self.exception_type == 2
+    
 
 class UniversalCalendar(DeclarativeBase):
     __tablename__ = 'universal_calendar'
@@ -116,14 +124,12 @@ class UniversalCalendar(DeclarativeBase):
         session.commit()
         q = session.query(CalendarDate)
         for calendar_date in q:
-            if calendar_date.exception_type == 1:
+            if calendar_date.is_addition:
                 uc = cls.from_calendar_date(calendar_date)
                 session.merge(uc)
-            if calendar_date.exception_type == 2:
-                d = cls.__table__.delete()
-                d = d.where(cls.__table__.c.service_id == calendar_date.service_id)
-                d = d.where(cls.__table__.c.date == calendar_date.date)
-                engine.execute(d)
+            if calendar_date.is_removal:
+                kwargs = dict(service_id=calendar_date.service_id, date=calendar_date.date)
+                session.query(cls).filter_by(**kwargs).delete()
         session.commit()
         session.close()
         processing_time = time.time() - start_time

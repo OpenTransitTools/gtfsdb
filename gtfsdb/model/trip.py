@@ -21,7 +21,7 @@ class Trip(DeclarativeBase):
 
     route_id = Column(String, ForeignKey(Route.route_id), nullable=False)
     service_id = Column(String, nullable=False)
-    trip_id = Column(String, primary_key=True)
+    trip_id = Column(String, primary_key=True, nullable=False)
     trip_headsign = Column(String)
     trip_short_name = Column(String)
     direction_id = Column(Integer)
