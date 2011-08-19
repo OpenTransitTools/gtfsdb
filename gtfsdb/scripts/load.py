@@ -115,7 +115,7 @@ def main():
     # load derived geometries
     # currently only written for postgresql
     dialect_name = engine.url.get_dialect().name
-    if options.geospatial and dialect_name == 'postgres':
+    if options.geospatial and dialect_name == 'postgresql':
         s = ' - %s geom' %(Route.__tablename__)
         sys.stdout.write(s)
         start_seconds = time.time()
