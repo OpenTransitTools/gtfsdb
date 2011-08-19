@@ -1,5 +1,4 @@
-import ConfigParser
-from optparse import OptionParser
+import argparse
 import pkg_resources
 import shutil
 from sqlalchemy import create_engine
@@ -28,67 +27,50 @@ from gtfsdb import (
 from gtfsdb.util import unzip_gtfs
 
 
-def get_default_config(options):
-    path = pkg_resources.resource_filename('gtfsdb', 'data')
-    filename = '%s/default.cfg' %(path)
-    config = ConfigParser.ConfigParser()
-    config.read(filename)
-
-    section = 'options'
-    options.database = config.get(section, 'database')
-    if config.has_option(section, 'create'):
-        options.create = config.getboolean(section, 'create')
-    if config.has_option(section, 'filename'):
-        options.filename = config.get(section, 'filename')
-    if config.has_option(section, 'geospatial'):
-        options.geospatial = config.getboolean(section, 'geospatial')
-    if config.has_option(section, 'schema'):
-        options.schema = config.get(section, 'schema')
-    return options
-
-
 def init_parser():
-    parser = OptionParser()
-    parser.set_defaults(
-        create=False,
-        filename='http://code.google.com/transit/spec/sample-feed.zip',
-        geospatial=False,
-        schema=None
+    parser = argparse.ArgumentParser(
+        prog='gtfsdb-load',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_option(
-        "-c", "--create", action="store_true", dest="create",
-        help="Create database tables"
+    parser.add_argument(
+        '--database_url',
+        default='sqlite://',
+        help='DATABASE URL with appropriate privileges'
     )
-    parser.add_option(
-        "-d", "--database", dest="database",
-        help="Database connection string for engine"
+    parser.add_argument(
+        '--file',
+        default='http://code.google.com/transit/spec/sample-feed.zip',
+        help='URL or local directory path to GTFS zip FILE',
     )
-    parser.add_option(
-        "-f", "--file", dest="filename",
-        help="URL or local directory path to GTFS zip file"
+    parser.add_argument(
+        '--is_geospatial',
+        action='store_true',
+        default=False,
+        help='Database IS GEOSPATIAL',
     )
-    parser.add_option(
-        "-g", "--geom", action="store_true", dest="geospatial",
-        help="Indicate that database is spatially enabled"
+    parser.add_argument(
+        '--schema',
+        default=None,
+        help='Database SCHEMA name',
     )
-    parser.add_option(
-        "-s", "--schema", dest="schema",
-        help="Optional database schema name"
-    )
-    (options, args) = parser.parse_args()
-    if options.database is None:
-        options = get_default_config(options)
-    return options
+    args = parser.parse_args()
+    return args
 
 
 def main():
-    options = init_parser()
-    engine = create_engine(options.database)
-    model.init(options)
-    if options.create:
-        model.DeclarativeBase.metadata.drop_all(bind=engine)
-        model.DeclarativeBase.metadata.create_all(bind=engine)
-    gtfs_directory = unzip_gtfs(options.filename)
+
+
+    # process command line args
+    args = init_parser()
+    for cls in model.DeclarativeBase.__subclasses__():
+        cls.set_schema(args.schema)
+        if args.is_geospatial and hasattr(cls, 'add_geometry_column'):
+            cls.add_geometry_column()
+    engine = create_engine(args.database_url)
+
+    model.DeclarativeBase.metadata.drop_all(bind=engine)
+    model.DeclarativeBase.metadata.create_all(bind=engine)
+    gtfs_directory = unzip_gtfs(args.file)
     data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
 
     # load lookup tables first
@@ -115,7 +97,7 @@ def main():
     # load derived geometries
     # currently only written for postgresql
     dialect_name = engine.url.get_dialect().name
-    if options.geospatial and dialect_name == 'postgresql':
+    if args.is_geospatial and dialect_name == 'postgresql':
         s = ' - %s geom' %(Route.__tablename__)
         sys.stdout.write(s)
         start_seconds = time.time()

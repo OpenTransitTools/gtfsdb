@@ -3,6 +3,7 @@ import datetime
 import os
 import sys
 import time
+
 from gtfsdb import util
 
 
@@ -69,10 +70,6 @@ class Base(object):
         if hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
         return row
-
-    @classmethod
-    def set_schema(cls, schema):
-        cls.__table__.schema = schema
 
     @classmethod
     def validate(cls, fieldnames):
