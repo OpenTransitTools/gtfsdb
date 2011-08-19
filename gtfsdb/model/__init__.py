@@ -1,5 +1,6 @@
-from gtfsdb.model.base import Base
 from sqlalchemy.ext.declarative import declarative_base
+
+from gtfsdb.model.base import Base
 
 
 DeclarativeBase = declarative_base(cls=Base)
@@ -13,17 +14,3 @@ proposed_files = ['feed_info.txt', 'stop_features.txt']
 files = required_files + optional_files + proposed_files
 
 SRID = 4326
-
-
-class ModelIterator:
-
-    def __iter__(self):
-        for cls in DeclarativeBase.__subclasses__():
-            yield cls
-
-
-def init(options):
-    for cls in ModelIterator():
-        cls.set_schema(options.schema)
-        if options.geospatial and hasattr(cls, 'add_geometry_column'):
-            cls.add_geometry_column()

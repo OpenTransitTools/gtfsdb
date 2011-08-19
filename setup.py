@@ -14,6 +14,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=(
+      'argparse>=1.2.1',
       'GeoAlchemy>=0.6',
       'SQLAlchemy>=0.7.2',
     ),
