@@ -6,8 +6,7 @@ class Agency(DeclarativeBase):
     __tablename__ = 'agency'
 
     required_fields = ['agency_name', 'agency_url', 'agency_timezone']
-    optional_fields = ['agency_id', 'agency_lang', 'agency_phone']
-    proposed_fields = ['agency_fare_url']
+    optional_fields = ['agency_id', 'agency_lang', 'agency_phone', 'agency_fare_url']
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     agency_id = Column(String)
