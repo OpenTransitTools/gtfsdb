@@ -12,6 +12,7 @@ from gtfsdb import (
     CalendarDate,
     FareAttribute,
     FareRule,
+    FeedInfo,
     Frequency,
     model,
     Pattern,
@@ -78,6 +79,7 @@ def main():
 
     # load GTFS data files & transform/derive additional data
     # due to foreign key constraints these files need to be loaded in the appropriate order
+    FeedInfo.load(engine, gtfs_directory)
     Agency.load(engine, gtfs_directory)
     Calendar.load(engine, gtfs_directory)
     CalendarDate.load(engine, gtfs_directory)

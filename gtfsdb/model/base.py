@@ -72,6 +72,10 @@ class Base(object):
         return row
 
     @classmethod
+    def set_schema(cls, schema):
+        cls.__table__.schema = schema
+
+    @classmethod
     def validate(cls, fieldnames):
         all_fields = cls.required_fields + cls.optional_fields + cls.proposed_fields
 
