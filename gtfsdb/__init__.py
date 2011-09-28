@@ -3,6 +3,7 @@ from gtfsdb.model.calendar import Calendar, CalendarDate, UniversalCalendar
 from gtfsdb.model.fare import FareAttribute, FareRule
 from gtfsdb.model.feed_info import FeedInfo
 from gtfsdb.model.frequency import Frequency
+from gtfsdb.model.gtfs import GTFS
 from gtfsdb.model.route import Route, RouteType
 from gtfsdb.model.shape import Pattern, Shape
 from gtfsdb.model.stop import Stop

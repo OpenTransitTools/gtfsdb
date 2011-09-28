@@ -1,9 +1,7 @@
 import argparse
-import os
-import pkg_resources
-import subprocess
 import sys
-from urllib import urlretrieve
+
+from gtfsdb.model.gtfs import GTFS
 
 
 def init_parser():
@@ -21,21 +19,6 @@ def init_parser():
 
 def main():
     args = init_parser()
-    (filename, headers) = urlretrieve(args.file)
-
-    path = os.path.join(
-        pkg_resources.get_distribution('transitfeed').egg_info,
-        'scripts/feedvalidator.py'
-    )
-
-    stdout, stderr = subprocess.Popen(
-        [sys.executable, path, '--output=CONSOLE', filename],
-        stdout=subprocess.PIPE
-    ).communicate()
-
-    is_valid = True
-    for line in str(stdout).splitlines():
-        if line.startswith('ERROR'):
-            is_valid = 'errors' not in line.lower()
-            continue
+    feed = GTFS(args.file)
+    is_valid, stdout = feed.validate()
     sys.stdout.write(stdout)
