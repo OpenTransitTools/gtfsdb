@@ -1,25 +1,26 @@
-from gtfsdb.model import DeclarativeBase
 from geoalchemy import GeometryColumn, GeometryDDL, MultiLineString
-from sqlalchemy import Column, ForeignKey, Index, Integer, String
+from sqlalchemy import Column, ForeignKey, Index
+from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
 
 from .agency import Agency
+from .base import Base
 
 
 __all__ = ['RouteType', 'Route']
 
 
-class RouteType(DeclarativeBase):
+class RouteType(Base):
     __tablename__ = 'route_type'
-    
+
     route_type = Column(Integer, primary_key=True)
     route_type_name = Column(String)
     route_type_desc = Column(String)
 
 
-class Route(DeclarativeBase):
+class Route(Base):
     __tablename__ = 'routes'
-    
+
     required_fields = [
         'route_id',
         'route_short_name',

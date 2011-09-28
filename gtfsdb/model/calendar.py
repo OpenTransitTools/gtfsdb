@@ -1,15 +1,18 @@
 import datetime
 import sys
 import time
-from gtfsdb.model import DeclarativeBase
-from sqlalchemy import Boolean, Column, Date, Index, Integer, String
+
+from sqlalchemy import Column, Index
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.types import Boolean, Date, Integer, String
+
+from .base import Base
 
 
 __all__ = ['Calendar', 'CalendarDate', 'UniversalCalendar']
 
 
-class Calendar(DeclarativeBase):
+class Calendar(Base):
     __tablename__ = 'calendar'
 
     required_fields = [
@@ -71,7 +74,7 @@ class Calendar(DeclarativeBase):
 Index('%s_ix1' %(Calendar.__tablename__), Calendar.start_date, Calendar.end_date)
 
 
-class CalendarDate(DeclarativeBase):
+class CalendarDate(Base):
     __tablename__ = 'calendar_dates'
 
     required_fields = ['service_id', 'date', 'exception_type']
@@ -87,9 +90,9 @@ class CalendarDate(DeclarativeBase):
     @property
     def is_removal(self):
         return self.exception_type == 2
-    
 
-class UniversalCalendar(DeclarativeBase):
+
+class UniversalCalendar(Base):
     __tablename__ = 'universal_calendar'
 
     required_fields = ['service_id', 'date']

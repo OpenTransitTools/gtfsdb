@@ -1,16 +1,18 @@
 import sys
 import time
-from gtfsdb.model import DeclarativeBase, SRID
+from gtfsdb.model import SRID
 from geoalchemy import GeometryColumn, GeometryDDL, Point, LineString, WKTSpatialElement
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 
+from .base import Base
+
 
 __all__ = ['Pattern', 'Shape']
 
 
-class Pattern(DeclarativeBase):
+class Pattern(Base):
     __tablename__ = 'patterns'
 
     shape_id = Column(String, primary_key=True)
@@ -61,9 +63,9 @@ class Pattern(DeclarativeBase):
         print ' (%.0f seconds)' %(processing_time)
 
 
-class Shape(DeclarativeBase):
+class Shape(Base):
     __tablename__ = 'shapes'
-    
+
     required_fields = [
         'shape_id',
         'shape_pt_lat',

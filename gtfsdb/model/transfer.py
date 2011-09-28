@@ -1,10 +1,11 @@
-from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Column, Index, Integer, Sequence, String
 
+from .base import Base
 
-class Transfer(DeclarativeBase):
+
+class Transfer(Base):
     __tablename__ = 'transfers'
-    
+
     required_fields = ['from_stop_id', 'to_stop_id', 'transfer_type']
     optional_fields = ['min_transfer_time']
 

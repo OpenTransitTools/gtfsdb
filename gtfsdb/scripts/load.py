@@ -14,7 +14,7 @@ from gtfsdb import (
     FareRule,
     FeedInfo,
     Frequency,
-    model,
+    GTFS,
     Pattern,
     Route,
     RouteType,
@@ -25,6 +25,8 @@ from gtfsdb import (
     Trip,
     UniversalCalendar,
 )
+from gtfsdb.model.base import Base
+
 from gtfsdb.util import unzip_gtfs
 
 
@@ -62,14 +64,14 @@ def main():
 
     # process command line args
     args = init_parser()
-    for cls in model.DeclarativeBase.__subclasses__():
+    for cls in Base.__subclasses__():
         cls.set_schema(args.schema)
         if args.is_geospatial and hasattr(cls, 'add_geometry_column'):
             cls.add_geometry_column()
     engine = create_engine(args.database_url)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
-    model.DeclarativeBase.metadata.drop_all(bind=engine)
-    model.DeclarativeBase.metadata.create_all(bind=engine)
     gtfs_directory = unzip_gtfs(args.file)
     data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
 

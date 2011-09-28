@@ -1,8 +1,9 @@
-from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Column, Index, Integer, Sequence, String
 
+from .base import Base
 
-class Agency(DeclarativeBase):
+
+class Agency(Base):
     __tablename__ = 'agency'
 
     required_fields = ['agency_name', 'agency_url', 'agency_timezone']

@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from gtfsdb.model.gtfs import GTFS
+from gtfsdb import GTFS
 
 
 def init_parser():

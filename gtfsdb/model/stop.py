@@ -1,11 +1,13 @@
-from gtfsdb.model import DeclarativeBase, SRID
+from gtfsdb.model import SRID
 from geoalchemy import GeometryColumn, GeometryDDL, Point, WKTSpatialElement
 from sqlalchemy import Column, Index, Integer, Numeric, String
 
+from .base import Base
 
-class Stop(DeclarativeBase):
+
+class Stop(Base):
     __tablename__ = 'stops'
-    
+
     required_fields = ['stop_id', 'stop_name', 'stop_lat', 'stop_lon']
     optional_fields = ['stop_code', 'stop_desc', 'zone_id', 'stop_url',
                        'location_type', 'parent_station']
@@ -25,7 +27,7 @@ class Stop(DeclarativeBase):
     def add_geometry_column(cls):
         cls.geom = GeometryColumn(Point(2))
         GeometryDDL(cls.__table__)
-    
+
     @classmethod
     def add_geom_to_dict(cls, row):
         wkt = 'SRID=%s;POINT(%s %s)' %(

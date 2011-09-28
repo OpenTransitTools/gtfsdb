@@ -1,19 +1,13 @@
-from gtfsdb.model import DeclarativeBase
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Index,
-    Integer,
-    Numeric,
-    Sequence,
-    String,
-)
+from sqlalchemy import Column, ForeignKey, Index, Sequence
+from sqlalchemy.types import Integer, Numeric, String
+
+from .base import Base
 
 
 __all__ = ['FareAttribute', 'FareRule']
 
 
-class FareAttribute(DeclarativeBase):
+class FareAttribute(Base):
     __tablename__ = 'fare_attributes'
 
     required_fields = [
@@ -34,7 +28,7 @@ class FareAttribute(DeclarativeBase):
     transfer_duration = Column(Integer)
 
 
-class FareRule(DeclarativeBase):
+class FareRule(Base):
 
     __tablename__ = 'fare_rules'
 
