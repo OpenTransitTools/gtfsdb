@@ -7,7 +7,7 @@ Supported Databases
 - PostgreSQL (PostGIS for Geo tables) - preferred
 - Oracle - tested
 - MySQL  - not yet tested
-- SQLite - not yet tested
+- SQLite - tested
 
 Installation
 ============
@@ -42,13 +42,12 @@ Windows
 Usage
 =====
 
-Command line run of application using gtfsdb/data/default.cfg::
+Example load of GTFS sample into SQLite:
 
-    python gtfsdb/scripts/load.py
+    gtfsdb-load --file http://code.google.com/transit/spec/sample-feed.zip
 
-Example load of GTFS sample feed on default install of PostgreSQL with
-PostGIS enabled::
 
-    python gtfsdb/scripts/load.py -f \
-        http://code.google.com/transit/spec/sample-feed.zip \
-        -c -d postgres://postgres@localhost -g
+Example load of GTFS sample into PostgreSQL with PostGIS enabled:
+
+    gtfsdb-load --database_url postgresql://postgres@localhost --is_geospatial \
+         --file http://code.google.com/transit/spec/sample-feed.zip

@@ -34,14 +34,13 @@ def init_parser():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
+        'file',
+        help='URL or local directory path to GTFS zip FILE',
+    )
+    parser.add_argument(
         '--database_url',
         default='sqlite://',
         help='DATABASE URL with appropriate privileges'
-    )
-    parser.add_argument(
-        '--file',
-        default='http://code.google.com/transit/spec/sample-feed.zip',
-        help='URL or local directory path to GTFS zip FILE',
     )
     parser.add_argument(
         '--is_geospatial',
