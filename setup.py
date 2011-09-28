@@ -17,6 +17,7 @@ setup(
       'argparse>=1.2.1',
       'GeoAlchemy>=0.6',
       'SQLAlchemy>=0.7.2',
+      'transitfeed>=1.2.7',
     ),
     extras_require = {
       'oracle': ['cx_Oracle>=5.1'],
@@ -24,7 +25,8 @@ setup(
     },
     entry_points={
       'console_scripts': [
-          'gtfsdb-load = gtfsdb.scripts.load:main'
+          'gtfsdb-load = gtfsdb.scripts.load:main',
+          'gtfsdb-validate = gtfsdb.scripts.validate:main'
       ]
     },
     classifiers=(
