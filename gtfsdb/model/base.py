@@ -4,10 +4,12 @@ import os
 import sys
 import time
 
+from sqlalchemy.ext.declarative import declarative_base
+
 from gtfsdb import util
 
 
-class Base(object):
+class _Base(object):
 
     required_fields = []
     optional_fields = []
@@ -96,3 +98,6 @@ class Base(object):
             unknown_fields = list(fields)
             if unknown_fields:
                 print ' %s unknown fields: %s' %(cls.get_filename(), unknown_fields)
+
+
+Base = declarative_base(cls=_Base)

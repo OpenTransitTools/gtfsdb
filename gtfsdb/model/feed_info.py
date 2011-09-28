@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Index, Sequence
 from sqlalchemy.types import Date, String
 
-from gtfsdb.model import DeclarativeBase
+from .base import Base
 
 
-class FeedInfo(DeclarativeBase):
+class FeedInfo(Base):
     __tablename__ = 'feed_info'
 
     required_fields = ['feed_publisher_name', 'feed_publisher_url', 'feed_lang']

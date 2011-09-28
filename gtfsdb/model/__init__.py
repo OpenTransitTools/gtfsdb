@@ -1,10 +1,3 @@
-from sqlalchemy.ext.declarative import declarative_base
-
-from gtfsdb.model.base import Base
-
-
-DeclarativeBase = declarative_base(cls=Base)
-
 required_files = ['agency.txt', 'stops.txt', 'routes.txt',
                   'trips.txt', 'stop_times.txt']
 optional_files = ['calendar.txt', 'calendar_dates.txt', 'fare_attributes.txt',

@@ -1,12 +1,13 @@
-from gtfsdb.model import DeclarativeBase
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relation
 from gtfsdb.model.shape import Pattern
 from gtfsdb.model.route import Route
 from gtfsdb.model.calendar import UniversalCalendar
 
+from .base import Base
 
-class Trip(DeclarativeBase):
+
+class Trip(Base):
     __tablename__ = 'trips'
 
     required_fields = ['route_id', 'service_id', 'trip_id']

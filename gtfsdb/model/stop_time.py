@@ -1,13 +1,13 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, Numeric, String
 from sqlalchemy.orm import relation
 
-from gtfsdb.model import DeclarativeBase
-from gtfsdb.model.trip import Trip
+from .base import Base
+from .trip import Trip
 
 
-class StopTime(DeclarativeBase):
+class StopTime(Base):
     __tablename__ = 'stop_times'
-    
+
     required_fields = [
         'trip_id',
         'arrival_time',
