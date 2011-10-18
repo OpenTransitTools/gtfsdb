@@ -27,7 +27,7 @@ from gtfsdb import (
 )
 from gtfsdb.model.base import Base
 
-from gtfsdb.util import unzip_gtfs
+#from gtfsdb.util import unzip_gtfs
 
 
 def init_parser():
@@ -72,7 +72,8 @@ def main():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
-    gtfs_directory = unzip_gtfs(args.file)
+    gtfs = GTFS(args.file)
+    gtfs_directory = gtfs.unzip()
     data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
 
     # load lookup tables first
