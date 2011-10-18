@@ -44,10 +44,10 @@ Usage
 
 Example load of GTFS sample into SQLite:
 
-    gtfsdb-load --file http://code.google.com/transit/spec/sample-feed.zip
+    gtfsdb-load http://code.google.com/transit/spec/sample-feed.zip
 
 
 Example load of GTFS sample into PostgreSQL with PostGIS enabled:
 
     gtfsdb-load --database_url postgresql://postgres@localhost --is_geospatial \
-         --file http://code.google.com/transit/spec/sample-feed.zip
+        http://code.google.com/transit/spec/sample-feed.zip
