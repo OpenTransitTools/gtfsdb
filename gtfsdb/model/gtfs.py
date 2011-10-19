@@ -1,3 +1,4 @@
+from contextlib import closing
 import os
 import pkg_resources
 import shutil
@@ -96,6 +97,6 @@ class GTFS(object):
     def unzip(self, path=None):
         """Unzip GTFS files from URL/directory to path."""
         path = path if path else tempfile.mkdtemp()
-        with zipfile.ZipFile(self.local_file) as zip:
+        with closing(zipfile.ZipFile(self.local_file)) as zip:
             zip.extractall(path)
         return path
