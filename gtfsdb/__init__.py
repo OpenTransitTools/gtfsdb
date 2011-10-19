@@ -1,5 +1,6 @@
 from gtfsdb.model.agency import Agency
 from gtfsdb.model.calendar import Calendar, CalendarDate, UniversalCalendar
+from gtfsdb.model.db import Database
 from gtfsdb.model.fare import FareAttribute, FareRule
 from gtfsdb.model.feed_info import FeedInfo
 from gtfsdb.model.frequency import Frequency
