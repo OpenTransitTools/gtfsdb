@@ -10,7 +10,7 @@ class Agency(Base):
     optional_fields = ['agency_id', 'agency_lang', 'agency_phone', 'agency_fare_url']
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    agency_id = Column(String)
+    agency_id = Column(String, unique=True)
     agency_name = Column(String, nullable=False)
     agency_url = Column(String, nullable=False)
     agency_timezone = Column(String, nullable=False)
