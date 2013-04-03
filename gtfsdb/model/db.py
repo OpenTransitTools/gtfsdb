@@ -19,3 +19,8 @@ class Database(object):
         """Create GTFS database"""
         Base.metadata.drop_all(bind=self.engine)
         Base.metadata.create_all(bind=self.engine)
+
+    def get_session(self):
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+        return session
