@@ -22,6 +22,7 @@ from .route import Route, RouteType
 from .shape import Pattern, Shape
 from .stop_time import StopTime
 from .stop import Stop
+from .stop_feature import StopFeature, StopFeatureType
 from .transfer import Transfer
 from .trip import Trip
 
@@ -39,6 +40,8 @@ class GTFS(object):
 
         # load lookup tables first
         RouteType.load(db.engine, data_directory, False)
+        StopFeatureType.load(db.engine, data_directory, False)
+
         # load GTFS data files & transform/derive additional data
         # due to foreign key constraints these files need to be loaded in the appropriate order
         FeedInfo.load(db.engine, gtfs_directory)
@@ -47,6 +50,7 @@ class GTFS(object):
         CalendarDate.load(db.engine, gtfs_directory)
         Route.load(db.engine, gtfs_directory)
         Stop.load(db.engine, gtfs_directory)
+        StopFeature.load(db.engine, gtfs_directory)
         Transfer.load(db.engine, gtfs_directory)
         Shape.load(db.engine, gtfs_directory)
         Pattern.load(db.engine)
