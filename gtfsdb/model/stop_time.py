@@ -3,7 +3,7 @@ from sqlalchemy.orm import relation
 
 from .base import Base
 from .trip import Trip
-
+from .stop import Stop
 
 class StopTime(Base):
     __tablename__ = 'stop_times'
@@ -26,7 +26,7 @@ class StopTime(Base):
     trip_id = Column(String, ForeignKey(Trip.trip_id), primary_key=True, nullable=False)
     arrival_time = Column(String)
     departure_time = Column(String)
-    stop_id = Column(String, nullable=False)
+    stop_id = Column(String, ForeignKey(Stop.stop_id), nullable=False)
     stop_sequence = Column(Integer, primary_key=True, nullable=False)
     stop_headsign = Column(String)
     pickup_type = Column(Integer, default=0)
