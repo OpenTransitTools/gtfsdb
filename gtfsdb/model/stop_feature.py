@@ -1,6 +1,7 @@
 from gtfsdb.model import SRID
 from geoalchemy import GeometryColumn, GeometryDDL, Point, WKTSpatialElement
 from sqlalchemy import Column, ForeignKey, Index, Integer, Numeric, Sequence, String
+from sqlalchemy.orm import relationship 
 
 from .base import Base
 from .stop import Stop
@@ -24,6 +25,9 @@ class StopFeature(Base):
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     stop_id = Column(String, ForeignKey(Stop.stop_id), nullable=False)
     feature_type = Column(String, ForeignKey(StopFeatureType.feature_type), nullable=False)
+
+    stop_feature_type = relationship("StopFeatureType")
+
 
 Index('%s_ix1' %(StopFeature.__tablename__), StopFeature.stop_id)
 Index('%s_ix2' %(StopFeature.__tablename__), StopFeature.feature_type)
