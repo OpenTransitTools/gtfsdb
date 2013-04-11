@@ -18,7 +18,7 @@ class StopFeatureType(Base):
 class StopFeature(Base):
     __tablename__ = 'stop_features'
 
-    required_fields = ['stop_id', 'feature_type', 'stop_feature_type']
+    required_fields = ['stop_id', 'feature_type']
     optional_fields = []
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)

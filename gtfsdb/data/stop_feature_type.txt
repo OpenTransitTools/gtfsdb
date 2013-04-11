@@ -1,4 +1,5 @@
 feature_type,feature_name
+"1000","Shelter"
 "2100","Bench"
 "2200","Trash Can"
 "2300","Bike Storage"
@@ -8,7 +9,6 @@ feature_type,feature_name
 "2410","Ticket Vending Machine"
 "2420","Food Vending Machine"
 "2500","Phone"
-"3000","Pavement Features"
 "3100","Curbcut"
 "3200","Sidewalk"
 "3300","Paved Landing"
