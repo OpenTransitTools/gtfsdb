@@ -1,6 +1,7 @@
 from gtfsdb.model import SRID
 from geoalchemy import GeometryColumn, GeometryDDL, Point, WKTSpatialElement
 from sqlalchemy import Column, Index, Integer, Numeric, String
+from sqlalchemy.orm import relationship 
 
 from .base import Base
 
@@ -22,6 +23,8 @@ class Stop(Base):
     stop_url = Column(String)
     location_type = Column(Integer, default=0)
     parent_station = Column(String)
+
+    stop_feature = relationship("StopFeature")
 
     @classmethod
     def add_geometry_column(cls):
