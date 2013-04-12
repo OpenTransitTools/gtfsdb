@@ -24,7 +24,8 @@ class Stop(Base):
     location_type = Column(Integer, default=0)
     parent_station = Column(String)
 
-    stop_feature = relationship("StopFeature")
+    stop_features = relationship("StopFeature")
+    stop_times    = relationship("StopTime")
 
     @classmethod
     def add_geometry_column(cls):
