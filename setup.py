@@ -1,10 +1,15 @@
 from setuptools import setup, find_packages
+import sys
 
-version = '0.1dev'
+
+install_requires = ['sqlalchemy>=0.7.2']
+if sys.version_info[:2] <= (2, 6):
+    install_requires += ('argparse>=1.2.1',)
+
 
 setup(
     name='gtfsdb',
-    version=version,
+    version='0.1.0dev',
     description='GTFS Database',
     long_description=open('README').read(),
     keywords='GTFS',
@@ -13,21 +18,14 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=(
-      'argparse>=1.2.1',
-      'GeoAlchemy>=0.6',
-      'SQLAlchemy>=0.7.2',
-      'transitfeed>=1.2.7',
-    ),
-    extras_require = {
-      'oracle': ['cx_Oracle>=5.1'],
+    install_requires=install_requires,
+    extras_require={
+      'geo': ['geoalchemy>=0.6'],
+      'oracle': ['cx_oracle>=5.1'],
       'postgresql': ['psycopg2>=2.4.2'],
     },
     entry_points={
-      'console_scripts': [
-          'gtfsdb-load = gtfsdb.scripts.load:main',
-          'gtfsdb-validate = gtfsdb.scripts.validate:main'
-      ]
+        'console_scripts': ['gtfsdb-load = gtfsdb.scripts.load:main']
     },
     classifiers=(
         'Development Status :: 2 - Pre-Alpha',
