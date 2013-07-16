@@ -2,7 +2,7 @@ import codecs
 
 
 class UTF8Recoder(object):
-    """Iterator that reads an encoded stream and reencodes the input to UTF-8"""
+    """Iterator that reads an encoded stream and encodes the input to UTF-8"""
     def __init__(self, f, encoding):
         self.reader = codecs.getreader(encoding)(f)
 

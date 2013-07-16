@@ -15,4 +15,4 @@ class Transfer(Base):
     transfer_type = Column(Integer, default=0)
     min_transfer_time = Column(Integer)
 
-Index('%s_ix1' %(Transfer.__tablename__), Transfer.transfer_type)
+Index('%s_ix1' % (Transfer.__tablename__), Transfer.transfer_type)

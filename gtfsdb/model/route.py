@@ -1,9 +1,8 @@
-from geoalchemy import GeometryColumn, GeometryDDL, MultiLineString
 from sqlalchemy import Column, ForeignKey, Index
+from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
 
-from .agency import Agency
 from .base import Base
 
 
@@ -36,17 +35,21 @@ class Route(Base):
     ]
 
     route_id = Column(String, primary_key=True, nullable=False)
-    agency_id = Column(String, ForeignKey(Agency.agency_id), nullable=True)
+    agency_id = Column(String, ForeignKey('agency.agency_id'), nullable=True)
     route_short_name = Column(String)
     route_long_name = Column(String)
-    route_type = Column(Integer, ForeignKey(RouteType.route_type), nullable=False)
+    route_type = Column(
+        Integer, ForeignKey(RouteType.route_type), nullable=False)
     route_url = Column(String)
     route_color = Column(String(6))
     route_text_color = Column(String(6))
 
+    trips = relationship('Trip')
+
     def load_geometry(self, session):
         from gtfsdb.model.shape import Pattern
         from gtfsdb.model.trip import Trip
+
         if hasattr(self, 'geom'):
             s = func.st_collect(Pattern.geom)
             s = func.st_multi(s)
@@ -57,8 +60,10 @@ class Route(Base):
 
     @classmethod
     def add_geometry_column(cls):
+        from geoalchemy import GeometryColumn, GeometryDDL, MultiLineString
+
         cls.geom = GeometryColumn(MultiLineString(2))
         GeometryDDL(cls.__table__)
 
-Index('%s_ix1' %(Route.__tablename__), Route.agency_id)
-Index('%s_ix2' %(Route.__tablename__), Route.route_type)
+Index('%s_ix1' % (Route.__tablename__), Route.agency_id)
+Index('%s_ix2' % (Route.__tablename__), Route.route_type)

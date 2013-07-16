@@ -136,6 +136,6 @@ class UniversalCalendar(Base):
         session.commit()
         session.close()
         processing_time = time.time() - start_time
-        print ' (%.0f seconds)' %(processing_time)
+        print ' (%.0f seconds)' % (processing_time)
 
-Index('%s_ix1' %(UniversalCalendar.__tablename__), UniversalCalendar.date)
+Index('%s_ix1' % (UniversalCalendar.__tablename__), UniversalCalendar.date)

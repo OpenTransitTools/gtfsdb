@@ -7,7 +7,8 @@ class Agency(Base):
     __tablename__ = 'agency'
 
     required_fields = ['agency_name', 'agency_url', 'agency_timezone']
-    optional_fields = ['agency_id', 'agency_lang', 'agency_phone', 'agency_fare_url']
+    optional_fields = ['agency_id', 'agency_lang', 'agency_phone',
+                       'agency_fare_url']
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     agency_id = Column(String, unique=True)
@@ -18,4 +19,4 @@ class Agency(Base):
     agency_phone = Column(String)
     agency_fare_url = Column(String)
 
-Index('%s_ix1' %(Agency.__tablename__), Agency.agency_id)
+Index('%s_ix1' % (Agency.__tablename__), Agency.agency_id)
