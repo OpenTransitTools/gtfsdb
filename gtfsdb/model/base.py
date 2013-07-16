@@ -42,12 +42,12 @@ class _Base(object):
 
     @classmethod
     def get_filename(cls):
-        return '%s.txt' %(cls.__tablename__)
+        return '%s.txt' % (cls.__tablename__)
 
     @classmethod
     def load(cls, engine, directory=None, validate=True):
         records = []
-        file_path = '%s/%s' %(directory, cls.get_filename())
+        file_path = '%s/%s' % (directory, cls.get_filename())
         if os.path.exists(file_path):
             start_time = time.time()
             file = open(file_path, 'r')
@@ -55,7 +55,7 @@ class _Base(object):
             reader = csv.DictReader(utf8_file)
             if validate:
                 cls.validate(reader.fieldnames)
-            s = ' - %s ' %(cls.get_filename())
+            s = ' - %s ' % (cls.get_filename())
             sys.stdout.write(s)
             table = cls.__table__
             engine.execute(table.delete())
@@ -73,7 +73,7 @@ class _Base(object):
                 engine.execute(table.insert(), records)
             file.close()
             processing_time = time.time() - start_time
-            print ' (%.0f seconds)' %(processing_time)
+            print ' (%.0f seconds)' % (processing_time)
 
     @classmethod
     def make_record(cls, row):
@@ -107,7 +107,7 @@ class _Base(object):
         if fields:
             missing_required_fields = list(fields)
             if missing_required_fields:
-                print ' %s missing fields: %s' %(cls.get_filename(), missing_required_fields)
+                print ' %s missing fields: %s' % (cls.get_filename(), missing_required_fields)
 
         # all fields
         fields = None
@@ -116,7 +116,7 @@ class _Base(object):
         if fields:
             unknown_fields = list(fields)
             if unknown_fields:
-                print ' %s unknown fields: %s' %(cls.get_filename(), unknown_fields)
+                print ' %s unknown fields: %s' % (cls.get_filename(), unknown_fields)
 
 
 Base = declarative_base(cls=_Base)

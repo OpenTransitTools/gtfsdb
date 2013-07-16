@@ -1,7 +1,6 @@
-from gtfsdb.model import SRID
-from geoalchemy import GeometryColumn, GeometryDDL, Point, WKTSpatialElement
-from sqlalchemy import Column, ForeignKey, Index, Integer, Numeric, Sequence, String
-from sqlalchemy.orm import relationship 
+from sqlalchemy import Column, ForeignKey, Index, Sequence
+from sqlalchemy.orm import relationship
+from sqlalchemy.types import Integer, String
 
 from .base import Base
 from .stop import Stop

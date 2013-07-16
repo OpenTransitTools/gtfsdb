@@ -27,7 +27,7 @@ class Trip(Base):
     trip_short_name = Column(String)
     direction_id = Column(Integer)
     block_id = Column(String)
-    shape_id= Column(String, ForeignKey(Pattern.shape_id), nullable=True)
+    shape_id = Column(String, ForeignKey(Pattern.shape_id), nullable=True)
     trip_type = Column(String)
     trip_bikes_allowed = Column(Integer)
 

@@ -11,7 +11,7 @@ class Database(object):
         self.schema = schema
         self.is_geospatial = is_geospatial
         for cls in Base.__subclasses__():
-            cls.set_schema(schema)
+            cls.__table__.schema = schema
             if is_geospatial and hasattr(cls, 'add_geometry_column'):
                 cls.add_geometry_column()
         self.engine = create_engine(url)
