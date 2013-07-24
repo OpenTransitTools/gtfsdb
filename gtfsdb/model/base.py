@@ -23,7 +23,7 @@ class _Base(object):
 
     def to_dict(self):
         ''' convert a SQLAlchemy object into a dict that is serializable to JSON
-        ''' 
+        '''
         ret_val = self.__dict__.copy()
 
         ''' not crazy about this hack, but ... 

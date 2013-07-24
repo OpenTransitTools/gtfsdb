@@ -1,8 +1,8 @@
 from gtfsdb.model import SRID
-from sqlalchemy import Column, Index, Integer, Numeric, String
+from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 
-from .base import Base
+from gtfsdb.model.base import Base
 
 
 class Stop(Base):
@@ -21,7 +21,7 @@ class Stop(Base):
     stop_lon = Column(Numeric(12, 9), nullable=False)
     zone_id = Column(String)
     stop_url = Column(String)
-    location_type = Column(Integer, default=0)
+    location_type = Column(Integer, index=True, default=0)
     parent_station = Column(String)
     wheelchair_boarding = Column(Integer, default=0)
 
@@ -47,5 +47,3 @@ class Stop(Base):
             row['geom'] = WKTSpatialElement(wkt)
         except ImportError:
             pass
-
-Index('%s_ix1' % (Stop.__tablename__), Stop.location_type)

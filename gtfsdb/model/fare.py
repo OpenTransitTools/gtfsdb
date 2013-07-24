@@ -1,7 +1,7 @@
-from sqlalchemy import Column, ForeignKey, Index, Sequence
+from sqlalchemy import Column, ForeignKey, Sequence
 from sqlalchemy.types import Integer, Numeric, String
 
-from .base import Base
+from gtfsdb.model.base import Base
 
 
 __all__ = ['FareAttribute', 'FareRule']
@@ -37,11 +37,10 @@ class FareRule(Base):
     proposed_fields = ['service_id']
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    fare_id = Column(String, ForeignKey(FareAttribute.fare_id), nullable=False)
+    fare_id = Column(String,
+        ForeignKey('fare_attributes.fare_id'), index=True, nullable=False)
     route_id = Column(String)
     origin_id = Column(String)
     destination_id = Column(String)
     contains_id = Column(String)
     service_id = Column(String)
-
-Index('%s_ix1' % (FareRule.__tablename__), FareRule.fare_id)

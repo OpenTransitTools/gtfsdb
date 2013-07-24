@@ -2,9 +2,16 @@ from setuptools import setup, find_packages
 import sys
 
 
-install_requires = ['sqlalchemy>=0.7.2']
+extras_require = dict(
+    geo=('geoalchemy>=0.6'),
+    oracle=('cx_oracle>=5.1'),
+    postgresql=('psycopg2>=2.4.2'),
+)
+
+
+install_requires = ['sqlalchemy>=0.8', ]
 if sys.version_info[:2] <= (2, 6):
-    install_requires += ('argparse>=1.2.1',)
+    install_requires.extend(['argparse>=1.2.1', 'unittest2'])
 
 
 setup(
@@ -19,11 +26,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
-    extras_require={
-      'geo': ['geoalchemy>=0.6'],
-      'oracle': ['cx_oracle>=5.1'],
-      'postgresql': ['psycopg2>=2.4.2'],
-    },
+    extras_require=extras_require,
     entry_points={
         'console_scripts': ['gtfsdb-load = gtfsdb.scripts.load:main']
     },
