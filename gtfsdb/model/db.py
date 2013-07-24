@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from .base import Base
-
 
 class Database(object):
 
@@ -10,16 +8,26 @@ class Database(object):
         self.url = url
         self.schema = schema
         self.is_geospatial = is_geospatial
-        for cls in Base.__subclasses__():
+        for cls in self.classes:
             cls.__table__.schema = schema
             if is_geospatial and hasattr(cls, 'add_geometry_column'):
                 cls.add_geometry_column()
         self.engine = create_engine(url)
 
+    @property
+    def classes(self):
+        from gtfsdb.model.base import Base
+        return Base.__subclasses__()
+
+    @property
+    def metadata(self):
+        from gtfsdb.model.base import Base
+        return Base.metadata
+
     def create(self):
         """Create GTFS database"""
-        Base.metadata.drop_all(bind=self.engine)
-        Base.metadata.create_all(bind=self.engine)
+        self.metadata.drop_all(bind=self.engine)
+        self.metadata.create_all(bind=self.engine)
 
     def get_session(self):
         Session = sessionmaker(bind=self.engine)

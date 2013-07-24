@@ -1,15 +1,17 @@
 import argparse
-import time
+import logging
 
 from gtfsdb import Database, GTFS
+
+
+log = logging.getLogger(__name__)
 
 
 def main():
     # process command line args
     parser = argparse.ArgumentParser(prog='gtfsdb-load',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('file',
-        help='URL or local directory path to GTFS zip FILE')
+    parser.add_argument('file', help='URL or local path to GTFS zip FILE')
     parser.add_argument('--database_url', default='sqlite://',
         help='DATABASE URL with appropriate privileges')
     parser.add_argument('--is_geospatial', action='store_true', default=False,
@@ -27,11 +29,4 @@ def main():
 
 
 if __name__ == '__main__':
-    start_seconds = time.time()
-    start_time = time.localtime()
-    print time.strftime('begin time: %H:%M:%S', start_time)
     main()
-    end_time = time.localtime()
-    print time.strftime('end time: %H:%M:%S', end_time)
-    process_time = time.time() - start_seconds
-    print 'processing time: %.0f seconds' % (process_time)

@@ -1,4 +1,5 @@
 from contextlib import closing
+import logging
 import os
 import time
 import pkg_resources
@@ -23,14 +24,18 @@ from .transfer import Transfer
 from .trip import Trip
 
 
+log = logging.getLogger(__name__)
+
+
 class GTFS(object):
 
-    def __init__(self, file):
-        self.file = file
-        (self.local_file, headers) = urlretrieve(file)
+    def __init__(self, filename):
+        self.file = filename
+        self.local_file = urlretrieve(filename)[0]
 
     def load(self, db):
         """Load GTFS into database"""
+        log.debug('begin load')
         gtfs_directory = self.unzip()
         data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
 
@@ -74,6 +79,7 @@ class GTFS(object):
             session.close()
             process_time = time.time() - start_seconds
             print ' (%.0f seconds)' % (process_time)
+        log.debug('end load')
 
     def validate(self):
         """Run transitfeed.feedvalidator"""

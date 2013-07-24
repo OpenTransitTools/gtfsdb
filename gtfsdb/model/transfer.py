@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Index, Integer, Sequence, String
+from sqlalchemy import Column, Integer, Sequence, String
 
-from .base import Base
+from gtfsdb.model.base import Base
 
 
 class Transfer(Base):
@@ -12,7 +12,5 @@ class Transfer(Base):
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     from_stop_id = Column(String)
     to_stop_id = Column(String)
-    transfer_type = Column(Integer, default=0)
+    transfer_type = Column(Integer, index=True, default=0)
     min_transfer_time = Column(Integer)
-
-Index('%s_ix1' % (Transfer.__tablename__), Transfer.transfer_type)

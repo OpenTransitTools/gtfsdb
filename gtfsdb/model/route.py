@@ -1,9 +1,9 @@
-from sqlalchemy import Column, ForeignKey, Index
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
 
-from .base import Base
+from gtfsdb.model.base import Base
 
 
 __all__ = ['RouteType', 'Route']
@@ -35,15 +35,18 @@ class Route(Base):
     ]
 
     route_id = Column(String, primary_key=True, nullable=False)
-    agency_id = Column(String, ForeignKey('agency.agency_id'), nullable=True)
+    agency_id = Column(
+        String, ForeignKey('agency.agency_id'), index=True, nullable=True)
     route_short_name = Column(String)
     route_long_name = Column(String)
-    route_type = Column(
-        Integer, ForeignKey(RouteType.route_type), nullable=False)
+    route_type = Column(Integer,
+        ForeignKey('route_type.route_type'), index=True, nullable=False)
     route_url = Column(String)
     route_color = Column(String(6))
     route_text_color = Column(String(6))
 
+    patterns = relationship('Pattern', secondary='trips')
+    stop_times = relationship('StopTime', secondary='trips')
     trips = relationship('Trip')
 
     def load_geometry(self, session):
@@ -64,6 +67,3 @@ class Route(Base):
 
         cls.geom = GeometryColumn(MultiLineString(2))
         GeometryDDL(cls.__table__)
-
-Index('%s_ix1' % (Route.__tablename__), Route.agency_id)
-Index('%s_ix2' % (Route.__tablename__), Route.route_type)

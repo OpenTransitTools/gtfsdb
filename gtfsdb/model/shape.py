@@ -1,11 +1,12 @@
 import sys
 import time
-from gtfsdb.model import SRID
+
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import func
 
-from .base import Base
+from gtfsdb.model import SRID
+from gtfsdb.model.base import Base
 
 
 __all__ = ['Pattern', 'Shape']
@@ -16,6 +17,8 @@ class Pattern(Base):
 
     shape_id = Column(String, primary_key=True)
     pattern_dist = Column(Numeric(20, 10))
+
+    trips = relationship('Trip')
 
     def geom_from_shape(self, shape_points):
         from geoalchemy import WKTSpatialElement
