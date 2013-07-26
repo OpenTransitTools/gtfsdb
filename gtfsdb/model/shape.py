@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.sql import func
 
-from gtfsdb.model import SRID
+from gtfsdb.config import config
 from gtfsdb.model.base import Base
 
 
@@ -90,7 +90,7 @@ class Shape(Base):
         try:
             from geoalchemy import WKTSpatialElement
             wkt = 'SRID=%s;POINT(%s %s)' % (
-                SRID,
+                config.get('DEFAULT', 'SRID'),
                 row['shape_pt_lon'],
                 row['shape_pt_lat']
             )
