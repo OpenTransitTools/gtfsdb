@@ -1,4 +1,3 @@
-from gtfsdb.config import config
 from gtfsdb.model.agency import Agency
 from gtfsdb.model.calendar import Calendar, CalendarDate, UniversalCalendar
 from gtfsdb.model.db import Database

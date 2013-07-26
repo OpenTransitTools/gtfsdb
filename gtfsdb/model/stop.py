@@ -1,7 +1,7 @@
-from gtfsdb.model import SRID
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 
+from gtfsdb.config import config
 from gtfsdb.model.base import Base
 
 
@@ -37,7 +37,7 @@ class Stop(Base):
         try:
             from geoalchemy import WKTSpatialElement
             wkt = 'SRID=%s;POINT(%s %s)' % (
-                SRID,
+                config.get('DEFAULT', 'SRID'),
                 row['stop_lon'],
                 row['stop_lat']
             )
