@@ -8,22 +8,19 @@ from gtfsdb.model.base import Base
 class Stop(Base):
     __tablename__ = 'stops'
 
-    required_fields = ['stop_id', 'stop_name', 'stop_lat', 'stop_lon']
-    optional_fields = ['stop_code', 'stop_desc', 'zone_id', 'stop_url',
-                       'location_type', 'parent_station',
-                       'wheelchair_boarding']
-
-    stop_id = Column(String, primary_key=True, nullable=False)
-    stop_code = Column(String)
-    stop_name = Column(String, nullable=False)
-    stop_desc = Column(String)
+    stop_id = Column(String(255), primary_key=True, nullable=False)
+    stop_code = Column(String(50))
+    stop_name = Column(String(255), nullable=False)
+    stop_desc = Column(String(255))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
-    zone_id = Column(String)
-    stop_url = Column(String)
+    zone_id = Column(String(50))
+    stop_url = Column(String(255))
     location_type = Column(Integer, index=True, default=0)
-    parent_station = Column(String)
+    parent_station = Column(String(255))
+    stop_timezone = Column(String(50))
     wheelchair_boarding = Column(Integer, default=0)
+    platform_code = Column(String(50))
 
     stop_features = relationship('StopFeature')
     stop_times = relationship('StopTime')

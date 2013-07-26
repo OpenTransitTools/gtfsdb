@@ -85,8 +85,7 @@ class GTFS(object):
         """Run transitfeed.feedvalidator"""
         path = os.path.join(
             pkg_resources.get_distribution('transitfeed').egg_info,
-            'scripts/feedvalidator.py'
-        )
+            'scripts/feedvalidator.py')
 
         stdout, stderr = subprocess.Popen(
             [sys.executable, path, '--output=CONSOLE', self.local_file],
