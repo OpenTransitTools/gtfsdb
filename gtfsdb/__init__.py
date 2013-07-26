@@ -1,7 +1,4 @@
-import logging.config
-import os
-from pkg_resources import get_distribution
-
+from gtfsdb.config import config
 from gtfsdb.model.agency import Agency
 from gtfsdb.model.calendar import Calendar, CalendarDate, UniversalCalendar
 from gtfsdb.model.db import Database
@@ -15,8 +12,3 @@ from gtfsdb.model.stop import Stop
 from gtfsdb.model.stop_time import StopTime
 from gtfsdb.model.transfer import Transfer
 from gtfsdb.model.trip import Trip
-
-
-logging.config.fileConfig(
-    os.path.join(get_distribution('gtfsdb').location, 'app.ini'),
-    disable_existing_loggers=False)
