@@ -19,20 +19,7 @@ class Calendar(Base):
     __tablename__ = 'calendar'
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
-    required_fields = [
-        'service_id',
-        'monday',
-        'tuesday',
-        'wednesday',
-        'thursday',
-        'friday',
-        'saturday',
-        'sunday',
-        'start_date',
-        'end_date'
-    ]
-
-    service_id = Column(String, primary_key=True, nullable=False)
+    service_id = Column(String(255), primary_key=True, nullable=False)
     monday = Column(Boolean, nullable=False)
     tuesday = Column(Boolean, nullable=False)
     wednesday = Column(Boolean, nullable=False)
@@ -79,10 +66,8 @@ class Calendar(Base):
 class CalendarDate(Base):
     __tablename__ = 'calendar_dates'
 
-    required_fields = ['service_id', 'date', 'exception_type']
-
-    service_id = Column(String, primary_key=True)
-    date = Column(Date, primary_key=True, index=True)
+    service_id = Column(String(255), primary_key=True, nullable=False)
+    date = Column(Date, primary_key=True, index=True, nullable=False)
     exception_type = Column(Integer, nullable=False)
 
     @property
@@ -97,10 +82,8 @@ class CalendarDate(Base):
 class UniversalCalendar(Base):
     __tablename__ = 'universal_calendar'
 
-    required_fields = ['service_id', 'date']
-
-    service_id = Column(String, primary_key=True)
-    date = Column(Date, primary_key=True, index=True)
+    service_id = Column(String(255), primary_key=True, nullable=False)
+    date = Column(Date, primary_key=True, index=True, nullable=False)
 
     trips = relationship('Trip',
         primaryjoin='Trip.service_id==UniversalCalendar.service_id',
@@ -126,10 +109,8 @@ class UniversalCalendar(Base):
         session = Session()
         q = session.query(Calendar)
         for calendar in q:
-            rows = calendar.to_date_list()
-            for row in rows:
-                uc = cls(**row)
-                session.add(uc)
+            for row in calendar.to_date_list():
+                session.add(cls(**row))
         session.commit()
         q = session.query(CalendarDate)
         for calendar_date in q:

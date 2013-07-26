@@ -15,7 +15,7 @@ __all__ = ['Pattern', 'Shape']
 class Pattern(Base):
     __tablename__ = 'patterns'
 
-    shape_id = Column(String, primary_key=True)
+    shape_id = Column(String(255), primary_key=True)
     pattern_dist = Column(Numeric(20, 10))
 
     trips = relationship('Trip')
@@ -72,15 +72,7 @@ class Pattern(Base):
 class Shape(Base):
     __tablename__ = 'shapes'
 
-    required_fields = [
-        'shape_id',
-        'shape_pt_lat',
-        'shape_pt_lon',
-        'shape_pt_sequence'
-    ]
-    optional_fields = ['shape_dist_traveled']
-
-    shape_id = Column(String, primary_key=True)
+    shape_id = Column(String(255), primary_key=True)
     shape_pt_lat = Column(Numeric(12, 9))
     shape_pt_lon = Column(Numeric(12, 9))
     shape_pt_sequence = Column(Integer, primary_key=True)
@@ -95,11 +87,13 @@ class Shape(Base):
 
     @classmethod
     def add_geom_to_dict(cls, row):
-        from geoalchemy import WKTSpatialElement
-
-        wkt = 'SRID=%s;POINT(%s %s)' % (
-            SRID,
-            row['shape_pt_lon'],
-            row['shape_pt_lat']
-        )
-        row['geom'] = WKTSpatialElement(wkt)
+        try:
+            from geoalchemy import WKTSpatialElement
+            wkt = 'SRID=%s;POINT(%s %s)' % (
+                SRID,
+                row['shape_pt_lon'],
+                row['shape_pt_lat']
+            )
+            row['geom'] = WKTSpatialElement(wkt)
+        except ImportError:
+            pass

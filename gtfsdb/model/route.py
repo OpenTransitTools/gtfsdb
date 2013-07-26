@@ -13,35 +13,22 @@ class RouteType(Base):
     __tablename__ = 'route_type'
 
     route_type = Column(Integer, primary_key=True)
-    route_type_name = Column(String)
-    route_type_desc = Column(String)
+    route_type_name = Column(String(255))
+    route_type_desc = Column(String(255))
 
 
 class Route(Base):
     __tablename__ = 'routes'
 
-    required_fields = [
-        'route_id',
-        'route_short_name',
-        'route_long_name',
-        'route_type'
-    ]
-    optional_fields = [
-        'agency_id',
-        'route_desc',
-        'route_url',
-        'route_color',
-        'route_text_color'
-    ]
-
-    route_id = Column(String, primary_key=True, nullable=False)
+    route_id = Column(String(255), primary_key=True, nullable=False)
     agency_id = Column(
         String, ForeignKey('agency.agency_id'), index=True, nullable=True)
-    route_short_name = Column(String)
-    route_long_name = Column(String)
+    route_short_name = Column(String(255))
+    route_long_name = Column(String(255))
+    route_desc = Column(String(255))
     route_type = Column(Integer,
         ForeignKey('route_type.route_type'), index=True, nullable=False)
-    route_url = Column(String)
+    route_url = Column(String(255))
     route_color = Column(String(6))
     route_text_color = Column(String(6))
 

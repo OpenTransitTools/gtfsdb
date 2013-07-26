@@ -1,5 +1,6 @@
 import csv
 import datetime
+import logging
 import os
 import sys
 import time
@@ -9,11 +10,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from gtfsdb import util
 
 
-class _Base(object):
+log = logging.getLogger(__name__)
 
-    required_fields = []
-    optional_fields = []
-    proposed_fields = []
+
+class _Base(object):
 
     @classmethod
     def from_dict(cls, attrs):
@@ -50,13 +50,11 @@ class _Base(object):
         file_path = '%s/%s' % (directory, cls.get_filename())
         if os.path.exists(file_path):
             start_time = time.time()
-            file = open(file_path, 'r')
-            utf8_file = util.UTF8Recoder(file, 'utf-8-sig')
+            f = open(file_path, 'r')
+            utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
             reader = csv.DictReader(utf8_file)
             if validate:
                 cls.validate(reader.fieldnames)
-            s = ' - %s ' % (cls.get_filename())
-            sys.stdout.write(s)
             table = cls.__table__
             engine.execute(table.delete())
             i = 0
@@ -71,9 +69,10 @@ class _Base(object):
                     i = 0
             if len(records) > 0:
                 engine.execute(table.insert(), records)
-            file.close()
+            f.close()
             processing_time = time.time() - start_time
-            print ' (%.0f seconds)' % (processing_time)
+            log.debug('{0} ({1:.0f} seconds)'.format(
+                cls.get_filename(), processing_time))
 
     @classmethod
     def make_record(cls, row):
@@ -93,30 +92,20 @@ class _Base(object):
         return row
 
     @classmethod
-    def set_schema(cls, schema):
-        cls.__table__.schema = schema
-
-    @classmethod
     def validate(cls, fieldnames):
-        all_fields = cls.required_fields + cls.optional_fields + cls.proposed_fields
+        if not fieldnames:
+            return
+        cols = cls.__table__.columns
+        all_fields = [c.name for c in cols]
+        required_fields = [c.name for c in cols if c.nullable == False]
+        missing_fields = list(set(required_fields) - set(fieldnames))
+        unknown_fields = list(set(fieldnames) - set(all_fields))
 
-        # required fields
-        fields = None
-        if cls.required_fields and fieldnames:
-            fields = set(cls.required_fields) - set(fieldnames)
-        if fields:
-            missing_required_fields = list(fields)
-            if missing_required_fields:
-                print ' %s missing fields: %s' % (cls.get_filename(), missing_required_fields)
-
-        # all fields
-        fields = None
-        if all_fields and fieldnames:
-            fields = set(fieldnames) - set(all_fields)
-        if fields:
-            unknown_fields = list(fields)
-            if unknown_fields:
-                print ' %s unknown fields: %s' % (cls.get_filename(), unknown_fields)
-
+        if missing_fields:
+            log.debug('{0} missing fields: {1}'.format(
+                cls.get_filename(), missing_fields))
+        if unknown_fields:
+            log.debug('{0} unknown fields: {1}'.format(
+                cls.get_filename(), unknown_fields))
 
 Base = declarative_base(cls=_Base)
