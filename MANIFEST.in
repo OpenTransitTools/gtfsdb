@@ -1,2 +1,2 @@
-include *.ini
+recursive-include gtfsdb/configs *
 recursive-include gtfsdb/data *
