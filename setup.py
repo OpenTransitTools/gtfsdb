@@ -28,12 +28,14 @@ setup(
     install_requires=install_requires,
     extras_require=extras_require,
     entry_points={
-        'console_scripts': ['gtfsdb-load = gtfsdb.scripts.load:main']
+        'console_scripts': ['gtfsdb-load = gtfsdb.scripts:gtfsdb_load']
     },
     classifiers=(
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Natural Language :: English',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
     ),
