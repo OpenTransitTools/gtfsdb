@@ -86,8 +86,8 @@ class _Base(object):
                 row[k] = None
             elif k.endswith('date'):
                 row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
-        # add geometry to dict
-        if hasattr(cls, 'add_geom_to_dict'):
+        '''if this is a geospatially enabled database, add a geom'''
+        if hasattr(cls, 'geom') and hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
         return row
 
