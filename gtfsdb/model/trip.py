@@ -1,11 +1,12 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import Integer, String
 
 from gtfsdb.model.base import Base
 
 
 class Trip(Base):
+    filename = 'trips.txt'
     __tablename__ = 'trips'
 
     route_id = Column(

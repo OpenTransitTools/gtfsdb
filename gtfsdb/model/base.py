@@ -15,6 +15,8 @@ log = logging.getLogger(__name__)
 
 class _Base(object):
 
+    filename = None
+
     @classmethod
     def from_dict(cls, attrs):
         clean_dict = cls.make_record(attrs)
@@ -38,16 +40,12 @@ class _Base(object):
         if set(['created']).issubset(ret_val):
             ret_val['created'] = ret_val['created'].__str__();
 
-        return ret_val 
-
-    @classmethod
-    def get_filename(cls):
-        return '%s.txt' % (cls.__tablename__)
+        return ret_val
 
     @classmethod
     def load(cls, engine, directory=None, validate=True):
         records = []
-        file_path = '%s/%s' % (directory, cls.get_filename())
+        file_path = '%s/%s' % (directory, cls.filename)
         if os.path.exists(file_path):
             start_time = time.time()
             f = open(file_path, 'r')
@@ -72,7 +70,7 @@ class _Base(object):
             f.close()
             processing_time = time.time() - start_time
             log.debug('{0} ({1:.0f} seconds)'.format(
-                cls.get_filename(), processing_time))
+                cls.filename, processing_time))
 
     @classmethod
     def make_record(cls, row):
@@ -103,9 +101,9 @@ class _Base(object):
 
         if missing_fields:
             log.debug('{0} missing fields: {1}'.format(
-                cls.get_filename(), missing_fields))
+                cls.filename, missing_fields))
         if unknown_fields:
             log.debug('{0} unknown fields: {1}'.format(
-                cls.get_filename(), unknown_fields))
+                cls.filename, unknown_fields))
 
 Base = declarative_base(cls=_Base)

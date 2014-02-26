@@ -3,6 +3,7 @@ import logging
 import time
 
 from sqlalchemy import Column, Index
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.types import Boolean, Date, Integer, String
 
@@ -16,6 +17,7 @@ log = logging.getLogger(__name__)
 
 
 class Calendar(Base):
+    filename = 'calendar.txt'
     __tablename__ = 'calendar'
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
@@ -64,17 +66,18 @@ class Calendar(Base):
 
 
 class CalendarDate(Base):
+    filename = 'calendar_dates.txt'
     __tablename__ = 'calendar_dates'
 
     service_id = Column(String(255), primary_key=True, nullable=False)
     date = Column(Date, primary_key=True, index=True, nullable=False)
     exception_type = Column(Integer, nullable=False)
 
-    @property
+    @hybrid_property
     def is_addition(self):
         return self.exception_type == 1
 
-    @property
+    @hybrid_property
     def is_removal(self):
         return self.exception_type == 2
 
@@ -89,10 +92,6 @@ class UniversalCalendar(Base):
         primaryjoin='Trip.service_id==UniversalCalendar.service_id',
         foreign_keys=(service_id),
         viewonly=True)
-
-    @classmethod
-    def get_filename(cls):
-        return None
 
     @classmethod
     def from_calendar_date(cls, calendar_date):

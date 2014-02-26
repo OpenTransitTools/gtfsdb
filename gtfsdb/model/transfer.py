@@ -4,6 +4,7 @@ from gtfsdb.model.base import Base
 
 
 class Transfer(Base):
+    filename = 'transfers.txt'
     __tablename__ = 'transfers'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)

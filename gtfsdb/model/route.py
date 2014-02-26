@@ -10,6 +10,7 @@ __all__ = ['RouteType', 'Route']
 
 
 class RouteType(Base):
+    filename = 'route_type.txt'
     __tablename__ = 'route_type'
 
     route_type = Column(Integer, primary_key=True, autoincrement=False)
@@ -18,6 +19,7 @@ class RouteType(Base):
 
 
 class Route(Base):
+    filename = 'routes.txt'
     __tablename__ = 'routes'
 
     route_id = Column(String(255), primary_key=True, nullable=False)

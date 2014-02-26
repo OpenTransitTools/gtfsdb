@@ -5,6 +5,7 @@ from gtfsdb.model.base import Base
 
 
 class Agency(Base):
+    filename = 'agency.txt'
     __tablename__ = 'agency'
 
     id = Column(Integer,
