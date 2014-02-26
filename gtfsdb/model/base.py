@@ -43,28 +43,28 @@ class _Base(object):
         return ret_val
 
     @classmethod
-    def load(cls, engine, directory=None, validate=True):
+    def load(cls, db, directory=None, validate=True, batch_size=10000):
         records = []
-        file_path = '%s/%s' % (directory, cls.filename)
+        file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
             start_time = time.time()
             f = open(file_path, 'r')
             utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
             reader = csv.DictReader(utf8_file)
             table = cls.__table__
-            engine.execute(table.delete())
+            db.engine.execute(table.delete())
             i = 0
             for row in reader:
                 records.append(cls.make_record(row))
                 i += 1
-                # commit every 10,000 records to the database to manage memory usage
-                if i >= 10000:
-                    engine.execute(table.insert(), records)
+                # commit every `batch_size` records to manage memory
+                if i >= batch_size:
+                    db.engine.execute(table.insert(), records)
                     sys.stdout.write('*')
                     records = []
                     i = 0
             if len(records) > 0:
-                engine.execute(table.insert(), records)
+                db.engine.execute(table.insert(), records)
             f.close()
             processing_time = time.time() - start_time
             log.debug('{0} ({1:.0f} seconds)'.format(

@@ -4,7 +4,7 @@ import time
 
 from sqlalchemy import Column, Index
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship
 from sqlalchemy.types import Boolean, Date, Integer, String
 
 from gtfsdb.model.base import Base
@@ -102,10 +102,9 @@ class UniversalCalendar(Base):
         return cls(**kwargs)
 
     @classmethod
-    def load(cls, engine):
+    def load(cls, db):
         start_time = time.time()
-        Session = sessionmaker(bind=engine)
-        session = Session()
+        session = db.session
         q = session.query(Calendar)
         for calendar in q:
             for row in calendar.to_date_list():
