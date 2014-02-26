@@ -1,7 +1,7 @@
 from ConfigParser import ConfigParser
 import logging.config
 import os
-from pkg_resources import resource_filename
+from pkg_resources import resource_filename  # @UnresolvedImport
 
 
 config = ConfigParser()

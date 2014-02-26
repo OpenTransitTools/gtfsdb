@@ -1,10 +1,8 @@
 from contextlib import closing
 import logging
-import os
 import time
 import pkg_resources
 import shutil
-import subprocess
 import sys
 import tempfile
 from urllib import urlretrieve
@@ -34,7 +32,7 @@ class GTFS(object):
         self.local_file = urlretrieve(filename)[0]
 
     def load(self, db):
-        """Load GTFS into database"""
+        '''Load GTFS into database'''
         log.debug('begin load')
         gtfs_directory = self.unzip()
         data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
@@ -63,14 +61,13 @@ class GTFS(object):
         shutil.rmtree(gtfs_directory)
         UniversalCalendar.load(db.engine)
 
-        # load derived geometries
-        # currently only written for postgresql
+        '''load derived geometries, currently only written for PostgreSQL'''
         dialect_name = db.engine.url.get_dialect().name
-        if db.is_geospatial and dialect_name == 'postgresql':
+        if db.is_geospatial and 'postgres' in dialect_name:
             s = ' - %s geom' % (Route.__tablename__)
             sys.stdout.write(s)
             start_seconds = time.time()
-            session = db.get_session()
+            session = db.session
             q = session.query(Route)
             for route in q:
                 route.load_geometry(session)
@@ -81,26 +78,8 @@ class GTFS(object):
             print ' (%.0f seconds)' % (process_time)
         log.debug('end load')
 
-    def validate(self):
-        """Run transitfeed.feedvalidator"""
-        path = os.path.join(
-            pkg_resources.get_distribution('transitfeed').egg_info,
-            'scripts/feedvalidator.py')
-
-        stdout, stderr = subprocess.Popen(
-            [sys.executable, path, '--output=CONSOLE', self.local_file],
-            stdout=subprocess.PIPE
-        ).communicate()
-
-        is_valid = True
-        for line in str(stdout).splitlines():
-            if line.startswith('ERROR'):
-                is_valid = 'errors' not in line.lower()
-                continue
-        return is_valid, stdout
-
     def unzip(self, path=None):
-        """Unzip GTFS files from URL/directory to path."""
+        '''Unzip GTFS files from URL/directory to path.'''
         path = path if path else tempfile.mkdtemp()
         with closing(zipfile.ZipFile(self.local_file)) as z:
             z.extractall(path)
