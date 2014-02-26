@@ -2,7 +2,7 @@ import sys
 import time
 
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from gtfsdb.config import config
@@ -38,12 +38,11 @@ class Pattern(Base):
         GeometryDDL(cls.__table__)
 
     @classmethod
-    def load(cls, engine):
+    def load(cls, db):
         start_time = time.time()
         s = ' - %s' % (cls.__tablename__)
         sys.stdout.write(s)
-        Session = sessionmaker(bind=engine)
-        session = Session()
+        session = db.session
         q = session.query(
             Shape.shape_id,
             func.max(Shape.shape_dist_traveled).label('dist')

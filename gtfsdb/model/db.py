@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 class Database(object):
@@ -15,23 +15,20 @@ class Database(object):
         self.engine = create_engine(url)
         if 'sqlite' in url:
             self.engine.connect().connection.connection.text_factory = str
+        session_factory = sessionmaker(self.engine)
+        self.session = scoped_session(session_factory)
 
     @property
     def classes(self):
         from gtfsdb.model.base import Base
         return Base.__subclasses__()
 
-    @property
-    def metadata(self):
-        from gtfsdb.model.base import Base
-        return Base.metadata
-
     def create(self):
         """Create GTFS database"""
         self.metadata.drop_all(bind=self.engine)
         self.metadata.create_all(bind=self.engine)
 
-    def get_session(self):
-        Session = sessionmaker(bind=self.engine)
-        session = Session()
-        return session
+    @property
+    def metadata(self):
+        from gtfsdb.model.base import Base
+        return Base.metadata
