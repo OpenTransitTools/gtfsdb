@@ -5,6 +5,7 @@ from gtfsdb.model.base import Base
 
 
 class FeedInfo(Base):
+    filename = 'feed_info.txt'
     __tablename__ = 'feed_info'
 
     feed_publisher_name = Column(String(255), primary_key=True)

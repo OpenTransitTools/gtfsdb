@@ -6,6 +6,7 @@ from gtfsdb.model.base import Base
 
 
 class Frequency(Base):
+    filename = 'frequencies.txt'
     __tablename__ = 'frequencies'
 
     trip_id = Column(

@@ -8,6 +8,7 @@ __all__ = ['FareAttribute', 'FareRule']
 
 
 class FareAttribute(Base):
+    filename = 'fare_attributes.txt'
     __tablename__ = 'fare_attributes'
 
     fare_id = Column(String(255), primary_key=True)
@@ -20,6 +21,7 @@ class FareAttribute(Base):
 
 
 class FareRule(Base):
+    filename = 'fare_rules.txt'
     __tablename__ = 'fare_rules'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)

@@ -6,6 +6,7 @@ from gtfsdb.model.base import Base
 
 
 class StopTime(Base):
+    filename = 'stop_times.txt'
     __tablename__ = 'stop_times'
 
     trip_id = Column(String(255),

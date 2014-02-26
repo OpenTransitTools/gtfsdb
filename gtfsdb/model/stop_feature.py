@@ -9,6 +9,7 @@ __all__ = ['StopFeatureType', 'StopFeature']
 
 
 class StopFeatureType(Base):
+    filename = 'stop_feature_type.txt'
     __tablename__ = 'stop_feature_type'
 
     feature_type = Column(String(50), primary_key=True)
@@ -16,6 +17,7 @@ class StopFeatureType(Base):
 
 
 class StopFeature(Base):
+    filename = 'stop_features.txt'
     __tablename__ = 'stop_features'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)

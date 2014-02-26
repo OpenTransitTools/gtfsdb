@@ -38,10 +38,6 @@ class Pattern(Base):
         GeometryDDL(cls.__table__)
 
     @classmethod
-    def get_filename(cls):
-        return None
-
-    @classmethod
     def load(cls, engine):
         start_time = time.time()
         s = ' - %s' % (cls.__tablename__)
@@ -70,6 +66,7 @@ class Pattern(Base):
 
 
 class Shape(Base):
+    filename = 'shapes.txt'
     __tablename__ = 'shapes'
 
     shape_id = Column(String(255), primary_key=True)
