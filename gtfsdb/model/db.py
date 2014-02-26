@@ -13,6 +13,8 @@ class Database(object):
             if is_geospatial and hasattr(cls, 'add_geometry_column'):
                 cls.add_geometry_column()
         self.engine = create_engine(url)
+        if 'sqlite' in url:
+            self.engine.connect().connection.connection.text_factory = str
 
     @property
     def classes(self):
