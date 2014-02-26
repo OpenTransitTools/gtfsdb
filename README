@@ -6,7 +6,7 @@ Supported Databases
 
 - PostgreSQL (PostGIS for Geo tables) - preferred
 - Oracle - tested
-- MySQL  - not yet tested
+- MySQL  - tested
 - SQLite - tested
 
 Installation
@@ -42,6 +42,8 @@ Windows
 Usage
 =====
 
+The GTFS file being used is assumed to be valid.
+
 Example load of GTFS sample into SQLite:
 
     gtfsdb-load http://code.google.com/transit/spec/sample-feed.zip
@@ -51,3 +53,5 @@ Example load of GTFS sample into PostgreSQL with PostGIS enabled:
 
     gtfsdb-load --database_url postgresql://postgres@localhost --is_geospatial \
         http://code.google.com/transit/spec/sample-feed.zip
+
+Note: using the `is_geospatial` arg will take much longer to load
