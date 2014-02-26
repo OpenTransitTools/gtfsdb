@@ -34,15 +34,14 @@ class GTFS(object):
     def load(self, db):
         '''Load GTFS into database'''
         log.debug('begin load')
-        gtfs_directory = self.unzip()
+
+        '''load lookup tables from data directory'''
         data_directory = pkg_resources.resource_filename('gtfsdb', 'data')
+        RouteType.load(db, data_directory, False)
+        StopFeatureType.load(db, data_directory, False)
 
-        # load lookup tables first
-        RouteType.load(db.engine, data_directory, False)
-        StopFeatureType.load(db.engine, data_directory, False)
-
-        # load GTFS data files & transform/derive additional data
-        # due to foreign key constraints these files need to be loaded in the appropriate order
+        '''load known files & fields from GTFS'''
+        gtfs_directory = self.unzip()
         FeedInfo.load(db.engine, gtfs_directory)
         Agency.load(db.engine, gtfs_directory)
         Calendar.load(db.engine, gtfs_directory)
@@ -52,14 +51,14 @@ class GTFS(object):
         StopFeature.load(db.engine, gtfs_directory)
         Transfer.load(db.engine, gtfs_directory)
         Shape.load(db.engine, gtfs_directory)
-        Pattern.load(db.engine)
+        Pattern.load(db)
         Trip.load(db.engine, gtfs_directory)
         StopTime.load(db.engine, gtfs_directory)
         Frequency.load(db.engine, gtfs_directory)
         FareAttribute.load(db.engine, gtfs_directory)
         FareRule.load(db.engine, gtfs_directory)
         shutil.rmtree(gtfs_directory)
-        UniversalCalendar.load(db.engine)
+        UniversalCalendar.load(db)
 
         '''load derived geometries, currently only written for PostgreSQL'''
         dialect_name = db.engine.url.get_dialect().name
