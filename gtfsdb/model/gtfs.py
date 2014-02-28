@@ -1,7 +1,6 @@
 from contextlib import closing
 import logging
 import time
-import pkg_resources
 import shutil
 import sys
 import tempfile
@@ -61,8 +60,7 @@ class GTFS(object):
         UniversalCalendar.load(db)
 
         '''load derived geometries, currently only written for PostgreSQL'''
-        dialect_name = db.engine.url.get_dialect().name
-        if db.is_geospatial and 'postgres' in dialect_name:
+        if db.is_geospatial and db.is_postgresql:
             s = ' - %s geom' % (Route.__tablename__)
             sys.stdout.write(s)
             start_seconds = time.time()
