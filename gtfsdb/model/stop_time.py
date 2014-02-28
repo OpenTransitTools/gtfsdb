@@ -2,11 +2,14 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Boolean, Integer, Numeric, String
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
 class StopTime(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'stop_times.txt'
+
     __tablename__ = 'stop_times'
 
     trip_id = Column(String(255),

@@ -1,10 +1,13 @@
 from sqlalchemy import Column, Integer, Sequence, String
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
 class Transfer(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'transfers.txt'
+
     __tablename__ = 'transfers'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)

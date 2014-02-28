@@ -1,11 +1,14 @@
 from sqlalchemy import Column, Sequence
 from sqlalchemy.types import Integer, String
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
 class Agency(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'agency.txt'
+
     __tablename__ = 'agency'
 
     id = Column(Integer,
