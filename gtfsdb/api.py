@@ -17,4 +17,4 @@ def database_load(filename, **kwargs):
     db = Database(**kwargs)
     db.create()
     gtfs = GTFS(filename)
-    gtfs.load(db)
+    gtfs.load(db, **kwargs)

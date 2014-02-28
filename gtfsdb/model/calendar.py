@@ -108,7 +108,7 @@ class UniversalCalendar(Base):
         return cls(**kwargs)
 
     @classmethod
-    def load(cls, db):
+    def load(cls, db, **kwargs):
         start_time = time.time()
         session = db.session
         q = session.query(Calendar)

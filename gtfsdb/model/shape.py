@@ -40,7 +40,7 @@ class Pattern(Base):
         GeometryDDL(cls.__table__)
 
     @classmethod
-    def load(cls, db):
+    def load(cls, db, **kwargs):
         start_time = time.time()
         s = ' - %s' % (cls.__tablename__)
         sys.stdout.write(s)

@@ -44,7 +44,23 @@ class _Base(object):
         return ret_val
 
     @classmethod
-    def load(cls, db, directory=None, validate=True, batch_size=10000):
+    def load(cls, db, **kwargs):
+        '''Load method for ORM
+
+        arguments:
+            db: instance of gtfsdb.Database
+
+        keyword arguments:
+            gtfs_directory: path to unzipped GTFS files
+            batch_size: batch size for memory management
+        '''
+        batch_size = kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE)
+        directory = None
+        if cls.datasource == config.DATASOURCE_GTFS:
+            directory = kwargs.get('gtfs_directory')
+        elif cls.datasource == config.DATASOURCE_LOOKUP:
+            directory = resource_filename('gtfsdb', 'data')
+
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
@@ -60,7 +76,6 @@ class _Base(object):
             for row in reader:
                 records.append(cls.make_record(row))
                 i += 1
-                # commit every `batch_size` records to manage memory
                 if i >= batch_size:
                     db.engine.execute(table.insert(), records)
                     sys.stdout.write('*')
