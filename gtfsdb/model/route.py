@@ -32,8 +32,7 @@ class Route(Base):
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
     route_desc = Column(String(255))
-    route_type = Column(Integer,
-        ForeignKey('route_type.route_type'), index=True, nullable=False)
+    route_type = Column(Integer, index=True, nullable=False)
     route_url = Column(String(255))
     route_color = Column(String(6))
     route_text_color = Column(String(6))
@@ -42,17 +41,25 @@ class Route(Base):
     stop_times = relationship('StopTime', secondary='trips')
     trips = relationship('Trip')
 
-    def load_geometry(self, session):
+    @classmethod
+    def load_geoms(cls, db):
         from gtfsdb.model.shape import Pattern
         from gtfsdb.model.trip import Trip
 
-        if hasattr(self, 'geom'):
-            s = func.st_collect(Pattern.geom)
-            s = func.st_multi(s)
-            s = func.st_astext(s).label('geom')
-            q = session.query(s)
-            q = q.filter(Pattern.trips.any((Trip.route == self)))
-            self.geom = q.first().geom
+        '''load derived geometries, currently only written for PostgreSQL'''
+        if db.is_geospatial and db.is_postgresql:
+            session = db.session
+            routes = session.query(Route).all()
+            for route in routes:
+                s = func.st_collect(Pattern.geom)
+                s = func.st_multi(s)
+                s = func.st_astext(s).label('geom')
+                q = session.query(s)
+                q = q.filter(Pattern.trips.any((Trip.route == route)))
+                route.geom = q.first().geom
+                session.merge(route)
+            session.commit()
+            session.close()
 
     @classmethod
     def add_geometry_column(cls):

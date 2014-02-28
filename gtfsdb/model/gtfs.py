@@ -1,8 +1,6 @@
 from contextlib import closing
 import logging
-import time
 import shutil
-import sys
 import tempfile
 from urllib import urlretrieve
 import zipfile
@@ -21,7 +19,7 @@ class GTFS(object):
 
     def load(self, db, **kwargs):
         '''Load GTFS into database'''
-        log.debug('begin load')
+        log.debug('begin GTFS.load')
 
         '''load known GTFS files, derived tables & lookup tables'''
         gtfs_directory = self.unzip()
@@ -33,21 +31,9 @@ class GTFS(object):
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 
-        '''load derived geometries, currently only written for PostgreSQL'''
-        if db.is_geospatial and db.is_postgresql:
-            s = ' - %s geom' % (Route.__tablename__)
-            sys.stdout.write(s)
-            start_seconds = time.time()
-            session = db.session
-            q = session.query(Route)
-            for route in q:
-                route.load_geometry(session)
-                session.merge(route)
-            session.commit()
-            session.close()
-            process_time = time.time() - start_seconds
-            print ' (%.0f seconds)' % (process_time)
-        log.debug('end load')
+        '''load route geometries derived from shapes.txt'''
+        Route.load_geoms(db)
+        log.debug('end GTFS.load')
 
     def unzip(self, path=None):
         '''Unzip GTFS files from URL/directory to path.'''
