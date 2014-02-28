@@ -6,19 +6,11 @@ from gtfsdb import config
 
 class Database(object):
 
-    def __init__(self, url, schema=None, is_geospatial=False):
-        self.url = url
-        self.schema = schema
-        self.is_geospatial = is_geospatial
-        for cls in self.classes:
-            cls.__table__.schema = schema
-            if is_geospatial and hasattr(cls, 'add_geometry_column'):
-                cls.add_geometry_column()
-        self.engine = create_engine(url)
-        if 'sqlite' in url:
-            self.engine.connect().connection.connection.text_factory = str
-        session_factory = sessionmaker(self.engine)
-        self.session = scoped_session(session_factory)
+    def __init__(self, **kwargs):
+        self.url = kwargs.get('url', config.DEFAULT_DATABASE_URL)
+        self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
+        self.is_geospatial = kwargs.get('is_geospatial',
+                                        config.DEFAULT_IS_GEOSPATIAL)
 
     @property
     def classes(self):
@@ -38,3 +30,45 @@ class Database(object):
     def metadata(self):
         from gtfsdb.model.base import Base
         return Base.metadata
+
+    @property
+    def is_geospatial(self):
+        return self._is_geospatial
+
+    @is_geospatial.setter
+    def is_geospatial(self, val):
+        self._is_geospatial = val
+        for cls in self.classes:
+            if val and hasattr(cls, 'add_geometry_column'):
+                cls.add_geometry_column()
+
+    @property
+    def is_postgresql(self):
+        return 'postgres' in self.dialect_name
+
+    @property
+    def is_sqlite(self):
+        return 'sqlite' in self.dialect_name
+
+    @property
+    def schema(self):
+        return self._schema
+
+    @schema.setter
+    def schema(self, val):
+        self._schema = val
+        for cls in self.classes:
+            cls.__table__.schema = val
+
+    @property
+    def url(self):
+        return self._url
+
+    @url.setter
+    def url(self, val):
+        self._url = val
+        self.engine = create_engine(val)
+        if self.is_sqlite:
+            self.engine.connect().connection.connection.text_factory = str
+        session_factory = sessionmaker(self.engine)
+        self.session = scoped_session(session_factory)

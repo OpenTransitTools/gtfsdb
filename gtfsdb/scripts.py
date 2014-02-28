@@ -19,5 +19,10 @@ def gtfsdb_load():
         help='Database SCHEMA name')
     args = parser.parse_args()
 
-    database_load(
-        args.file, args.database_url, args.schema, args.is_geospatial)
+    kwargs = dict(
+        batch_size=args.batch_size,
+        database_url=args.database_url,
+        schema=args.schema,
+        is_geospatial=args.is_geospatial,
+    )
+    database_load(args.file, **kwargs)
