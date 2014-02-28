@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+from gtfsdb import config
+
 
 class Database(object):
 
@@ -27,6 +29,10 @@ class Database(object):
         """Create GTFS database"""
         self.metadata.drop_all(bind=self.engine)
         self.metadata.create_all(bind=self.engine)
+
+    @property
+    def dialect_name(self):
+        return self.engine.url.get_dialect().name
 
     @property
     def metadata(self):

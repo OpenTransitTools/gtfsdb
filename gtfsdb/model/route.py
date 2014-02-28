@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
@@ -10,6 +11,7 @@ __all__ = ['RouteType', 'Route']
 
 
 class RouteType(Base):
+    datasource = config.DATASOURCE_LOOKUP
     filename = 'route_type.txt'
     __tablename__ = 'route_type'
 
@@ -19,7 +21,9 @@ class RouteType(Base):
 
 
 class Route(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'routes.txt'
+
     __tablename__ = 'routes'
 
     route_id = Column(String(255), primary_key=True, nullable=False)

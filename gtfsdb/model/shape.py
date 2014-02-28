@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from gtfsdb.config import config
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
@@ -13,6 +13,8 @@ __all__ = ['Pattern', 'Shape']
 
 
 class Pattern(Base):
+    datasource = config.DATASOURCE_DERIVED
+
     __tablename__ = 'patterns'
 
     shape_id = Column(String(255), primary_key=True)
@@ -65,7 +67,9 @@ class Pattern(Base):
 
 
 class Shape(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'shapes.txt'
+
     __tablename__ = 'shapes'
 
     shape_id = Column(String(255), primary_key=True)
@@ -86,7 +90,7 @@ class Shape(Base):
         try:
             from geoalchemy import WKTSpatialElement
             wkt = 'SRID=%s;POINT(%s %s)' % (
-                config.get('DEFAULT', 'SRID'),
+                config.SRID,
                 row['shape_pt_lon'],
                 row['shape_pt_lat']
             )

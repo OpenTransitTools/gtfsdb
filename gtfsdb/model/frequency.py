@@ -2,11 +2,14 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
 class Frequency(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'frequencies.txt'
+
     __tablename__ = 'frequencies'
 
     trip_id = Column(

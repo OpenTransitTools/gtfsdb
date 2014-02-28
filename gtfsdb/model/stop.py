@@ -1,12 +1,14 @@
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 
-from gtfsdb.config import config
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
 class Stop(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'stops.txt'
+
     __tablename__ = 'stops'
 
     stop_id = Column(String(255), primary_key=True, nullable=False)
@@ -38,7 +40,7 @@ class Stop(Base):
         try:
             from geoalchemy import WKTSpatialElement
             wkt = 'SRID=%s;POINT(%s %s)' % (
-                config.get('DEFAULT', 'SRID'),
+                config.SRID,
                 row['stop_lon'],
                 row['stop_lat']
             )

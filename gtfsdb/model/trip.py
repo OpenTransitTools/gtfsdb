@@ -2,11 +2,14 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
 class Trip(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'trips.txt'
+
     __tablename__ = 'trips'
 
     route_id = Column(
@@ -28,5 +31,5 @@ class Trip(Base):
     stop_times = relationship('StopTime')
     universal_calendar = relationship('UniversalCalendar',
         primaryjoin='Trip.service_id==UniversalCalendar.service_id',
-        foreign_keys=(service_id),
+        foreign_keys='(Trip.service_id)',
         viewonly=True)

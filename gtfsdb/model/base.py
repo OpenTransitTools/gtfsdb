@@ -2,12 +2,13 @@ import csv
 import datetime
 import logging
 import os
+from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
 import time
 
 from sqlalchemy.ext.declarative import declarative_base
 
-from gtfsdb import util
+from gtfsdb import config, util
 
 
 log = logging.getLogger(__name__)
@@ -51,6 +52,8 @@ class _Base(object):
             f = open(file_path, 'r')
             utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
             reader = csv.DictReader(utf8_file)
+            reader.fieldnames = [field.strip().lower()
+                                 for field in reader.fieldnames]
             table = cls.__table__
             db.engine.execute(table.delete())
             i = 0
@@ -74,7 +77,7 @@ class _Base(object):
     def make_record(cls, row):
         for k, v in row.items():
             if isinstance(v, basestring):
-                v = v.strip()
+                row[k] = v.strip()
             if (k not in cls.__table__.c):
                 del row[k]
             elif not v:

@@ -7,6 +7,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Boolean, Date, Integer, String
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
@@ -17,7 +18,9 @@ log = logging.getLogger(__name__)
 
 
 class Calendar(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'calendar.txt'
+
     __tablename__ = 'calendar'
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
@@ -66,7 +69,9 @@ class Calendar(Base):
 
 
 class CalendarDate(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'calendar_dates.txt'
+
     __tablename__ = 'calendar_dates'
 
     service_id = Column(String(255), primary_key=True, nullable=False)
@@ -83,6 +88,7 @@ class CalendarDate(Base):
 
 
 class UniversalCalendar(Base):
+    datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'universal_calendar'
 
     service_id = Column(String(255), primary_key=True, nullable=False)

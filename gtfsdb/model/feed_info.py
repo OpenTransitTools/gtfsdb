@@ -1,11 +1,14 @@
 from sqlalchemy import Column
 from sqlalchemy.types import Date, String
 
+from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
 class FeedInfo(Base):
+    datasource = config.DATASOURCE_GTFS
     filename = 'feed_info.txt'
+
     __tablename__ = 'feed_info'
 
     feed_publisher_name = Column(String(255), primary_key=True)
