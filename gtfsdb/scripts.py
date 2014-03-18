@@ -21,8 +21,8 @@ def gtfsdb_load():
 
     kwargs = dict(
         batch_size=args.batch_size,
-        database_url=args.database_url,
         schema=args.schema,
         is_geospatial=args.is_geospatial,
+        url=args.database_url,
     )
     database_load(args.file, **kwargs)
