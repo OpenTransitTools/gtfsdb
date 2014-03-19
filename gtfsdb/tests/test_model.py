@@ -11,7 +11,7 @@ from gtfsdb import *
 
 class BasicModelTests(object):
     path = resource_filename('gtfsdb', 'tests')
-    url = 'sqlite:///{0}'.format(os.path.join(path, 'sample_feed.db'))
+    url = 'sqlite:///{0}'.format(os.path.join(path, 'large_sample_feed.db'))
     db = Database(url=url)
 
     def get_first(self):
