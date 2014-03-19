@@ -14,4 +14,4 @@ class TestAPI(unittest.TestCase):
     def test_database_load(self):
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'sample-feed.zip'))
-        database_load(filename, url='sqlite:///test.db')
+        database_load(filename)
