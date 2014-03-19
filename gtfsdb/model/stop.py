@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 
@@ -27,6 +29,20 @@ class Stop(Base):
 
     stop_features = relationship('StopFeature')
     stop_times = relationship('StopTime')
+    trips = relationship('Trip', secondary='stop_times')
+
+    @property
+    def headsigns(self):
+        '''Returns a dictionary of all head signs used at the stop and the
+        number of trips the head sign is used'''
+        try:
+            self._headsigns
+        except AttributeError:
+            self._headsigns = defaultdict(int)
+            for st in self.stop_times:
+                headsign = st.stop_headsign or st.trip.trip_headsign
+                self._headsigns[headsign] += 1
+        return self._headsigns
 
     @classmethod
     def add_geometry_column(cls):
