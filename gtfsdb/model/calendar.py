@@ -36,22 +36,9 @@ class Calendar(Base):
     end_date = Column(Date, nullable=False)
 
     def weekday_list(self):
-        day_list = []
-        if self.monday:
-            day_list.append(0)
-        if self.tuesday:
-            day_list.append(1)
-        if self.wednesday:
-            day_list.append(2)
-        if self.thursday:
-            day_list.append(3)
-        if self.friday:
-            day_list.append(4)
-        if self.saturday:
-            day_list.append(5)
-        if self.sunday:
-            day_list.append(6)
-        return day_list
+        weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3,
+                            friday=4, saturday=5, sunday=6)
+        return [v for k, v in weekday_dict.iteritems() if getattr(self, k)]
 
     def to_date_list(self):
         date_list = []
