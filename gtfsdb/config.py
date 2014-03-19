@@ -25,3 +25,25 @@ DATASOURCE_LOOKUP = 2
 
 '''Geometry constants'''
 SRID = 4326
+
+'''Order list of class names, used for creating & populating tables'''
+SORTED_CLASS_NAMES = [
+    'RouteType',
+    'StopFeatureType',
+    'FeedInfo',
+    'Agency',
+    'Calendar',
+    'CalendarDate',
+    'Route',
+    'Stop',
+    'StopFeature',
+    'Transfer',
+    'Shape',
+    'Pattern',
+    'Trip',
+    'StopTime',
+    'Frequency',
+    'FareAttribute',
+    'FareRule',
+    'UniversalCalendar',
+]
