@@ -9,9 +9,10 @@ def database_load(filename, **kwargs):
 
     keyword arguments:
         batch_size: record batch size for memory management
-        url: SQLAlchemy database url
-        schema: database schema name
         is_geospatial: if database is support geo functions
+        schema: database schema name
+        tables: limited list of tables to load
+        url: SQLAlchemy database url
     '''
 
     db = Database(**kwargs)

@@ -9,10 +9,12 @@ class Database(object):
     def __init__(self, **kwargs):
         '''
         keyword arguments:
-            url: SQLAlchemy database url
-            schema: database schema name
             is_geospatial: if database supports geo functions
+            schema: database schema name
+            tables: limited list of tables to load into database
+            url: SQLAlchemy database url
         '''
+        self.tables = kwargs.get('tables', None)
         self.url = kwargs.get('url', config.DEFAULT_DATABASE_URL)
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
         self.is_geospatial = kwargs.get('is_geospatial',
@@ -20,13 +22,20 @@ class Database(object):
 
     @property
     def classes(self):
+        '''Return all sub classes of declarative_base or the subset of classes
+        filtered by `tables`'''
         from gtfsdb.model.base import Base
+
+        if self.tables:
+            return [c for c in Base.__subclasses__()
+                    if c.__table__.name in self.tables]
         return Base.__subclasses__()
 
     def create(self):
-        """Create GTFS database"""
-        self.metadata.drop_all(bind=self.engine)
-        self.metadata.create_all(bind=self.engine)
+        '''Drop/create GTFS database'''
+        for cls in self.classes:
+            cls.__table__.drop(self.engine, checkfirst=True)
+            cls.__table__.create(self.engine)
 
     @property
     def dialect_name(self):
@@ -65,16 +74,6 @@ class Database(object):
         self._schema = val
         for cls in self.classes:
             cls.__table__.schema = val
-
-    @property
-    def sorted_classes(self):
-        classes = []
-        for t in self.metadata.sorted_tables:
-            cls = next((c for c in self.classes
-                        if c.__table__ == t), None)
-            if cls:
-                classes.append(cls)
-        return classes
 
     @property
     def url(self):
