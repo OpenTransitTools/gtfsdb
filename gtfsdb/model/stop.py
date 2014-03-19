@@ -27,9 +27,15 @@ class Stop(Base):
     wheelchair_boarding = Column(Integer, default=0)
     platform_code = Column(String(50))
 
-    stop_features = relationship('StopFeature')
-    stop_times = relationship('StopTime')
-    trips = relationship('Trip', secondary='stop_times')
+    stop_features = relationship('StopFeature',
+        primaryjoin='Stop.stop_id==StopFeature.stop_id',
+        foreign_keys='(Stop.stop_id)',
+        uselist=True, viewonly=True)
+
+    stop_times = relationship('StopTime',
+        primaryjoin='Stop.stop_id==StopTime.stop_id',
+        foreign_keys='(Stop.stop_id)',
+        uselist=True, viewonly=True)
 
     @property
     def headsigns(self):
