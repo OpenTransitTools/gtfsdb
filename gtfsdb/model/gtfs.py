@@ -27,7 +27,7 @@ class GTFS(object):
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
         )
-        for cls in db.classes:
+        for cls in db.sorted_classes:
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 

@@ -22,18 +22,16 @@ class Database(object):
 
     @property
     def classes(self):
-        '''Return all sub classes of declarative_base or the subset of classes
-        filtered by `tables`'''
         from gtfsdb.model.base import Base
 
         if self.tables:
             return [c for c in Base.__subclasses__()
-                    if c.__table__.name in self.tables]
+                    if c.__tablename__ in self.tables]
         return Base.__subclasses__()
 
     def create(self):
         '''Drop/create GTFS database'''
-        for cls in self.classes:
+        for cls in self.sorted_classes:
             cls.__table__.drop(self.engine, checkfirst=True)
             cls.__table__.create(self.engine)
 
@@ -74,6 +72,16 @@ class Database(object):
         self._schema = val
         for cls in self.classes:
             cls.__table__.schema = val
+
+    @property
+    def sorted_classes(self):
+        classes = []
+        for class_name in config.SORTED_CLASS_NAMES:
+            cls = next((c for c in self.classes
+                        if c.__name__ == class_name), None)
+            if cls:
+                classes.append(cls)
+        return classes
 
     @property
     def url(self):
