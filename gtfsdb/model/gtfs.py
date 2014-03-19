@@ -27,12 +27,13 @@ class GTFS(object):
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
         )
-        for cls in db.sorted_classes:
+        for cls in db.classes:
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 
         '''load route geometries derived from shapes.txt'''
-        Route.load_geoms(db)
+        if Route in db.classes:
+            Route.load_geoms(db)
         log.debug('end GTFS.load')
 
     def unzip(self, path=None):
