@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Sequence
+from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
@@ -26,10 +26,9 @@ class StopFeature(Base):
     __tablename__ = 'stop_features'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    stop_id = Column(
-        String(255), ForeignKey('stops.stop_id'), index=True, nullable=False)
-    feature_type = Column(String(50),
-        ForeignKey('stop_feature_type.feature_type'),
-        index=True, nullable=False)
+    stop_id = Column(String(255), index=True, nullable=False)
+    feature_type = Column(String(50), index=True, nullable=False)
 
-    stop_feature_type = relationship('StopFeatureType')
+    stop_feature_type = relationship('StopFeatureType',
+        primaryjoin='StopFeature.feature_type==StopFeatureType.feature_type',
+        foreign_keys='(StopFeature.feature_type)')

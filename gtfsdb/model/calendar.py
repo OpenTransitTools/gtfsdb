@@ -95,9 +95,9 @@ class UniversalCalendar(Base):
     date = Column(Date, primary_key=True, index=True, nullable=False)
 
     trips = relationship('Trip',
-        primaryjoin='Trip.service_id==UniversalCalendar.service_id',
-        foreign_keys=(service_id),
-        viewonly=True)
+        primaryjoin='UniversalCalendar.service_id==Trip.service_id',
+        foreign_keys='(UniversalCalendar.service_id)',
+        uselist=True, viewonly=True)
 
     @classmethod
     def from_calendar_date(cls, calendar_date):

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
@@ -27,8 +27,7 @@ class Route(Base):
     __tablename__ = 'routes'
 
     route_id = Column(String(255), primary_key=True, nullable=False)
-    agency_id = Column(
-        String, ForeignKey('agency.agency_id'), index=True, nullable=True)
+    agency_id = Column(String(255), index=True, nullable=True)
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
     route_desc = Column(String(255))
@@ -37,9 +36,10 @@ class Route(Base):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
 
-    patterns = relationship('Pattern', secondary='trips')
-    stop_times = relationship('StopTime', secondary='trips')
-    trips = relationship('Trip')
+    trips = relationship('Trip',
+        primaryjoin='Route.route_id==Trip.route_id',
+        foreign_keys='(Route.route_id)',
+        uselist=True, viewonly=True)
 
     @classmethod
     def load_geoms(cls, db):
