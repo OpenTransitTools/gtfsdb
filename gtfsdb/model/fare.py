@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Sequence
+from sqlalchemy import Column, Sequence
 from sqlalchemy.types import Integer, Numeric, String
 
 from gtfsdb import config
