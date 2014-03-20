@@ -21,7 +21,7 @@ class Trip(Base):
     block_id = Column(String(255))
     shape_id = Column(String(255), nullable=True)
     trip_type = Column(String(255))
-    trip_bikes_allowed = Column(Integer, default=0)
+    bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)
 
     pattern = relationship('Pattern',
