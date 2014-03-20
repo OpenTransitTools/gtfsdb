@@ -19,3 +19,4 @@ def database_load(filename, **kwargs):
     db.create()
     gtfs = GTFS(filename)
     gtfs.load(db, **kwargs)
+    return db
