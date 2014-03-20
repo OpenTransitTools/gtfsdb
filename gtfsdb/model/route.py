@@ -2,7 +2,7 @@ import logging
 import time
 
 from sqlalchemy import Column
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import object_session, relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
 
@@ -47,12 +47,35 @@ class Route(Base):
         foreign_keys='(Route.route_id)',
         uselist=True, viewonly=True)
 
+    @property
+    def _get_start_end_dates(self):
+        '''find the min & max date using Trip & UniversalCalendar'''
+        from gtfsdb.model.calendar import UniversalCalendar
+
+        try:
+            self._start_date
+        except AttributeError:
+            session = object_session(self)
+            q = session.query(func.min(UniversalCalendar.date),
+                              func.max(UniversalCalendar.date))
+            q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
+            self._start_date, self._end_date = q.one()
+        return self._start_date, self._end_date
+
+    @property
+    def start_date(self):
+        return self._get_start_end_dates[0]
+
+    @property
+    def end_date(self):
+        return self._get_start_end_dates[1]
+
     @classmethod
     def load_geoms(cls, db):
+        '''load derived geometries, currently only written for PostgreSQL'''
         from gtfsdb.model.shape import Pattern
         from gtfsdb.model.trip import Trip
 
-        '''load derived geometries, currently only written for PostgreSQL'''
         if db.is_geospatial and db.is_postgresql:
             start_time = time.time()
             session = db.session
@@ -66,7 +89,6 @@ class Route(Base):
                 route.geom = q.first().geom
                 session.merge(route)
             session.commit()
-            session.close()
             processing_time = time.time() - start_time
             log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(
                 cls.__name__, processing_time))

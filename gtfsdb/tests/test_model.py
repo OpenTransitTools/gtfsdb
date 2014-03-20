@@ -1,3 +1,4 @@
+import datetime
 import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
@@ -43,6 +44,11 @@ class TestCalendarDate(unittest.TestCase, BasicModelTests):
 
 class TestRoute(unittest.TestCase, BasicModelTests):
     model = Route
+
+    def test_dates(self):
+        m = self.get_first()
+        self.assert_(isinstance(m.start_date, datetime.date))
+        self.assert_(isinstance(m.end_date, datetime.date))
 
 
 class TestShape(unittest.TestCase, BasicModelTests):
