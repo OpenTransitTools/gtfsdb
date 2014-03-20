@@ -1,18 +1,23 @@
 import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
+import tempfile
 if sys.version_info[:2] == (2, 6):
     import unittest2 as unittest
 else:
     import unittest
 
 from gtfsdb import *
+from gtfsdb.api import database_load
 
 
 class BasicModelTests(object):
+
     path = resource_filename('gtfsdb', 'tests')
-    url = 'sqlite:///{0}'.format(os.path.join(path, 'large_sample_feed.db'))
-    db = Database(url=url)
+    gtfs_file = 'file:///{0}'.format(
+        os.path.join(path, 'large-sample-feed.zip'))
+    url = 'sqlite:///{0}'.format(tempfile.mkstemp()[1])
+    db = database_load(gtfs_file, url=url)
 
     def get_first(self):
         if hasattr(self, 'model'):
