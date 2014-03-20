@@ -116,4 +116,5 @@ class UniversalCalendar(Base):
         session.commit()
         session.close()
         process_time = time.time() - start_time
-        log.debug('UniversalCalendar ({0:.0f} seconds)'.format(process_time))
+        log.debug('{0}.load ({1:.0f} seconds)'.format(
+            cls.__name__, process_time))

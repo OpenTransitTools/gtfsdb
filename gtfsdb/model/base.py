@@ -11,9 +11,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from gtfsdb import config, util
 
 
-log = logging.getLogger(__name__)
-
-
 class _Base(object):
 
     filename = None
@@ -54,6 +51,8 @@ class _Base(object):
             gtfs_directory: path to unzipped GTFS files
             batch_size: batch size for memory management
         '''
+        log = logging.getLogger(cls.__module__)
+        start_time = time.time()
         batch_size = kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE)
         directory = None
         if cls.datasource == config.DATASOURCE_GTFS:
@@ -64,7 +63,6 @@ class _Base(object):
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
-            start_time = time.time()
             f = open(file_path, 'r')
             utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
             reader = csv.DictReader(utf8_file)
@@ -84,9 +82,9 @@ class _Base(object):
             if len(records) > 0:
                 db.engine.execute(table.insert(), records)
             f.close()
-            processing_time = time.time() - start_time
-            log.debug('{0} ({1:.0f} seconds)'.format(
-                cls.filename, processing_time))
+        process_time = time.time() - start_time
+        log.debug('{0}.load ({1:.0f} seconds)'.format(
+            cls.__name__, process_time))
 
     @classmethod
     def make_record(cls, row):

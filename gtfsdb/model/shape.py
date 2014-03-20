@@ -1,4 +1,4 @@
-import sys
+import logging
 import time
 
 from sqlalchemy import Column, Integer, Numeric, String
@@ -10,6 +10,9 @@ from gtfsdb.model.base import Base
 
 
 __all__ = ['Pattern', 'Shape']
+
+
+log = logging.getLogger(__name__)
 
 
 class Pattern(Base):
@@ -44,8 +47,6 @@ class Pattern(Base):
     @classmethod
     def load(cls, db, **kwargs):
         start_time = time.time()
-        s = ' - %s' % (cls.__tablename__)
-        sys.stdout.write(s)
         session = db.session
         q = session.query(
             Shape.shape_id,
@@ -65,7 +66,8 @@ class Pattern(Base):
         session.commit()
         session.close()
         processing_time = time.time() - start_time
-        print ' (%.0f seconds)' % (processing_time)
+        log.debug('{0}.load ({1:.0f} seconds)'.format(
+            cls.__name__, processing_time))
 
 
 class Shape(Base):
