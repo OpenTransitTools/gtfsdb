@@ -37,6 +37,7 @@ class Trip(Base):
     stop_times = relationship('StopTime',
         primaryjoin='Trip.trip_id==StopTime.trip_id',
         foreign_keys='(Trip.trip_id)',
+        order_by='StopTime.stop_sequence',
         uselist=True, viewonly=True)
 
     universal_calendar = relationship('UniversalCalendar',
