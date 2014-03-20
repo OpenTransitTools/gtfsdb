@@ -1,3 +1,6 @@
+import logging
+import time
+
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
@@ -8,6 +11,9 @@ from gtfsdb.model.base import Base
 
 
 __all__ = ['RouteType', 'Route']
+
+
+log = logging.getLogger(__name__)
 
 
 class RouteType(Base):
@@ -48,6 +54,7 @@ class Route(Base):
 
         '''load derived geometries, currently only written for PostgreSQL'''
         if db.is_geospatial and db.is_postgresql:
+            start_time = time.time()
             session = db.session
             routes = session.query(Route).all()
             for route in routes:
@@ -60,6 +67,9 @@ class Route(Base):
                 session.merge(route)
             session.commit()
             session.close()
+            processing_time = time.time() - start_time
+            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(
+                cls.__name__, processing_time))
 
     @classmethod
     def add_geometry_column(cls):
