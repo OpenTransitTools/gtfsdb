@@ -25,7 +25,8 @@ class Pattern(Base):
 
     trips = relationship('Trip',
         primaryjoin='Pattern.shape_id==Trip.shape_id',
-        foreign_keys='(Pattern.shape_id)')
+        foreign_keys='(Pattern.shape_id)',
+        uselist=True, viewonly=True)
 
     def geom_from_shape(self, shape_points):
         from geoalchemy import WKTSpatialElement

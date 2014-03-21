@@ -31,4 +31,5 @@ class StopFeature(Base):
 
     stop_feature_type = relationship('StopFeatureType',
         primaryjoin='StopFeature.feature_type==StopFeatureType.feature_type',
-        foreign_keys='(StopFeature.feature_type)')
+        foreign_keys='(StopFeature.feature_type)',
+        uselist=False, viewonly=True)

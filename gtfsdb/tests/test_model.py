@@ -60,7 +60,7 @@ class TestStop(unittest.TestCase, BasicModelTests):
 
     def test_headsigns(self):
         m = self.get_first()
-        m.headsigns
+        self.assert_(isinstance(m.headsigns, dict))
 
 
 class TestStopTimes(unittest.TestCase, BasicModelTests):
@@ -74,12 +74,20 @@ class TestTransfer(unittest.TestCase, BasicModelTests):
 class TestTrip(unittest.TestCase, BasicModelTests):
     model = Trip
 
-    def test_times(self):
+    def test_end_stop(self):
         m = self.get_first()
-        self.assert_(m.start_time)
-        self.assert_(m.end_time)
+        self.assert_(isinstance(m.end_stop, Stop))
+
+    def test_start_stop(self):
+        m = self.get_first()
+        self.assert_(isinstance(m.start_stop, Stop))
 
     def test_stop_times(self):
         m = self.get_first()
         for stop_time in m.stop_times:
             self.assert_(isinstance(stop_time, StopTime))
+
+    def test_times(self):
+        m = self.get_first()
+        self.assert_(m.start_time)
+        self.assert_(m.end_time)
