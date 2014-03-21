@@ -21,5 +21,4 @@ class Frequency(Base):
     trip = relationship('Trip',
         primaryjoin='Frequency.trip_id==Trip.trip_id',
         foreign_keys='(Frequency.trip_id)',
-        uselist=False,
-        viewonly=True)
+        uselist=False, viewonly=True)

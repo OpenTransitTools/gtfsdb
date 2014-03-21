@@ -25,11 +25,13 @@ class StopTime(Base):
 
     stop = relationship('Stop',
         primaryjoin='Stop.stop_id==StopTime.stop_id',
-        foreign_keys='(Stop.stop_id)')
+        foreign_keys='(Stop.stop_id)',
+        uselist=False, viewonly=True)
 
     trip = relationship('Trip',
         primaryjoin='Trip.trip_id==StopTime.trip_id',
-        foreign_keys='(StopTime.trip_id)')
+        foreign_keys='(StopTime.trip_id)',
+        uselist=False, viewonly=True)
 
     def __init__(self, *args, **kwargs):
         super(StopTime, self).__init__(*args, **kwargs)

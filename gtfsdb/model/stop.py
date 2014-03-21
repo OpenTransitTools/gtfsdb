@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import joinedload, object_session, relationship
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -39,15 +39,20 @@ class Stop(Base):
 
     @property
     def headsigns(self):
-        '''Returns a dictionary of all head signs used at the stop and the
-        number of trips the head sign is used'''
+        '''Returns a dictionary of all unique (route_id, headsign) tuples used
+        at the stop and the number of trips the head sign is used'''
+        from gtfsdb.model.stop_time import StopTime
+
         try:
             self._headsigns
         except AttributeError:
             self._headsigns = defaultdict(int)
-            for st in self.stop_times:
-                headsign = st.stop_headsign or st.trip.trip_headsign
-                self._headsigns[headsign] += 1
+            session = object_session(self)
+            q = session.query(StopTime).options(joinedload('trip'))
+            q = q.filter_by(stop_id=self.stop_id)
+            for r in q:
+                headsign = r.stop_headsign or r.trip.trip_headsign
+                self._headsigns[(r.trip.route_id, headsign)] += 1
         return self._headsigns
 
     @classmethod
