@@ -62,6 +62,11 @@ class TestStop(unittest.TestCase, BasicModelTests):
         m = self.get_first()
         self.assert_(isinstance(m.headsigns, dict))
 
+    def test_routes(self):
+        m = self.get_first()
+        for r in m.routes:
+            self.assert_(isinstance(r, Route))
+
 
 class TestStopTimes(unittest.TestCase, BasicModelTests):
     model = StopTime
