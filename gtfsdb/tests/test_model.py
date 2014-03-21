@@ -74,6 +74,11 @@ class TestTransfer(unittest.TestCase, BasicModelTests):
 class TestTrip(unittest.TestCase, BasicModelTests):
     model = Trip
 
+    def test_times(self):
+        m = self.get_first()
+        self.assert_(m.start_time)
+        self.assert_(m.end_time)
+
     def test_stop_times(self):
         m = self.get_first()
         for stop_time in m.stop_times:
