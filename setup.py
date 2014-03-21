@@ -18,7 +18,7 @@ if sys.version_info[:2] <= (2, 6):
 
 setup(
     name='gtfsdb',
-    version='0.1.5dev',
+    version='0.1.5',
     description='GTFS Database',
     long_description=open('README').read(),
     keywords='GTFS',
