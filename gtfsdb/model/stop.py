@@ -52,8 +52,24 @@ class Stop(Base):
             q = q.filter_by(stop_id=self.stop_id)
             for r in q:
                 headsign = r.stop_headsign or r.trip.trip_headsign
-                self._headsigns[(r.trip.route_id, headsign)] += 1
+                self._headsigns[(r.trip.route, headsign)] += 1
         return self._headsigns
+
+    @property
+    def routes(self):
+        ''''''
+        from gtfsdb.model.route import Route
+        from gtfsdb.model.trip import Trip
+
+        try:
+            self._routes
+        except AttributeError:
+            session = object_session(self)
+            q = session.query(Route)
+            q = q.filter(Route.trips.any(
+                Trip.stop_times.any(stop_id=self.stop_id)))
+            self._routes = q.all()
+        return self._routes
 
     @classmethod
     def add_geometry_column(cls):
