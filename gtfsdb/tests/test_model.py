@@ -51,6 +51,10 @@ class TestRoute(unittest.TestCase, BasicModelTests):
         self.assert_(isinstance(m.end_date, datetime.date))
 
 
+class TestRouteDirection(unittest.TestCase, BasicModelTests):
+    model = RouteDirection
+
+
 class TestShape(unittest.TestCase, BasicModelTests):
     model = Shape
 
