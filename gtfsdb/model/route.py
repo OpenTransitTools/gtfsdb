@@ -41,6 +41,7 @@ class Route(Base):
     route_url = Column(String(255))
     route_color = Column(String(6))
     route_text_color = Column(String(6))
+    route_sort_order = Column(Integer, index=True)
 
     trips = relationship('Trip',
         primaryjoin='Route.route_id==Trip.route_id',
