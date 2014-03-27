@@ -42,16 +42,12 @@ class Calendar(Base):
 
     def to_date_list(self):
         date_list = []
-        d = self.start_date
-        delta = datetime.timedelta(days=1)
         weekdays = self.weekday_list()
-        while d <= self.end_date:
+        diff = self.end_date - self.start_date
+        for i in range(diff.days + 1):
+            d = self.start_date + datetime.timedelta(days=i)
             if d.weekday() in weekdays:
-                kwargs = dict(
-                    service_id=self.service_id,
-                    date=d)
-                date_list.append(kwargs)
-            d += delta
+                date_list.append(dict(service_id=self.service_id, date=d))
         return date_list
 
 
@@ -87,34 +83,21 @@ class UniversalCalendar(Base):
         uselist=True, viewonly=True)
 
     @classmethod
-    def from_calendar_date(cls, calendar_date):
-        kwargs = dict(
-            date=calendar_date.date,
-            service_id=calendar_date.service_id,
-        )
-        return cls(**kwargs)
-
-    @classmethod
     def load(cls, db, **kwargs):
         start_time = time.time()
         session = db.session
-        q = session.query(Calendar)
-        for calendar in q:
-            for row in calendar.to_date_list():
-                session.add(cls(**row))
+        for c in session.query(Calendar):
+            session.add_all([cls(**r) for r in c.to_date_list()])
         session.commit()
         q = session.query(CalendarDate)
         for calendar_date in q:
+            cd_kwargs = dict(date=calendar_date.date,
+                             service_id=calendar_date.service_id)
             if calendar_date.is_addition:
-                uc = cls.from_calendar_date(calendar_date)
-                session.merge(uc)
+                session.merge(cls(**cd_kwargs))
             if calendar_date.is_removal:
-                kwargs = dict(
-                    service_id=calendar_date.service_id,
-                    date=calendar_date.date)
-                session.query(cls).filter_by(**kwargs).delete()
+                session.query(cls).filter_by(**cd_kwargs).delete()
         session.commit()
-        session.close()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(
             cls.__name__, process_time))
