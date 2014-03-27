@@ -1,11 +1,10 @@
 import datetime
 import os
 from pkg_resources import resource_filename  # @UnresolvedImport
-import sys
 import tempfile
-if sys.version_info[:2] == (2, 6):
+try:
     import unittest2 as unittest
-else:
+except ImportError:
     import unittest
 
 from gtfsdb import *
