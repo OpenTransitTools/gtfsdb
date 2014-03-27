@@ -10,7 +10,7 @@ from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
-__all__ = ['RouteType', 'Route']
+__all__ = ['RouteType', 'Route', 'RouteDirection']
 
 
 log = logging.getLogger(__name__)
@@ -100,3 +100,14 @@ class Route(Base):
 
         cls.geom = GeometryColumn(MultiLineString(2))
         GeometryDDL(cls.__table__)
+
+
+class RouteDirection(Base):
+    datasource = config.DATASOURCE_GTFS
+    filename = 'route_directions.txt'
+
+    __tablename__ = 'route_directions'
+
+    route_id = Column(String(255), primary_key=True, nullable=False)
+    direction_id = Column(Integer, primary_key=True, nullable=False)
+    direction_name = Column(String(255))
