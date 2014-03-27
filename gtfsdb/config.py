@@ -35,6 +35,7 @@ SORTED_CLASS_NAMES = [
     'Calendar',
     'CalendarDate',
     'Route',
+    'RouteDirection',
     'Stop',
     'StopFeature',
     'Transfer',
