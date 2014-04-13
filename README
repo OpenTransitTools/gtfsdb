@@ -9,49 +9,15 @@ Supported Databases
 - MySQL  - tested
 - SQLite - tested
 
-Installation
-============
 
-All
----
+Install and use via cloned gtfsdb source tree:
+==============================================
 
-- Install PostgreSQL (and PostGIS) or some other SQLAlchemy-supported RDBMS
-- Install Distribute (or setuptools)
-  - http://pypi.python.org/pypi/distribute#installation-instructions
-
-Linux
------
-
-Clone the gtfsdb repository, then run `easy_install .` at the top level. Or,
-set up a virtualenv and run `python setup.py develop`.
-
-Windows
--------
-
-- Have a database--the docs and examples assume Postgres & PostGIS are
-  installed
-  - http://www.postgresql.org/download/windows
-  - http://postgis.refractions.net/download/windows/
-- Install Python 2.6 or 2.7 using an installer from python.org
-- Install Psygopg2 using installer
-  - http://www.stickpeople.com/projects/python/win-psycopg/
-- Clone gtfsdb repository
-- cd to top level of gtfsdb tree
-- `python setup.py install` or `python setup.py develop`
-
-Usage
-=====
-
-The GTFS file being used is assumed to be valid.
-
-Example load of GTFS sample into SQLite:
-
-    gtfsdb-load http://code.google.com/transit/spec/sample-feed.zip
-
-
-Example load of GTFS sample into PostgreSQL with PostGIS enabled:
-
-    gtfsdb-load --database_url postgresql://postgres@localhost --is_geospatial \
-        http://code.google.com/transit/spec/sample-feed.zip
-
-Note: using the `is_geospatial` arg will take much longer to load
+- hg clone https://code.google.com/p/gtfsdb
+- cd gtfsdb
+- buildout install prod
+- bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+  examples:
+  - bin/gtfsdb-load --database_url sqlite:///gtfsdb.db http://developer.trimet.org/schedule/gtfs.zip
+  - bin/gtfsdb-load --database_url postgresql://postgres@localhost --is_geospatial http://developer.trimet.org/schedule/gtfs.zip  
+  note: using the `is_geospatial` arg will take much longer to load...
