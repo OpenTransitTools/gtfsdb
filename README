@@ -10,14 +10,57 @@ Supported Databases
 - SQLite - tested
 
 
-Install and use via cloned gtfsdb source tree:
-==============================================
+Install and use via the gtfsdb source tree:
+==========================================
 
-- hg clone https://code.google.com/p/gtfsdb
-- cd gtfsdb
-- buildout install prod
-- bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+0. Install Python 2.7, easy_install and buildout on your system...
+1. hg clone https://code.google.com/p/gtfsdb
+2. cd gtfsdb
+3. buildout install prod
+4. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
   examples:
-  - bin/gtfsdb-load --database_url sqlite:///gtfsdb.db http://developer.trimet.org/schedule/gtfs.zip
+  - bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
   - bin/gtfsdb-load --database_url postgresql://postgres@localhost --is_geospatial http://developer.trimet.org/schedule/gtfs.zip  
   note: using the `is_geospatial` arg will take much longer to load...
+
+
+NOTES:
+
+The best way to get gtfsbd up and running is via the python 'buildout' and 'easy_install' tools.
+Highly recommended to first install easy_install (setup tools) and buildout (e.g., easy_install zc.buildout)
+before doing anything else.
+
+Note that gtfsdb requires the psychopg2 database driver. If you are on linux / mac, buildout will
+install the necessary dependancies (or re-use whatever you have in your system site-lib).
+If you are on windows, you most likely have to find and install a pre-compiled version
+
+Gtfsdb also requires geoalchemy 0.7.2, and sqlalchemy 0.8.4 (not 0.9.x which
+are the newest version) availabe at https://pypi.python.org/pypi/GeoAlchemy/0.7.2 and
+https://pypi.python.org/pypi/SQLAlchemy/0.8.4 respectively, and are
+both installed using the same "build", "install --user" technique. 
+Buildout should handle this for you, but You may have to remove the SQLAlchemy 
+version 0.9.x if that had been installed, in order for gtfsdb to find the
+correct 0.8.4 version.  (thanks to edward groth for this content)
+
+
+Install Steps (on Windows):
+---------------------------
+    0. Have a db - docs and examples assume Postgres/PostGIS installed
+       http://www.postgresql.org/download/windows 
+       http://postgis.refractions.net/download/windows/
+
+    1. Python2.7 - http://www.python.org/download/releases/2.7.6/ (python-2.7.6.msi)
+       NOTE: see this for setting env variables correctly: http://blog.sadphaeton.com/2009/01/20/python-development-windows-part-1installing-python.html
+
+    2a. Install Setup Tools (easy_install) https://pypi.python.org/pypi/setuptools#windows-8-powershell
+    2b. easy_install zc.buildout
+
+    3. Install Psygopg2 (from binary):  http://www.stickpeople.com/projects/python/win-psycopg/
+
+    4. Check out gtfsdb from trunk with Mercurial - see http://code.google.com/p/gtfsdb/source/checkout
+
+    5. cd top level of gtfsdb tree
+    
+    6. buildout install prod
+
+    7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
