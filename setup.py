@@ -9,7 +9,7 @@ extras_require = dict(
     postgresql=['psycopg2>=2.4.2'],
 )
 
-install_requires = ['sqlalchemy == 0.8.2', ]
+install_requires = ['sqlalchemy == 0.8.6', ]
 if sys.version_info[:2] <= (2, 6):
     install_requires.append('argparse>=1.2.1')
     extras_require['dev'].append('unittest2')
