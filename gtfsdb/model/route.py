@@ -48,6 +48,21 @@ class Route(Base):
         foreign_keys='(Route.route_id)',
         uselist=True, viewonly=True)
 
+    directions = relationship('RouteDirection',
+        primaryjoin='Route.route_id==RouteDirection.route_id',
+        foreign_keys='(Route.route_id)',
+        uselist=True, viewonly=True)
+
+
+    @property
+    def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
+        ret_val = self.route_long_name
+        if self.route_long_name and self.route_short_name:
+            ret_val = fmt.format(self=self)
+        elif self.route_long_name is None:
+            ret_val = self.route_short_name
+        return ret_val
+
     @property
     def _get_start_end_dates(self):
         '''find the min & max date using Trip & UniversalCalendar'''
