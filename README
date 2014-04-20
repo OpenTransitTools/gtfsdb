@@ -32,15 +32,15 @@ before doing anything else.
 
 Note that gtfsdb requires the psychopg2 database driver. If you are on linux / mac, buildout will
 install the necessary dependancies (or re-use whatever you have in your system site-lib).
-If you are on windows, you most likely have to find and install a pre-compiled version
+If you are on windows, you most likely have to find and install a pre-compiled version (see below).
 
 Gtfsdb also requires geoalchemy 0.7.2, and sqlalchemy 0.8.4 (not 0.9.x which
 are the newest version) availabe at https://pypi.python.org/pypi/GeoAlchemy/0.7.2 and
 https://pypi.python.org/pypi/SQLAlchemy/0.8.4 respectively, and are
-both installed using the same "build", "install --user" technique. 
-Buildout should handle this for you, but You may have to remove the SQLAlchemy 
-version 0.9.x if that had been installed, in order for gtfsdb to find the
-correct 0.8.4 version.  (thanks to edward groth for this content)
+both installed using the buildout.  If you're having trouble with gtfsdb, there's the potential
+that an incompatiable version of sqlalchemy (say v 0.9.x) is installed, in your site-packages.
+Again, the correct 0.8.4 version is sqlalchemy is requried by geoalchemy, so hoping it all goes smooth.  
+(Thanks to edward groth for help with this content).
 
 
 Install Steps (on Windows):
