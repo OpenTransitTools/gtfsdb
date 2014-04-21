@@ -56,12 +56,18 @@ class Route(Base):
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
-        ret_val = self.route_long_name
-        if self.route_long_name and self.route_short_name:
-            ret_val = fmt.format(self=self)
-        elif self.route_long_name is None:
-            ret_val = self.route_short_name
-        return ret_val
+        ''' build a route name out of long and short names...
+        '''
+        try:
+            self._route_name
+        except AttributeError:
+            ret_val = self.route_long_name
+            if self.route_long_name and self.route_short_name:
+                ret_val = fmt.format(self=self)
+            elif self.route_long_name is None:
+                ret_val = self.route_short_name
+            self._route_name = ret_val
+        return self._route_name
 
     @property
     def _get_start_end_dates(self):
