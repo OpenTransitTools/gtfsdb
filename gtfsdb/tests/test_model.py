@@ -17,6 +17,7 @@ class BasicModelTests(object):
     gtfs_file = 'file:///{0}'.format(
         os.path.join(path, 'large-sample-feed.zip'))
     url = 'sqlite:///{0}'.format(tempfile.mkstemp()[1])
+    print url
     db = database_load(gtfs_file, url=url)
 
     def get_first(self):

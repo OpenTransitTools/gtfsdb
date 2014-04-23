@@ -60,3 +60,8 @@ class Trip(Base):
     @property
     def start_time(self):
         return self.stop_times[0].departure_time
+
+    @property
+    def trip_len(self):
+        return len(self.stop_times)
+
