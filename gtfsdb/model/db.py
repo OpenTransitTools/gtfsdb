@@ -1,3 +1,6 @@
+import logging
+log = logging.getLogger(__file__)
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -32,7 +35,10 @@ class Database(object):
     def create(self):
         '''Drop/create GTFS database'''
         for cls in self.sorted_classes:
-            cls.__table__.drop(self.engine, checkfirst=True)
+            try:
+                cls.__table__.drop(self.engine, checkfirst=True)
+            except:
+                log.info("NOTE: couldn't drop table")
             cls.__table__.create(self.engine)
 
     @property

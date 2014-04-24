@@ -69,7 +69,11 @@ class _Base(object):
             reader.fieldnames = [field.strip().lower()
                                  for field in reader.fieldnames]
             table = cls.__table__
-            db.engine.execute(table.delete())
+            try:
+                db.engine.execute(table.delete())
+            except:
+                log.debug("NOTE: couldn't delete this table")
+                
             i = 0
             for row in reader:
                 records.append(cls.make_record(row))
