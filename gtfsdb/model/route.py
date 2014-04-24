@@ -1,5 +1,6 @@
 import logging
 import time
+import sys
 
 from sqlalchemy import Column
 from sqlalchemy.orm import object_session, relationship
@@ -169,6 +170,7 @@ class RouteStop(Base):
 
         # step 1: for each route...
         for r in routes:
+
             # step 2: get a sorted list of trips (in both directions, potentially)  
             trips = sorted(r.trips, key=lambda tp: tp.trip_len)
 
@@ -215,8 +217,15 @@ class RouteStop(Base):
                         rs.order = k + 1
                         session.add(rs)
 
+                    # step 8: flush the new records to the db...
+                    sys.stdout.write('*')
+                    session.commit()
+                    session.flush()
+                    unique_stops_ids = [None]
+
         session.commit()
         session.close()
+
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
