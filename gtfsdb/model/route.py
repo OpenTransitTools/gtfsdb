@@ -11,7 +11,8 @@ from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
-__all__ = ['RouteType', 'Route', 'RouteDirection']
+__all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop']
+
 
 
 log = logging.getLogger(__name__)
