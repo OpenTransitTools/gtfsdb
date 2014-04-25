@@ -23,7 +23,7 @@ class RouteType(Base):
     filename = 'route_type.txt'
     __tablename__ = 'route_type'
 
-    route_type = Column(Integer, primary_key=True, autoincrement=False)
+    route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
     route_type_name = Column(String(255))
     route_type_desc = Column(String(255))
 
