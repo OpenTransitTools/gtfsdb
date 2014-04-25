@@ -146,14 +146,19 @@ class RouteStop(Base):
     stop_id  = Column(String(255), primary_key=True, nullable=False)
     order = Column(Integer, nullable=False)
 
-    direction = relationship('RouteDirection',
-        primaryjoin='RouteStop.route_id==RouteDirection.route_id and RouteStop.direction_id==RouteDirection.direction_id',
-        foreign_keys='(RouteStop.route_id, RouteStop.direction_id)',
+    route = relationship('Route',
+        primaryjoin='RouteStop.route_id==Route.route_id',
+        foreign_keys='(RouteStop.route_id)',
         uselist=False, viewonly=True)
 
     stop = relationship('Stop',
         primaryjoin='RouteStop.stop_id==Stop.stop_id',
         foreign_keys='(RouteStop.stop_id)',
+        uselist=False, viewonly=True)
+
+    direction = relationship('RouteDirection',
+        primaryjoin='RouteStop.route_id==RouteDirection.route_id and RouteStop.direction_id==RouteDirection.direction_id',
+        foreign_keys='(RouteStop.route_id, RouteStop.direction_id)',
         uselist=False, viewonly=True)
 
     @classmethod

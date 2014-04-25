@@ -5,10 +5,14 @@ syntax: regexp
 
 syntax: glob
 *.egg-info
+*egg*
 *.pyc
 *.pyo
 .svn
 nbproject
+*~
+bin
+.installed*
 
 syntax: regexp
 \.project$
