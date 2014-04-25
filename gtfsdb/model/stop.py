@@ -13,7 +13,7 @@ class Stop(Base):
 
     __tablename__ = 'stops'
 
-    stop_id = Column(String(255), primary_key=True, nullable=False)
+    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     stop_code = Column(String(50))
     stop_name = Column(String(255), nullable=False)
     stop_desc = Column(String(255))

@@ -34,7 +34,7 @@ class Route(Base):
 
     __tablename__ = 'routes'
 
-    route_id = Column(String(255), primary_key=True, nullable=False)
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
@@ -131,8 +131,8 @@ class RouteDirection(Base):
 
     __tablename__ = 'route_directions'
 
-    route_id = Column(String(255), primary_key=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, nullable=False)
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
     direction_name = Column(String(255))
 
 
@@ -141,10 +141,10 @@ class RouteStop(Base):
 
     __tablename__ = 'route_stops'
 
-    route_id = Column(String(255), primary_key=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, nullable=False)
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
     stop_id  = Column(String(255), primary_key=True, nullable=False)
-    order = Column(Integer, nullable=False)
+    order = Column(Integer, index=True, nullable=False)
 
     route = relationship('Route',
         primaryjoin='RouteStop.route_id==Route.route_id',
@@ -193,7 +193,7 @@ class RouteStop(Base):
                         last_pos = None 
                         for i, st in enumerate(t.stop_times):
                             if st.stop_id in unique_stops_ids:
-                                last_pos = i
+                                last_pos = unique_stops_ids.index(st.stop_id)
                             else:
                                 # step 5: add ths stop id to our unique list ... either in position, or appended to the end of the list
                                 if last_pos:
