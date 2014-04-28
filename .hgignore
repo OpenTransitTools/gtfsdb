@@ -2,6 +2,9 @@ syntax: regexp
 ^.coverage$
 ^build$
 ^dist$
+\.project$
+syntax: regexp
+\.pydevproject$
 
 syntax: glob
 *.egg-info
@@ -13,8 +16,8 @@ nbproject
 *~
 bin
 .installed*
+*.db
+lib
+include
+parts
 
-syntax: regexp
-\.project$
-syntax: regexp
-\.pydevproject$
