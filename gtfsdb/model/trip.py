@@ -13,7 +13,7 @@ class Trip(Base):
     __tablename__ = 'trips'
 
     route_id = Column(String(255), index=True, nullable=False)
-    service_id = Column(String(255), nullable=False)
+    service_id = Column(String(255), index=True, nullable=False)
     trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))
