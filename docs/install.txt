@@ -1,0 +1,32 @@
+GTFSDB Installation
+===================
+
+# ~/gtfsdb-0.1.6 $
+python build.py build
+
+Install only for this user. Python packages install to $HOME/.local
+(looks like the local directory we used before, but its different,
+note the dot before local), so you'll need to add $HOME/.local/bin to
+your shell's path.
+
+# ~/gtfsdb-0.1.6 $
+export PATH=$PATH:$HOME/.local/bin
+
+# ~/gtfsdb-0.1.6 $
+python build.py install --user
+
+Gtfsdb requires the psychopg2 database driver. If it is not available
+in your linux package system, download & install locally using the
+same technique as for gtfsdb. It will require the python and postgresql
+development packages in order to build.
+https://pypi.python.org/pypi/psycopg2/
+
+Gtfsdb also requires geoalchemy 0.7.2, and sqlalchemy 0.8.4 (not 0.9.x 
+which are the newest version) availabe at
+https://pypi.python.org/pypi/GeoAlchemy/0.7.2 and
+https://pypi.python.org/pypi/SQLAlchemy/0.8.4 respectively, and are
+both installed using the same "build", "install --user" technique. You
+may have to remove the SQLAlchemy version 0.9.x if that had been
+installed automatically by accident, in order for gtfsdb to find the
+correct 0.8.4 version.
+

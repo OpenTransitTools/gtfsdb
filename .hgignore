@@ -1,0 +1,20 @@
+syntax: regexp
+^.coverage$
+^build$
+^dist$
+
+syntax: glob
+*.egg-info
+*egg*
+*.pyc
+*.pyo
+.svn
+nbproject
+*~
+bin
+.installed*
+
+syntax: regexp
+\.project$
+syntax: regexp
+\.pydevproject$
