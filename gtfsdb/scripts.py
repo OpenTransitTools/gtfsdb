@@ -12,12 +12,12 @@ def gtfsdb_load():
     parser.add_argument('file', help='URL or local path to GTFS zip FILE')
     parser.add_argument('--batch_size', default=config.DEFAULT_BATCH_SIZE,
         help='BATCH SIZE to use for memory management')
-    parser.add_argument('--database_url', default=config.DEFAULT_DATABASE_URL,
+    parser.add_argument('--database_url', '-d', default=config.DEFAULT_DATABASE_URL,
         help='DATABASE URL with appropriate privileges')
-    parser.add_argument('--is_geospatial', action='store_true',
+    parser.add_argument('--is_geospatial', '-g', action='store_true',
         default=config.DEFAULT_IS_GEOSPATIAL,
         help='Database supports GEOSPATIAL functions')
-    parser.add_argument('--schema', default=config.DEFAULT_SCHEMA,
+    parser.add_argument('--schema', '-s', default=config.DEFAULT_SCHEMA,
         help='Database SCHEMA name')
     parser.add_argument('--tables', choices=tables, default=None, nargs='*',
         help='Limited list of TABLES to load, if blank, load all tables')
