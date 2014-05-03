@@ -5,6 +5,8 @@ import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
 import time
+import logging
+log = logging.getLogger(__name__)
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -14,6 +16,14 @@ from gtfsdb import config, util
 class _Base(object):
 
     filename = None
+
+    @classmethod
+    def make_geom_lazy(cls):
+        from sqlalchemy.orm import deferred 
+        try:
+            cls.__mapper__.add_property('geom', deferred(cls.__table__.c.geom))
+        except Exception, e:
+            log.warn(e)
 
     @classmethod
     def from_dict(cls, attrs):
