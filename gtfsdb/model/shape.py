@@ -89,7 +89,6 @@ class Shape(Base):
 
         cls.geom = GeometryColumn(Point(2))
         GeometryDDL(cls.__table__)
-        cls.make_geom_lazy()
 
     @classmethod
     def add_geom_to_dict(cls, row):

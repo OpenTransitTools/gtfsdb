@@ -123,7 +123,6 @@ class Route(Base):
 
         cls.geom = GeometryColumn(MultiLineString(2))
         GeometryDDL(cls.__table__)
-        cls.make_geom_lazy()
 
 
 class RouteDirection(Base):
