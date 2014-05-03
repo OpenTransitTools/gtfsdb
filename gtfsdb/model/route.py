@@ -143,7 +143,7 @@ class RouteStop(Base):
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    stop_id  = Column(String(255), primary_key=True, nullable=False)
+    stop_id  = Column(String(255), primary_key=True, index=True, nullable=False)
     order = Column(Integer, index=True, nullable=False)
 
     route = relationship('Route',
@@ -174,11 +174,20 @@ class RouteStop(Base):
 
         #import pdb; pdb.set_trace()
 
-        # step 1: for each route...
+        # step 0: for each route...
         for r in routes:
 
-            # step 2: get a sorted list of trips (in both directions, potentially)  
-            trips = sorted(r.trips, key=lambda tp: tp.trip_len)
+            # step 1: filter the list of trips down to only a trip with a unique pattern
+            #   TODO: any way to have the orm do this?  Something probably really simple Mike?
+            trips = []
+            shape_id_filter = []
+            for t in r.trips:
+                if t.shape_id not in shape_id_filter:
+                    shape_id_filter.append(t.shape_id)
+                    trips.append(t)
+
+            # step 2: sort our list of trips by length (note: for trips with two directions, ...)
+            trips = sorted(trips, key=lambda t: t.trip_len)
 
             # PART A: we're going to just collect a list of unique stop ids for this route / directions 
             for d in [0, 1]:

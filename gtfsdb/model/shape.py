@@ -20,7 +20,7 @@ class Pattern(Base):
 
     __tablename__ = 'patterns'
 
-    shape_id = Column(String(255), primary_key=True)
+    shape_id = Column(String(255), primary_key=True, index=True)
     pattern_dist = Column(Numeric(20, 10))
 
     trips = relationship('Trip',
@@ -77,10 +77,10 @@ class Shape(Base):
 
     __tablename__ = 'shapes'
 
-    shape_id = Column(String(255), primary_key=True)
+    shape_id = Column(String(255), primary_key=True, index=True)
     shape_pt_lat = Column(Numeric(12, 9))
     shape_pt_lon = Column(Numeric(12, 9))
-    shape_pt_sequence = Column(Integer, primary_key=True)
+    shape_pt_sequence = Column(Integer, primary_key=True, index=True)
     shape_dist_traveled = Column(Numeric(20, 10))
 
     @classmethod
