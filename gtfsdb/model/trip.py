@@ -19,7 +19,7 @@ class Trip(Base):
     trip_short_name = Column(String(255))
     direction_id = Column(Integer)
     block_id = Column(String(255))
-    shape_id = Column(String(255), nullable=True)
+    shape_id = Column(String(255), index=True, nullable=True)
     trip_type = Column(String(255))
     bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)
