@@ -37,6 +37,10 @@ class GTFS(object):
         '''load route geometries derived from shapes.txt'''
         if Route in db.classes:
             Route.load_geoms(db)
+
+        for cls in db.sorted_classes:
+            cls.post_process(db)
+
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
 
