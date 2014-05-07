@@ -30,4 +30,7 @@ def gtfsdb_load():
         tables=args.tables,
         url=args.database_url,
     )
-    database_load(args.file, **kwargs)
+    db = database_load(args.file, **kwargs)
+
+    from gtfsdb.model import StopTimes
+    StopTimes.postprocess(db.session)

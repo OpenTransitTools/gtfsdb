@@ -1,10 +1,13 @@
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
 
+import logging
+log = logging.getLogger(__name__)
 
 class StopTime(Base):
     datasource = config.DATASOURCE_GTFS
@@ -37,3 +40,24 @@ class StopTime(Base):
         super(StopTime, self).__init__(*args, **kwargs)
         if 'timepoint' not in kwargs:
             self.timepoint = 'arrival_time' in kwargs
+
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        ''' delete all 'depature_time' values that appear for the last stop
+            time of a given trip (e.g., the trip ends there, so there isn't a 
+            further vehicle departure for that stop time / trip pair) 
+        '''
+        log.debug('{0}.post_process'.format(cls.__name__))
+
+        sq = db.session.query(StopTime.trip_id, func.max(StopTime.stop_sequence).label('end_sequence'))
+        sq = sq.group_by(StopTime.trip_id).subquery()
+
+        q = db.session.query(StopTime)
+        q = q.filter_by(trip_id=sq.c.trip_id, stop_sequence=sq.c.end_sequence)
+
+        for r in q:
+            r.departure_time = None
+
+        db.session.commit()
+
