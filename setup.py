@@ -28,7 +28,10 @@ setup(
     install_requires=install_requires,
     extras_require=extras_require,
     entry_points={
-        'console_scripts': ['gtfsdb-load = gtfsdb.scripts:gtfsdb_load']
+        'console_scripts': [
+            'gtfsdb-load = gtfsdb.scripts:gtfsdb_load',
+            'rs-test = gtfsdb.scripts:route_stop_load'
+        ]
     },
     classifiers=(
         'Development Status :: 4 - Beta',

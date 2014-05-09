@@ -4,8 +4,21 @@ from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.api import database_load
 
-
 def gtfsdb_load():
+    kwargs = get_args()
+    db = database_load(args.file, **kwargs)
+
+def route_stop_load():
+    ''' written as a test / debug method for RS table loader '''
+    from gtfsdb import Database, RouteStop
+    kwargs = get_args()
+    db = Database(**kwargs)
+    #import pdb; pdb.set_trace()
+    RouteStop.load(db, **kwargs)
+
+def get_args():
+    ''' database load command-line arg parser and help util...
+    '''
     tables = sorted([t.name for t in Base.metadata.sorted_tables])
     parser = argparse.ArgumentParser(prog='gtfsdb-load',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -30,4 +43,4 @@ def gtfsdb_load():
         tables=args.tables,
         url=args.database_url,
     )
-    db = database_load(args.file, **kwargs)
+    return kwargs
