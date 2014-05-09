@@ -187,7 +187,7 @@ class RouteStop(Base):
                     trips.append(t)
 
             # step 2: sort our list of trips by length (note: for trips with two directions, ...)
-            trips = sorted(trips, key=lambda t: t.trip_len)
+            trips = sorted(trips, key=lambda t: t.trip_len, reverse=True)
 
             # PART A: we're going to just collect a list of unique stop ids for this route / directions 
             for d in [0, 1]:

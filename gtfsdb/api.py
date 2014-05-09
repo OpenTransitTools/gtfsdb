@@ -20,3 +20,4 @@ def database_load(filename, **kwargs):
     gtfs = GTFS(filename)
     gtfs.load(db, **kwargs)
     return db
+
