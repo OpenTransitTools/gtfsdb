@@ -17,7 +17,7 @@ class StopTime(Base):
 
     trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
     arrival_time = Column(String(8))
-    departure_time = Column(String(8))
+    departure_time = Column(String(8), index=True)
     stop_id = Column(String(255), index=True, nullable=False)
     stop_sequence = Column(Integer, primary_key=True, nullable=False)
     stop_headsign = Column(String(255))
@@ -40,6 +40,14 @@ class StopTime(Base):
         super(StopTime, self).__init__(*args, **kwargs)
         if 'timepoint' not in kwargs:
             self.timepoint = 'arrival_time' in kwargs
+
+
+    def get_headsign(self):
+        ''' get the headsign at this stop ... rule is that if stop is empty, use trip headsign '''
+        ret_val = self.stop_headsign
+        if not ret_val:
+            ret_val = self.trip.trip_headsign
+        return ret_val
 
 
     @classmethod
@@ -66,6 +74,27 @@ class StopTime(Base):
         for r in q:
             r.arrival_time = None
 
-
         db.session.commit()
+
+    @classmethod
+    def get_stop_schedule(cls, session, stop_id, date, route_id=None):
+        ''' helper routine which returns the stop schedule for a give date
+        '''
+        from gtfsdb.model.trip import Trip
+
+        # step 1: get stop times based on date
+        q = session.query(StopTime)
+        q = q.filter_by(stop_id=stop_id)
+        q = q.filter(StopTime.departure_time!=None)
+        q = q.filter(StopTime.trip.has(Trip.universal_calendar.any(date=date)))
+
+        # step 2: apply an optional route filter
+        if route_id:
+            q = q.filter(StopTime.trip.has(Trip.route_id == route_id))
+
+        # step 3: order the stop times
+        q = q.order_by(StopTime.departure_time)
+
+        ret_val = q.all()
+        return ret_val
 
