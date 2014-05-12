@@ -77,7 +77,7 @@ class StopTime(Base):
         db.session.commit()
 
     @classmethod
-    def get_stop_schedule(cls, session, stop_id, date, route_id=None):
+    def get_departure_schedule(cls, session, stop_id, date, route_id=None):
         ''' helper routine which returns the stop schedule for a give date
         '''
         from gtfsdb.model.trip import Trip
