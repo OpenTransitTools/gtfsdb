@@ -60,14 +60,15 @@ class Stop(Base):
         ''''''
         from gtfsdb.model.route import Route
         from gtfsdb.model.trip import Trip
+        from gtfsdb.model.stop_time import StopTime
 
         try:
             self._routes
         except AttributeError:
             session = object_session(self)
             q = session.query(Route)
-            q = q.filter(Route.trips.any(
-                Trip.stop_times.any(stop_id=self.stop_id)))
+            f = ((StopTime.stop_id == self.stop_id) & (StopTime.departure_time != ''))
+            q = q.filter(Route.trips.any(Trip.stop_times.any(f)))
             self._routes = q.all()
         return self._routes
 
