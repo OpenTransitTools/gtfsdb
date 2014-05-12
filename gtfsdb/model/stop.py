@@ -69,6 +69,7 @@ class Stop(Base):
             q = session.query(Route)
             f = ((StopTime.stop_id == self.stop_id) & (StopTime.departure_time != ''))
             q = q.filter(Route.trips.any(Trip.stop_times.any(f)))
+            q = q.order_by(Route.route_sort_order)
             self._routes = q.all()
         return self._routes
 
