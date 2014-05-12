@@ -201,15 +201,17 @@ class RouteStop(Base):
                         #         further, let's try to find the best position of that stop (e.g., look for where the stop patterns breaks)
                         last_pos = None 
                         for i, st in enumerate(t.stop_times):
-                            if st.stop_id in unique_stops_ids:
-                                last_pos = unique_stops_ids.index(st.stop_id)
-                            else:
-                                # step 5: add ths stop id to our unique list ... either in position, or appended to the end of the list
-                                if last_pos:
-                                    last_pos += 1
-                                    unique_stops_ids.insert(last_pos, st.stop_id)
+                            # step 5a: make sure this stop that customers can actually board...
+                            if st.is_boarding_stop():
+                                if st.stop_id in unique_stops_ids:
+                                    last_pos = unique_stops_ids.index(st.stop_id)
                                 else:
-                                    unique_stops_ids.append(st.stop_id)
+                                    # step 5b: add ths stop id to our unique list ... either in position, or appended to the end of the list
+                                    if last_pos:
+                                        last_pos += 1
+                                        unique_stops_ids.insert(last_pos, st.stop_id)
+                                    else:
+                                        unique_stops_ids.append(st.stop_id)
 
                 # PART B: add records to the database ...
                 if len(unique_stops_ids) > 0:

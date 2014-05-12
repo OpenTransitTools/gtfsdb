@@ -41,7 +41,6 @@ class StopTime(Base):
         if 'timepoint' not in kwargs:
             self.timepoint = 'arrival_time' in kwargs
 
-
     def get_headsign(self):
         ''' get the headsign at this stop ... rule is that if stop is empty, use trip headsign '''
         ret_val = self.stop_headsign
@@ -49,12 +48,33 @@ class StopTime(Base):
             ret_val = self.trip.trip_headsign
         return ret_val
 
+    def is_boarding_stop(self):
+        ''' return whether the vehicle that is stopping at this stop, and at this time, is an 
+            in-revenue vehicle that a customer can actually board...
+
+            pickup_type = 1 - No pickup available
+
+            departure_time = None
+
+            NOTE: in gtfsdb, we NULL out the departure times when the vehicle doesn't 
+                  pick up anyone (e.g., at route end points, there are no departures...)
+
+            @see: https://developers.google.com/transit/gtfs/reference#stop_times_fields
+        '''
+        ret_val = True
+        if self.pickup_type == 1 or self.departure_time is None:
+            ret_val = False
+        return ret_val
+
 
     @classmethod
     def post_process(cls, db, **kwargs):
         ''' delete all 'depature_time' values that appear for the last stop
             time of a given trip (e.g., the trip ends there, so there isn't a 
-            further vehicle departure for that stop time / trip pair) 
+            further vehicle departure for that stop time / trip pair)...
+
+            NOTE: we know this breaks the current GTFS spec, which states that departure &  
+                  arrival times must both exist for every stop time.  Sadly, GTFS is wrong...
         '''
         log.debug('{0}.post_process'.format(cls.__name__))
 
