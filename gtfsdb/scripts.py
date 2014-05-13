@@ -5,13 +5,13 @@ from gtfsdb.model.base import Base
 from gtfsdb.api import database_load
 
 def gtfsdb_load():
-    kwargs = get_args()
+    args, kwargs = get_args()
     db = database_load(args.file, **kwargs)
 
 def route_stop_load():
     ''' written as a test / debug method for RS table loader '''
     from gtfsdb import Database, RouteStop
-    kwargs = get_args()
+    args, kwargs = get_args()
     db = Database(**kwargs)
     #import pdb; pdb.set_trace()
     RouteStop.load(db, **kwargs)
@@ -43,4 +43,4 @@ def get_args():
         tables=args.tables,
         url=args.database_url,
     )
-    return kwargs
+    return args, kwargs
