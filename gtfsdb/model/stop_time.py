@@ -1,3 +1,7 @@
+import datetime
+import logging
+log = logging.getLogger(__name__)
+
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
@@ -5,9 +9,6 @@ from sqlalchemy.types import Boolean, Integer, Numeric, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-
-import logging
-log = logging.getLogger(__name__)
 
 class StopTime(Base):
     datasource = config.DATASOURCE_GTFS
@@ -97,10 +98,15 @@ class StopTime(Base):
         db.session.commit()
 
     @classmethod
-    def get_departure_schedule(cls, session, stop_id, date, route_id=None):
+    def get_departure_schedule(cls, session, stop_id, date=None, route_id=None):
         ''' helper routine which returns the stop schedule for a give date
         '''
         from gtfsdb.model.trip import Trip
+
+        # step 0: make sure we have a valid date
+        if date is None:
+            date = datetime.date.today()
+
 
         # step 1: get stop times based on date
         q = session.query(StopTime)
