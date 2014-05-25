@@ -80,6 +80,7 @@ class StopTime(Base):
         log.debug('{0}.post_process'.format(cls.__name__))
 
         # remove the departure times at the end of a trip
+        log.info("QUERY StopTime")
         sq = db.session.query(StopTime.trip_id, func.max(StopTime.stop_sequence).label('end_sequence'))
         sq = sq.group_by(StopTime.trip_id).subquery()
         q = db.session.query(StopTime)
@@ -88,6 +89,7 @@ class StopTime(Base):
             r.departure_time = None
 
         # remove the arrival times at the start of a trip
+        log.info("QUERY StopTime")
         sq = db.session.query(StopTime.trip_id, func.min(StopTime.stop_sequence).label('start_sequence'))
         sq = sq.group_by(StopTime.trip_id).subquery()
         q = db.session.query(StopTime)
@@ -109,6 +111,7 @@ class StopTime(Base):
 
 
         # step 1: get stop times based on date
+        log.info("QUERY StopTime")
         q = session.query(StopTime)
         q = q.filter_by(stop_id=stop_id)
         q = q.filter(StopTime.departure_time!=None)
