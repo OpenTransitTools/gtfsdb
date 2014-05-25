@@ -3,7 +3,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from sqlalchemy import Column
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
 
@@ -29,7 +29,7 @@ class StopTime(Base):
 
     stop = relationship('Stop',
         primaryjoin='Stop.stop_id==StopTime.stop_id',
-        foreign_keys='(Stop.stop_id)',
+        foreign_keys='(StopTime.stop_id)',
         uselist=False, viewonly=True)
 
     trip = relationship('Trip',
@@ -120,6 +120,9 @@ class StopTime(Base):
 
         # step 3: order the stop times
         q = q.order_by(StopTime.departure_time)
+
+        # step 4: options to speed up /q
+        q = q.options(joinedload(StopTime.trip))
 
         ret_val = q.all()
         return ret_val
