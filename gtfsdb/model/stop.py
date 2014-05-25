@@ -1,4 +1,6 @@
 from collections import defaultdict
+import logging
+log = logging.getLogger(__name__)
 
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import joinedload, object_session, relationship
@@ -48,7 +50,8 @@ class Stop(Base):
         except AttributeError:
             self._headsigns = defaultdict(int)
             session = object_session(self)
-            q = session.query(StopTime).options(joinedload('trip'))
+            log.info("QUERY StopTime")
+            q = session.query(StopTime).options(joinedload(StopTime.trip), joinedload(StopTime.trip.route))
             q = q.filter_by(stop_id=self.stop_id)
             for r in q:
                 headsign = r.stop_headsign or r.trip.trip_headsign
