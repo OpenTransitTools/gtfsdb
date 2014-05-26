@@ -149,17 +149,17 @@ class RouteStop(Base):
     route = relationship('Route',
         primaryjoin='RouteStop.route_id==Route.route_id',
         foreign_keys='(RouteStop.route_id)',
-        uselist=False, viewonly=True)
+        uselist=False, viewonly=True, lazy='joined')
 
     stop = relationship('Stop',
         primaryjoin='RouteStop.stop_id==Stop.stop_id',
         foreign_keys='(RouteStop.stop_id)',
-        uselist=False, viewonly=True)
+        uselist=False, viewonly=True, lazy='joined')
 
     direction = relationship('RouteDirection',
         primaryjoin='RouteStop.route_id==RouteDirection.route_id and RouteStop.direction_id==RouteDirection.direction_id',
         foreign_keys='(RouteStop.route_id, RouteStop.direction_id)',
-        uselist=False, viewonly=True)
+        uselist=False, viewonly=True, lazy='joined')
 
     @classmethod
     def load(cls, db, **kwargs):
