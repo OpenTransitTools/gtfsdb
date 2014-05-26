@@ -51,7 +51,8 @@ class Stop(Base):
             self._headsigns = defaultdict(int)
             session = object_session(self)
             log.info("QUERY StopTime")
-            q = session.query(StopTime).options(joinedload_all('trip.route'))
+            q = session.query(StopTime)
+            q = q.options(joinedload_all('trip.route'))
             q = q.filter_by(stop_id=self.stop_id)
             for r in q:
                 headsign = r.stop_headsign or r.trip.trip_headsign
