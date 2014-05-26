@@ -53,7 +53,7 @@ class Route(Base):
     directions = relationship('RouteDirection',
         primaryjoin='Route.route_id==RouteDirection.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True)
+        uselist=True, viewonly=True, lazy='joined')
 
 
     @property
