@@ -41,6 +41,7 @@ class Stop(Base):
         foreign_keys='(Stop.stop_id)',
         uselist=True, viewonly=True)
 
+
     @property
     def headsigns(self):
         '''Returns a dictionary of all unique (route_id, headsign) tuples used
