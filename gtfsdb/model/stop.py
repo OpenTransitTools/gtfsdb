@@ -28,6 +28,8 @@ class Stop(Base):
     stop_timezone = Column(String(50))
     wheelchair_boarding = Column(Integer, default=0)
     platform_code = Column(String(50))
+    direction = Column(String(50))
+    position = Column(String(50))
 
     stop_features = relationship('StopFeature',
         primaryjoin='Stop.stop_id==StopFeature.stop_id',
