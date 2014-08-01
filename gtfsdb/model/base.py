@@ -83,7 +83,7 @@ class _Base(object):
                 db.engine.execute(table.delete())
             except:
                 log.debug("NOTE: couldn't delete this table")
-                
+
             i = 0
             for row in reader:
                 records.append(cls.make_record(row))
