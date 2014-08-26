@@ -16,7 +16,7 @@ Install and use via the gtfsdb source tree:
 0. Install Python 2.7, easy_install and buildout on your system...
 1. hg clone https://code.google.com/p/gtfsdb
 2. cd gtfsdb
-3. buildout install prod 
+3. buildout install prod
    NOTE: if you're using postgres, do a 'buildout install prod pg'
 4. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
    examples:
@@ -29,23 +29,23 @@ The best way to get gtfsbd up and running is via the python 'buildout' and 'easy
 Highly recommended to first install easy_install (setup tools) and buildout (e.g., easy_install zc.buildout)
 before doing anything else.
 
-Postgres users, gtfsdb requires the psychopg2 database driver. If you are on linux / mac, buildout will
-install the necessary dependancies (or re-use whatever you have in your system site-lib).
+Postgres users, gtfsdb requires the psycopg2 database driver. If you are on linux / mac, buildout will
+install the necessary dependencies (or re-use whatever you have in your system site-lib).
 If you are on windows, you most likely have to find and install a pre-compiled version (see below).
 
 Gtfsdb also requires geoalchemy 0.7.2, and sqlalchemy 0.8.6 (not 0.9.x which
-are the newest version) availabe at https://pypi.python.org/pypi/GeoAlchemy/0.7.2 and
+are the newest version) available at https://pypi.python.org/pypi/GeoAlchemy/0.7.2 and
 https://pypi.python.org/pypi/SQLAlchemy/0.8.6 respectively, and are
 both installed using the buildout.  If you're having trouble with gtfsdb, there's the potential
-that an incompatiable version of sqlalchemy (say v 0.9.x) is installed, in your site-packages.
-Again, the correct 0.8.6 version is sqlalchemy is requried by geoalchemy, so hoping it all goes smooth.  
+that an incompatible version of sqlalchemy (say v 0.9.x) is installed, in your site-packages.
+Again, the correct 0.8.6 version is sqlalchemy is required by geoalchemy, so hoping it all goes smooth.  
 (Thanks to edward groth for help with this content).
 
 
 Install Steps (on Windows):
 ---------------------------
     0. Have a db - docs and examples assume Postgres/PostGIS installed
-       http://www.postgresql.org/download/windows 
+       http://www.postgresql.org/download/windows
        http://postgis.refractions.net/download/windows/
 
     1. Python2.7 - http://www.python.org/download/releases/2.7.6/ (python-2.7.6.msi)
