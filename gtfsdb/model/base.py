@@ -115,12 +115,21 @@ class _Base(object):
         for k, v in row.items():
             if isinstance(v, basestring):
                 row[k] = v.strip()
-            if (k not in cls.__table__.c):
-                del row[k]
-            elif not v:
-                row[k] = None
-            elif k.endswith('date'):
-                row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
+
+            try:
+                if k:
+                    if (k not in cls.__table__.c):
+                        del row[k]
+                    elif not v:
+                        row[k] = None
+                    elif k.endswith('date'):
+                        row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
+                else:
+                    log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
+            except Exception, e:
+                #import pdb; pdb.set_trace()
+                log.warning(e)
+                
         '''if this is a geospatially enabled database, add a geom'''
         if hasattr(cls, 'geom') and hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
