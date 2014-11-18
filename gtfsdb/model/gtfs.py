@@ -47,6 +47,9 @@ class GTFS(object):
     def unzip(self, path=None):
         '''Unzip GTFS files from URL/directory to path.'''
         path = path if path else tempfile.mkdtemp()
-        with closing(zipfile.ZipFile(self.local_file)) as z:
-            z.extractall(path)
+        try:
+            with closing(zipfile.ZipFile(self.local_file)) as z:
+                z.extractall(path)
+        except Exception, e:
+            log.warning(e)
         return path
