@@ -23,7 +23,7 @@ Install and use via the gtfsdb source tree:
 ==========================================
 
 0. Install Python 2.7, easy_install and buildout on your system...
-1. hg clone https://code.google.com/p/gtfsdb
+1. git clone https://github.com/OpenTransitTools/gtfsdb.git
 2. cd gtfsdb
 3. buildout install prod
    NOTE: if you're using postgres, do a 'buildout install prod pg'
@@ -65,11 +65,10 @@ Install Steps (on Windows):
 
     3. Install Psygopg2 (from binary):  http://www.stickpeople.com/projects/python/win-psycopg/
 
-    4. Check out gtfsdb from trunk with Mercurial - see http://code.google.com/p/gtfsdb/source/checkout
+    4. Check out gtfsdb from trunk with Git - see: git clone https://github.com/OpenTransitTools/gtfsdb.git
 
     5. cd top level of gtfsdb tree
     
-    6. buildout install prod pg
+    6. buildout install prod
 
     7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
-
