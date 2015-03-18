@@ -9,6 +9,15 @@ Supported Databases
 - MySQL  - tested
 - SQLite - tested
 
+GTFS (General Transit Feed Specification) Database
+==================================================
+
+Python code that will load GTFS data into a relational database, and SQLAlchemy ORM bindings to the GTFS tables in the gtfsdb. 
+
+The gtfsdb project's focus is on making GTFS data available in a programmatic context for software developers. The need for the gtfsdb project comes from the fact that a lot of developers start out a GTFS-related effort by first building some amount of code to read GTFS data (whether that's an in-memory loader, a database loader, etc...);  GTFSDB can hopefully reduce the need for such drudgery, and give developers a starting point beyond the first step of dealing with GTFS in .csv file format.
+
+Available on pypi: https://pypi.python.org/pypi/gtfsdb
+
 
 Install and use via the gtfsdb source tree:
 ==========================================
@@ -63,3 +72,4 @@ Install Steps (on Windows):
     6. buildout install prod pg
 
     7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+
