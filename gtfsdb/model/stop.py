@@ -1,12 +1,15 @@
 from collections import defaultdict
 import logging
-log = logging.getLogger(__name__)
 
+from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
+from sqlalchemy.orm import joinedload_all, object_session, relationship
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+
+
+log = logging.getLogger(__name__)
 
 
 class Stop(Base):
@@ -31,16 +34,26 @@ class Stop(Base):
     direction = Column(String(50))
     position = Column(String(50))
 
-    stop_features = relationship('StopFeature',
+    stop_features = relationship(
+        'StopFeature',
         primaryjoin='Stop.stop_id==StopFeature.stop_id',
         foreign_keys='(Stop.stop_id)',
         uselist=True, viewonly=True)
 
-    stop_times = relationship('StopTime',
+    stop_times = relationship(
+        'StopTime',
         primaryjoin='Stop.stop_id==StopTime.stop_id',
         foreign_keys='(Stop.stop_id)',
         uselist=True, viewonly=True)
 
+    @classmethod
+    def add_geometry_column(cls):
+        cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+
+    @classmethod
+    def add_geom_to_dict(cls, row):
+        args = (config.SRID, row['stop_lon'], row['stop_lat'])
+        row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
 
     @property
     def headsigns(self):
@@ -79,23 +92,3 @@ class Stop(Base):
             q = q.order_by(Route.route_sort_order)
             self._routes = q.all()
         return self._routes
-
-    @classmethod
-    def add_geometry_column(cls):
-        from geoalchemy import GeometryColumn, GeometryDDL, Point
-
-        cls.geom = GeometryColumn(Point(2))
-        GeometryDDL(cls.__table__)
-
-    @classmethod
-    def add_geom_to_dict(cls, row):
-        try:
-            from geoalchemy import WKTSpatialElement
-            wkt = 'SRID=%s;POINT(%s %s)' % (
-                config.SRID,
-                row['stop_lon'],
-                row['stop_lat']
-            )
-            row['geom'] = WKTSpatialElement(wkt)
-        except ImportError:
-            pass

@@ -2,12 +2,18 @@ from setuptools import setup, find_packages
 import sys
 
 
+oracle_extras = ['cx_oracle>=5.1']
+postgresql_extras = ['psycopg2>=2.4.2']
+dev_extras = oracle_extras + postgresql_extras
+
+
 extras_require = dict(
-    dev=[],
-    oracle=['cx_oracle>=5.1'],
+    dev=dev_extras,
+    oracle=oracle_extras,
+    postgresql=postgresql_extras,
 )
 
-install_requires = ['sqlalchemy == 0.8.6', 'geoalchemy>=0.7.2', 'psycopg2>=2.4.2']
+install_requires = ['geoalchemy2>=0.2.4', 'sqlalchemy>=0.9']
 if sys.version_info[:2] <= (2, 6):
     install_requires.append('argparse>=1.2.1')
     extras_require['dev'].append('unittest2')

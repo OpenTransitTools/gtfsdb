@@ -20,16 +20,14 @@ class Database(object):
         self.tables = kwargs.get('tables', None)
         self.url = kwargs.get('url', config.DEFAULT_DATABASE_URL)
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
-        self.is_geospatial = kwargs.get('is_geospatial',
-                                        config.DEFAULT_IS_GEOSPATIAL)
+        self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
 
     @property
     def classes(self):
         from gtfsdb.model.base import Base
 
         if self.tables:
-            return [c for c in Base.__subclasses__()
-                    if c.__tablename__ in self.tables]
+            return [c for c in Base.__subclasses__() if c.__tablename__ in self.tables]
         return Base.__subclasses__()
 
     def create(self):
@@ -83,8 +81,7 @@ class Database(object):
     def sorted_classes(self):
         classes = []
         for class_name in config.SORTED_CLASS_NAMES:
-            cls = next((c for c in self.classes
-                        if c.__name__ == class_name), None)
+            cls = next((c for c in self.classes if c.__name__ == class_name), None)
             if cls:
                 classes.append(cls)
         return classes

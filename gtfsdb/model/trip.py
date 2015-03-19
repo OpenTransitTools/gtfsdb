@@ -24,23 +24,27 @@ class Trip(Base):
     bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)
 
-    pattern = relationship('Pattern',
+    pattern = relationship(
+        'Pattern',
         primaryjoin='Trip.shape_id==Pattern.shape_id',
         foreign_keys='(Trip.shape_id)',
         uselist=False, viewonly=True)
 
-    route = relationship('Route',
+    route = relationship(
+        'Route',
         primaryjoin='Trip.route_id==Route.route_id',
         foreign_keys='(Trip.route_id)',
         uselist=False, viewonly=True)
 
-    stop_times = relationship('StopTime',
+    stop_times = relationship(
+        'StopTime',
         primaryjoin='Trip.trip_id==StopTime.trip_id',
         foreign_keys='(Trip.trip_id)',
         order_by='StopTime.stop_sequence',
         uselist=True, viewonly=True)
 
-    universal_calendar = relationship('UniversalCalendar',
+    universal_calendar = relationship(
+        'UniversalCalendar',
         primaryjoin='Trip.service_id==UniversalCalendar.service_id',
         foreign_keys='(Trip.service_id)',
         uselist=True, viewonly=True)
@@ -64,4 +68,3 @@ class Trip(Base):
     @property
     def trip_len(self):
         return len(self.stop_times)
-

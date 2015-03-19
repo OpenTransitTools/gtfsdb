@@ -3,7 +3,7 @@ import time
 import sys
 
 from sqlalchemy import Column
-from sqlalchemy.orm import object_session, relationship
+from sqlalchemy.orm import deferred, object_session, relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
 
@@ -12,7 +12,6 @@ from gtfsdb.model.base import Base
 
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop']
-
 
 
 log = logging.getLogger(__name__)
@@ -45,16 +44,17 @@ class Route(Base):
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer, index=True)
 
-    trips = relationship('Trip',
+    trips = relationship(
+        'Trip',
         primaryjoin='Route.route_id==Trip.route_id',
         foreign_keys='(Route.route_id)',
         uselist=True, viewonly=True)
 
-    directions = relationship('RouteDirection',
+    directions = relationship(
+        'RouteDirection',
         primaryjoin='Route.route_id==RouteDirection.route_id',
         foreign_keys='(Route.route_id)',
         uselist=True, viewonly=True, lazy='joined')
-
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
@@ -119,10 +119,8 @@ class Route(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        from geoalchemy import GeometryColumn, GeometryDDL, MultiLineString
-
-        cls.geom = GeometryColumn(MultiLineString(2))
-        GeometryDDL(cls.__table__)
+        from geoalchemy2 import Geometry
+        cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
 
 
 class RouteDirection(Base):
@@ -143,20 +141,23 @@ class RouteStop(Base):
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    stop_id  = Column(String(255), primary_key=True, index=True, nullable=False)
+    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     order = Column(Integer, index=True, nullable=False)
 
-    route = relationship('Route',
+    route = relationship(
+        'Route',
         primaryjoin='RouteStop.route_id==Route.route_id',
         foreign_keys='(RouteStop.route_id)',
         uselist=False, viewonly=True, lazy='joined')
 
-    stop = relationship('Stop',
+    stop = relationship(
+        'Stop',
         primaryjoin='RouteStop.stop_id==Stop.stop_id',
         foreign_keys='(RouteStop.stop_id)',
         uselist=False, viewonly=True, lazy='joined')
 
-    direction = relationship('RouteDirection',
+    direction = relationship(
+        'RouteDirection',
         primaryjoin='RouteStop.route_id==RouteDirection.route_id and RouteStop.direction_id==RouteDirection.direction_id',
         foreign_keys='(RouteStop.route_id, RouteStop.direction_id)',
         uselist=False, viewonly=True, lazy='joined')
@@ -165,14 +166,12 @@ class RouteStop(Base):
     def load(cls, db, **kwargs):
         ''' for each route/direction, find list of stop_ids for route/direction pairs
 
-            the load is a two part process, where part A finds a list of unique stop ids, and  
+            the load is a two part process, where part A finds a list of unique stop ids, and
             part B creates the RouteStop (and potentially RouteDirections ... if not in GTFS) records
         '''
         start_time = time.time()
         session = db.session
         routes = session.query(Route).all()
-
-        #import pdb; pdb.set_trace()
 
         # step 0: for each route...
         for r in routes:
@@ -218,11 +217,11 @@ class RouteStop(Base):
 
                     # step 6: if a RouteDirection doesn't exist, let's create it...
                     if r.directions is None or len(r.directions) == 0:
-                       rd = RouteDirection()
-                       rd.route_id = r.route_id
-                       rd.direction_id = d
-                       rd.direction_name = "Outbound" if d is 0 else "Inbound"
-                       session.add(rd)
+                        rd = RouteDirection()
+                        rd.route_id = r.route_id
+                        rd.direction_id = d
+                        rd.direction_name = "Outbound" if d is 0 else "Inbound"
+                        session.add(rd)
 
                     # step 7: create new RouteStop records
                     for k, stop_id in enumerate(unique_stops_ids):
@@ -245,4 +244,3 @@ class RouteStop(Base):
 
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
-

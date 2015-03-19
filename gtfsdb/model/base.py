@@ -4,13 +4,13 @@ import logging
 import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
-import time
-import logging
-log = logging.getLogger(__name__)
-
+import time
 from sqlalchemy.ext.declarative import declarative_base
 
 from gtfsdb import config, util
+
+
+log = logging.getLogger(__name__)
 
 
 class _Base(object):
@@ -76,8 +76,7 @@ class _Base(object):
             f = open(file_path, 'r')
             utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
             reader = csv.DictReader(utf8_file)
-            reader.fieldnames = [field.strip().lower()
-                                 for field in reader.fieldnames]
+            reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
             table = cls.__table__
             try:
                 db.engine.execute(table.delete())
@@ -102,13 +101,11 @@ class _Base(object):
 
     @classmethod
     def post_process(cls, db, **kwargs):
-        '''Post-process processing method.  This method is a placeholder 
+        '''Post-process processing method.  This method is a placeholder
            that may be overridden in children...
-           @see: stop_time.py 
+           @see: stop_time.py
         '''
         pass
-    
-
 
     @classmethod
     def make_record(cls, row):
@@ -127,9 +124,8 @@ class _Base(object):
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
             except Exception, e:
-                #import pdb; pdb.set_trace()
                 log.warning(e)
-                
+
         '''if this is a geospatially enabled database, add a geom'''
         if hasattr(cls, 'geom') and hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)

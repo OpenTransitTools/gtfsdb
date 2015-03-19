@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import tempfile
@@ -11,18 +12,24 @@ from gtfsdb import *
 from gtfsdb.api import database_load
 
 
+log = logging.getLogger(__name__)
+
+
 class BasicModelTests(object):
 
     path = resource_filename('gtfsdb', 'tests')
-    gtfs_file = 'file:///{0}'.format(
-        os.path.join(path, 'large-sample-feed.zip'))
+    gtfs_file = 'file:///{0}'.format(os.path.join(path, 'large-sample-feed.zip'))
     url = 'sqlite:///{0}'.format(tempfile.mkstemp()[1])
-    print url
+    log.debug(url)
     db = database_load(gtfs_file, url=url)
 
     def get_first(self):
-        if hasattr(self, 'model'):
-            return self.db.session.query(self.model).first()
+        try:
+            self._first
+        except AttributeError:
+            if hasattr(self, 'model'):
+                self._first = self.db.session.query(self.model).first()
+                return self._first
 
     def test_entity(self):
         if hasattr(self, 'model'):
@@ -40,6 +47,14 @@ class TestCalendar(unittest.TestCase, BasicModelTests):
 
 class TestCalendarDate(unittest.TestCase, BasicModelTests):
     model = CalendarDate
+
+
+class TestFareAttribute(unittest.TestCase, BasicModelTests):
+    model = FareAttribute
+
+
+class TestFareRule(unittest.TestCase, BasicModelTests):
+    model = FareRule
 
 
 class TestRoute(unittest.TestCase, BasicModelTests):

@@ -18,7 +18,8 @@ class Frequency(Base):
     headway_secs = Column(Integer)
     exact_times = Column(Integer)
 
-    trip = relationship('Trip',
+    trip = relationship(
+        'Trip',
         primaryjoin='Frequency.trip_id==Trip.trip_id',
         foreign_keys='(Frequency.trip_id)',
         uselist=False, viewonly=True)

@@ -42,14 +42,6 @@ Postgres users, gtfsdb requires the psycopg2 database driver. If you are on linu
 install the necessary dependencies (or re-use whatever you have in your system site-lib).
 If you are on windows, you most likely have to find and install a pre-compiled version (see below).
 
-Gtfsdb also requires geoalchemy 0.7.2, and sqlalchemy 0.8.6 (not 0.9.x which
-are the newest version) available at https://pypi.python.org/pypi/GeoAlchemy/0.7.2 and
-https://pypi.python.org/pypi/SQLAlchemy/0.8.6 respectively, and are
-both installed using the buildout.  If you're having trouble with gtfsdb, there's the potential
-that an incompatible version of sqlalchemy (say v 0.9.x) is installed, in your site-packages.
-Again, the correct 0.8.6 version is sqlalchemy is required by geoalchemy, so hoping it all goes smooth.  
-(Thanks to edward groth for help with this content).
-
 
 Install Steps (on Windows):
 ---------------------------

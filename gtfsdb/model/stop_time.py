@@ -1,14 +1,17 @@
 import datetime
 import logging
-log = logging.getLogger(__name__)
 
 from sqlalchemy import Column
-from sqlalchemy.orm import relationship, joinedload, joinedload_all
+from sqlalchemy.orm import relationship, joinedload_all
 from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+
+
+log = logging.getLogger(__name__)
+
 
 class StopTime(Base):
     datasource = config.DATASOURCE_GTFS
@@ -27,12 +30,14 @@ class StopTime(Base):
     shape_dist_traveled = Column(Numeric(20, 10))
     timepoint = Column(Boolean, index=True, default=False)
 
-    stop = relationship('Stop',
+    stop = relationship(
+        'Stop',
         primaryjoin='Stop.stop_id==StopTime.stop_id',
         foreign_keys='(StopTime.stop_id)',
         uselist=False, viewonly=True)
 
-    trip = relationship('Trip',
+    trip = relationship(
+        'Trip',
         primaryjoin='Trip.trip_id==StopTime.trip_id',
         foreign_keys='(StopTime.trip_id)',
         uselist=False, viewonly=True)
@@ -50,14 +55,14 @@ class StopTime(Base):
         return ret_val
 
     def is_boarding_stop(self):
-        ''' return whether the vehicle that is stopping at this stop, and at this time, is an 
+        ''' return whether the vehicle that is stopping at this stop, and at this time, is an
             in-revenue vehicle that a customer can actually board...
 
             pickup_type = 1 - No pickup available
 
             departure_time = None
 
-            NOTE: in gtfsdb, we NULL out the departure times when the vehicle doesn't 
+            NOTE: in gtfsdb, we NULL out the departure times when the vehicle doesn't
                   pick up anyone (e.g., at route end points, there are no departures...)
 
             @see: https://developers.google.com/transit/gtfs/reference#stop_times_fields
@@ -67,14 +72,13 @@ class StopTime(Base):
             ret_val = False
         return ret_val
 
-
     @classmethod
     def post_process(cls, db, **kwargs):
         ''' delete all 'depature_time' values that appear for the last stop
-            time of a given trip (e.g., the trip ends there, so there isn't a 
+            time of a given trip (e.g., the trip ends there, so there isn't a
             further vehicle departure for that stop time / trip pair)...
 
-            NOTE: we know this breaks the current GTFS spec, which states that departure &  
+            NOTE: we know this breaks the current GTFS spec, which states that departure &
                   arrival times must both exist for every stop time.  Sadly, GTFS is wrong...
         '''
         log.debug('{0}.post_process'.format(cls.__name__))
@@ -109,12 +113,11 @@ class StopTime(Base):
         if date is None:
             date = datetime.date.today()
 
-
         # step 1: get stop times based on date
         log.info("QUERY StopTime")
         q = session.query(StopTime)
         q = q.filter_by(stop_id=stop_id)
-        q = q.filter(StopTime.departure_time!=None)
+        q = q.filter(StopTime.departure_time != None)
         q = q.filter(StopTime.trip.has(Trip.universal_calendar.any(date=date)))
 
         # step 2: apply an optional route filter
@@ -129,4 +132,3 @@ class StopTime(Base):
 
         ret_val = q.all()
         return ret_val
-

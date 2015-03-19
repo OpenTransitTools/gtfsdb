@@ -1,8 +1,9 @@
 import logging
 import time
 
+from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 
 from gtfsdb import config
@@ -23,27 +24,19 @@ class Pattern(Base):
     shape_id = Column(String(255), primary_key=True, index=True)
     pattern_dist = Column(Numeric(20, 10))
 
-    trips = relationship('Trip',
+    trips = relationship(
+        'Trip',
         primaryjoin='Pattern.shape_id==Trip.shape_id',
         foreign_keys='(Pattern.shape_id)',
         uselist=True, viewonly=True)
 
-    def geom_from_shape(self, shape_points):
-        from geoalchemy import WKTSpatialElement
-
-        wkt = 'LINESTRING('
-        for point in shape_points:
-            coords = '%s %s' % (point.shape_pt_lon, point.shape_pt_lat)
-            wkt = '%s%s, ' % (wkt, coords)
-        wkt = '%s)' % (wkt.rstrip(', '))
-        self.geom = WKTSpatialElement(wkt)
-
     @classmethod
     def add_geometry_column(cls):
-        from geoalchemy import GeometryColumn, GeometryDDL, LineString
+        cls.geom = deferred(Column(Geometry(geometry_type='LINESTRING', srid=config.SRID)))
 
-        cls.geom = GeometryColumn(LineString(2))
-        GeometryDDL(cls.__table__)
+    def geom_from_shape(self, points):
+        coords = ['{0} {1}'.format(r.shape_pt_lon, r.shape_pt_lat) for r in points]
+        self.geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
 
     @classmethod
     def load(cls, db, **kwargs):
@@ -85,20 +78,9 @@ class Shape(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        from geoalchemy import GeometryColumn, GeometryDDL, Point
-
-        cls.geom = GeometryColumn(Point(2))
-        GeometryDDL(cls.__table__)
+        cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     @classmethod
     def add_geom_to_dict(cls, row):
-        try:
-            from geoalchemy import WKTSpatialElement
-            wkt = 'SRID=%s;POINT(%s %s)' % (
-                config.SRID,
-                row['shape_pt_lon'],
-                row['shape_pt_lat']
-            )
-            row['geom'] = WKTSpatialElement(wkt)
-        except ImportError:
-            pass
+        args = (config.SRID, row['shape_pt_lon'], row['shape_pt_lat'])
+        row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)

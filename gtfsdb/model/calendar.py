@@ -77,7 +77,8 @@ class UniversalCalendar(Base):
     service_id = Column(String(255), primary_key=True, index=True, nullable=False)
     date = Column(Date, primary_key=True, index=True, nullable=False)
 
-    trips = relationship('Trip',
+    trips = relationship(
+        'Trip',
         primaryjoin='UniversalCalendar.service_id==Trip.service_id',
         foreign_keys='(UniversalCalendar.service_id)',
         uselist=True, viewonly=True)
@@ -99,5 +100,4 @@ class UniversalCalendar(Base):
                 session.query(cls).filter_by(**cd_kwargs).delete()
         session.commit()
         process_time = time.time() - start_time
-        log.debug('{0}.load ({1:.0f} seconds)'.format(
-            cls.__name__, process_time))
+        log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
