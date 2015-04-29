@@ -1,23 +1,59 @@
-syntax: regexp
-^.coverage$
-^build$
-^dist$
-\.project$
-syntax: regexp
-\.pydevproject$
-
-syntax: glob
-*.egg-info
-*egg*
-*.pyc
-*.pyo
-.svn
-nbproject
 *~
-bin
-.installed*
-*.db
-lib
-include
-parts
+[a-z].py
+*.py[cod]
+.settings
+COMMIT_EDITMSG
+.git/
+.git/*
+*.old
+.*#
+.#*
+*#
+#*
+.idea
+*.iml
 
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+.*~
+*.bak
+*.db
+*.sqlite
+*.db-journal
+nohup.out
+[a-z].json
+.git
+.git/FETCH_HEAD
+gtfsdb.db.bkup
+x
