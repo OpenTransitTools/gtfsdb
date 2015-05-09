@@ -26,7 +26,7 @@ Install and use via the gtfsdb source tree:
 1. git clone https://github.com/OpenTransitTools/gtfsdb.git
 2. cd gtfsdb
 3. buildout install prod
-   NOTE: if you're using postgres, do a 'buildout install prod pg'
+   NOTE: if you're using postgres, do a 'buildout install prod postgresql'
 4. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
    examples:
    - bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
