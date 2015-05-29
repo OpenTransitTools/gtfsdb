@@ -53,8 +53,8 @@ class StopTime(Base):
         return ret_val
 
     def get_direction_name(self, def_val="", banned=['Shuttle', 'MAX Shuttle', 'Garage', 'Center Garage', 'Merlo Garage', 'Powell Garage']):
-        ''' returns either the headsign (as long as headsign is not the same name as the route name)
-            or the route direction name
+        ''' returns either the headsign (priority) or the route direction name (when banned)
+            (as long as one of these names are not banned and not the same name as the route name)
         '''
         ret_val = def_val
         try:
