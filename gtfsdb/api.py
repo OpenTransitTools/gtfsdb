@@ -13,7 +13,6 @@ def database_load(filename, **kwargs):
         tables: limited list of tables to load
         url: SQLAlchemy database url
     '''
-
     db = Database(**kwargs)
     db.create()
     gtfs = GTFS(filename)

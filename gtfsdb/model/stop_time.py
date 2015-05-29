@@ -7,6 +7,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
 
 from gtfsdb import config
+from gtfsdb import util
 from gtfsdb.model.base import Base
 
 
@@ -54,20 +55,30 @@ class StopTime(Base):
             ret_val = self.trip.trip_headsign
         return ret_val
 
-    def get_direction_name(self):
-        headsign = self.get_headsign()
-        ret_val = headsign
+    def get_direction_name(self, def_val="", banned=['Shuttle', 'MAX Shuttle', 'Garage', 'Center Garage', 'Merlo Garage', 'Powell Garage']):
+        ''' returns either the headsign (as long as headsign is not the same name as the route name)
+            or the route direction name
+        '''
+        ret_val = def_val
         try:
-            route_long_name = self.trip.route.route_long_name
-            dir = self.trip.direction_id
-            self.trip.route.directions[dir]
-            get_route_direction_name(headsign, route_long_name, route_direction_name)
+            # step 0: create a banned list with the addition of our route_long_name
+            banned = banned + [self.trip.route.route_long_name]
+
+            headsign = self.get_headsign()
+            if headsign and not any([headsign in s for s in banned]):
+                # step 1: use the headsign as the direction name, just as long as the headsign is
+                #         not null and not the same as the route name
+                ret_val = headsign
+            else:
+                # step 2: lets use the direction name, if available
+                dir = self.trip.direction_id
+                dir = self.trip.route.directions[dir]
+                if dir.direction_name and not any([dir.direction_name in s for s in banned]):
+                    ret_val = dir.direction_name.lstrip('to ').lstrip('To ')
         except Exception, e:
             log.debug(e)
             pass
-
         return ret_val
-
 
     def is_boarding_stop(self):
         ''' return whether the vehicle that is stopping at this stop, and at this time, is an
