@@ -71,6 +71,16 @@ class Route(Base):
             self._route_name = ret_val
         return self._route_name
 
+    def direction_name(self, direction_id, def_val=''):
+        ret_val = def_val
+        try:
+            dir = self.directions.filter(RouteDirection.direction_id==direction_id)
+            if dir and dir.direction_name:
+                ret_val = dir.direction_name
+        except:
+            pass
+        return ret_val
+
     @property
     def _get_start_end_dates(self):
         '''find the min & max date using Trip & UniversalCalendar'''

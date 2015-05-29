@@ -54,6 +54,21 @@ class StopTime(Base):
             ret_val = self.trip.trip_headsign
         return ret_val
 
+    def get_direction_name(self):
+        headsign = self.get_headsign()
+        ret_val = headsign
+        try:
+            route_long_name = self.trip.route.route_long_name
+            dir = self.trip.direction_id
+            self.trip.route.directions[dir]
+            get_route_direction_name(headsign, route_long_name, route_direction_name)
+        except Exception, e:
+            log.debug(e)
+            pass
+
+        return ret_val
+
+
     def is_boarding_stop(self):
         ''' return whether the vehicle that is stopping at this stop, and at this time, is an
             in-revenue vehicle that a customer can actually board...
