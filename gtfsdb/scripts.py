@@ -9,7 +9,6 @@ def gtfsdb_load():
     args, kwargs = get_args()
     database_load(args.file, **kwargs)
 
-
 def route_stop_load():
     ''' written as a test / debug method for RS table loader '''
     from gtfsdb import Database, RouteStop
@@ -17,6 +16,13 @@ def route_stop_load():
     db = Database(**kwargs)
     RouteStop.load(db, **kwargs)
 
+def db_connect_tester():
+    ''' simple routine to connect to an existing database and list a few stops'''
+    from gtfsdb import Database, Stop
+    args, kwargs = get_args()
+    db = Database(**kwargs)
+    for s in db.session.query(Stop).limit(5):
+        print s.stop_name
 
 def get_args():
     ''' database load command-line arg parser and help util...
