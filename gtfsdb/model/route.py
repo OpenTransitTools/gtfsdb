@@ -1,6 +1,7 @@
-import logging
 import time
 import sys
+import logging
+log = logging.getLogger(__name__)
 
 from sqlalchemy import Column
 from sqlalchemy.orm import deferred, object_session, relationship
@@ -10,11 +11,7 @@ from sqlalchemy.sql import func
 from gtfsdb import config
 from gtfsdb.model.base import Base
 
-
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop']
-
-
-log = logging.getLogger(__name__)
 
 
 class RouteType(Base):

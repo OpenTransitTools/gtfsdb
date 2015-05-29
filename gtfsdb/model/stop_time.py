@@ -1,5 +1,6 @@
 import datetime
 import logging
+log = logging.getLogger(__name__)
 
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship, joinedload_all
@@ -7,11 +8,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
 
 from gtfsdb import config
-from gtfsdb import util
 from gtfsdb.model.base import Base
-
-
-log = logging.getLogger(__name__)
 
 
 class StopTime(Base):
