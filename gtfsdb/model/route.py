@@ -11,7 +11,7 @@ from sqlalchemy.sql import func
 from gtfsdb import config
 from gtfsdb.model.base import Base
 
-__all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop']
+__all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 
 
 class RouteType(Base):
@@ -251,3 +251,19 @@ class RouteStop(Base):
 
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
+
+
+class RouteFilter(Base):
+    ''' list of filters to be used to cull routes from certain lists
+        e.g., there might be Shuttles that you never want to be shown...you can load that data here, and
+        use it in your queries
+    '''
+    datasource = config.DATASOURCE_LOOKUP
+    filename = 'route_filter.txt'
+    __tablename__ = 'route_filters'
+
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    agency_id = Column(String(255), index=True, nullable=True)
+    description = Column(String)
+
+
