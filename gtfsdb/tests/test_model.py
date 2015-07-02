@@ -67,8 +67,10 @@ class TestRoute(unittest.TestCase, BasicModelTests):
 
     def test_active_routes(self):
         if hasattr(self, 'model'):
-            for r in self.db.session.query(self.model).all():
+            #for r in self.db.session.query(self.model).all():
+            for r in Route.active_routes(self.db.session):
                 print "{} {} {} {}".format(r.route_id, r.agency_id, r.start_date, r.end_date)
+                #self.assert_(r.route_id != "XXX_TEST_XXX")
 
 class TestRouteDirection(unittest.TestCase, BasicModelTests):
     model = RouteDirection

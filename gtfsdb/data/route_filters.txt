@@ -1,1 +1,2 @@
 route_id,agency_id,description
+XXX_TEST_XXX,*,RouteFilter (table) can be used to block a route(s) from the active list or routes

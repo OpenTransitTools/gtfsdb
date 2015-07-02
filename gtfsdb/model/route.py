@@ -1,3 +1,4 @@
+import datetime
 import time
 import sys
 import logging
@@ -129,6 +130,34 @@ class Route(Base):
         from geoalchemy2 import Geometry
         cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
 
+    @classmethod
+    def active_routes(cls, session, date=None):
+        ''' returns list of routes that are seen as 'active' based on dates and filters
+        '''
+        ret_val = []
+
+        # step 1: grab all stops
+        routes = session.query(Route).filter(~Route.route_id.in_(session.query(RouteFilter.route_id))).order_by(Route.route_sort_order).all()
+
+        # step 2: default date
+        if date is None or not isinstance(date, datetime.date):
+            date = datetime.date.today()
+
+        # step 3: filter by date
+        if date:
+            for r in routes:
+                if r:
+                    # step 3a: filter based on date (if invalid looking date objects, just pass the route on)
+                    if r.start_date and r.end_date:
+                        if r.start_date <= date <= r.end_date:
+                            ret_val.append(r)
+                    else:
+                        ret_val.append(r)
+        else:
+            # step 3b: if no good date, just assign routes to ret_val
+            ret_val = routes
+
+        return ret_val
 
 class RouteDirection(Base):
     datasource = config.DATASOURCE_GTFS
