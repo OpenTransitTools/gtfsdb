@@ -25,7 +25,6 @@ class Database(object):
     @property
     def classes(self):
         from gtfsdb.model.base import Base
-
         if self.tables:
             return [c for c in Base.__subclasses__() if c.__tablename__ in self.tables]
         return Base.__subclasses__()
@@ -33,6 +32,7 @@ class Database(object):
     def create(self):
         '''Drop/create GTFS database'''
         for cls in self.sorted_classes:
+            log.debug("create table: {0}".format(cls.__table__))
             try:
                 cls.__table__.drop(self.engine, checkfirst=True)
             except:
