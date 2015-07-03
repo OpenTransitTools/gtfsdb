@@ -1,8 +1,11 @@
-import datetime
 import logging
+log = logging.getLogger(__name__)
+
+import datetime
 import os
-from pkg_resources import resource_filename  # @UnresolvedImport
 import tempfile
+from pkg_resources import resource_filename  # @UnresolvedImport
+
 try:
     import unittest2 as unittest
 except ImportError:
@@ -10,10 +13,6 @@ except ImportError:
 
 from gtfsdb import *
 from gtfsdb.api import database_load
-
-
-log = logging.getLogger(__name__)
-
 
 class BasicModelTests(object):
 
@@ -67,10 +66,10 @@ class TestRoute(unittest.TestCase, BasicModelTests):
 
     def test_active_routes(self):
         if hasattr(self, 'model'):
-            #for r in self.db.session.query(self.model).all():
-            for r in Route.active_routes(self.db.session):
-                print "{} {} {} {}".format(r.route_id, r.agency_id, r.start_date, r.end_date)
-                #self.assert_(r.route_id != "XXX_TEST_XXX")
+            #import pdb; pdb.set_trace()
+            routes = Route.active_routes(self.db.session)
+            for r in routes:
+                self.assertFalse("we should not have any routes, but I see route id: {0}".format(r.route_id))
 
 class TestRouteDirection(unittest.TestCase, BasicModelTests):
     model = RouteDirection

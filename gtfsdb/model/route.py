@@ -88,8 +88,7 @@ class Route(Base):
             self._start_date
         except AttributeError:
             session = object_session(self)
-            q = session.query(func.min(UniversalCalendar.date),
-                              func.max(UniversalCalendar.date))
+            q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
             q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
             self._start_date, self._end_date = q.one()
         return self._start_date, self._end_date

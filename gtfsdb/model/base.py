@@ -4,7 +4,8 @@ import logging
 import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
-import time
+import time
+
 from sqlalchemy.ext.declarative import declarative_base
 
 from gtfsdb import config, util
@@ -70,6 +71,8 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
+        #import pdb; pdb.set_trace()
+
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
@@ -96,8 +99,8 @@ class _Base(object):
                 db.engine.execute(table.insert(), records)
             f.close()
         process_time = time.time() - start_time
-        log.debug('{0}.load ({1:.0f} seconds)'.format(
-            cls.__name__, process_time))
+        log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
+
 
     @classmethod
     def post_process(cls, db, **kwargs):
