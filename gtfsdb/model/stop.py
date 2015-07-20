@@ -1,5 +1,6 @@
-from collections import defaultdict
 import logging
+import datetime
+from collections import defaultdict
 
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
@@ -46,6 +47,26 @@ class Stop(Base):
         foreign_keys='(Stop.stop_id)',
         uselist=True, viewonly=True)
 
+    @property
+    def is_active(self, date=None):
+        return True
+
+    @property
+    def is_active(self, date=None):
+        """ :return False whenever we see that the stop has zero stop_times on the given
+                    input date (which defaults to 'today')
+        """
+        ret_val = False
+        if date is None:
+            date = datetime.date.today()
+
+        #import pdb; pdb.set_trace()
+        from gtfsdb.model.stop_time import StopTime
+        st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
+        if st and len(st) > 0:
+            ret_val = True
+        return ret_val
+
     @classmethod
     def add_geometry_column(cls):
         cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
@@ -54,6 +75,9 @@ class Stop(Base):
     def add_geom_to_dict(cls, row):
         args = (config.SRID, row['stop_lon'], row['stop_lat'])
         row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
+
+
+    """ TODO: rewrite the cache to use timeout checking in Base.py """
 
     @property
     def headsigns(self):

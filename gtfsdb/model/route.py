@@ -5,7 +5,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from sqlalchemy import Column
-from sqlalchemy.orm import deferred, object_session, relationship
+from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
 
@@ -55,6 +55,20 @@ class Route(Base):
         uselist=True, viewonly=True, lazy='joined')
 
     @property
+    def is_active(self, date=None):
+        """ :return False whenever we see that the route start and end date are outside the
+                    input date (where the input date defaults to 'today')
+        """
+        ret_val = True
+        if self.start_date and self.end_date:
+            if date is None:
+                date = datetime.date.today()
+            ret_val = False
+            if self.start_date <= date <= self.end_date:
+                ret_val = True
+        return ret_val
+
+    @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
         ''' build a route name out of long and short names...
         '''
@@ -85,8 +99,7 @@ class Route(Base):
         '''find the min & max date using Trip & UniversalCalendar'''
         if not self.is_cached_data_valid('_start_date'):
             from gtfsdb.model.calendar import UniversalCalendar
-            session = object_session(self)
-            q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+            q = self.session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
             q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
             self._start_date, self._end_date = q.one()
             self.update_cached_data('_start_date')

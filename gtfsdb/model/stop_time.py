@@ -127,7 +127,7 @@ class StopTime(Base):
         db.session.commit()
 
     @classmethod
-    def get_departure_schedule(cls, session, stop_id, date=None, route_id=None):
+    def get_departure_schedule(cls, session, stop_id, date=None, route_id=None, limit=None):
         ''' helper routine which returns the stop schedule for a give date
         '''
         from gtfsdb.model.trip import Trip
@@ -152,6 +152,9 @@ class StopTime(Base):
 
         # step 4: options to speed up /q
         q = q.options(joinedload_all('trip'))
+
+        if limit:
+            q = q.limit(limit)
 
         ret_val = q.all()
         return ret_val

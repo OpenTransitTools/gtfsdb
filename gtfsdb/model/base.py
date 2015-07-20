@@ -7,7 +7,7 @@ import sys
 import time
 
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.orm import object_session
 from gtfsdb import config, util
 
 
@@ -17,6 +17,15 @@ log = logging.getLogger(__name__)
 class _Base(object):
 
     filename = None
+
+    @property
+    def session(self):
+        ret_val = None
+        try:
+            ret_val = object_session(self)
+        except:
+            log.warn("can't get a session from object")
+        return ret_val
 
     @classmethod
     def make_geom_lazy(cls):
@@ -31,6 +40,7 @@ class _Base(object):
         clean_dict = cls.make_record(attrs)
         return cls(**clean_dict)
 
+    @property
     def to_dict(self):
         '''convert a SQLAlchemy object into a dict that is serializable to JSON
         '''
