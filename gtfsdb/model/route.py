@@ -58,15 +58,16 @@ class Route(Base):
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
         ''' build a route name out of long and short names...
         '''
-        try:
-            self._route_name
-        except AttributeError:
+        if not self.is_cached_data_valid('_route_name'):
+            log.warn("query route name")
             ret_val = self.route_long_name
             if self.route_long_name and self.route_short_name:
                 ret_val = fmt.format(self=self)
             elif self.route_long_name is None:
                 ret_val = self.route_short_name
             self._route_name = ret_val
+            self.update_cached_data('_route_name')
+
         return self._route_name
 
     def direction_name(self, direction_id, def_val=''):
@@ -82,15 +83,14 @@ class Route(Base):
     @property
     def _get_start_end_dates(self):
         '''find the min & max date using Trip & UniversalCalendar'''
-        from gtfsdb.model.calendar import UniversalCalendar
-
-        try:
-            self._start_date
-        except AttributeError:
+        if not self.is_cached_data_valid('_start_date'):
+            from gtfsdb.model.calendar import UniversalCalendar
             session = object_session(self)
             q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
             q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
             self._start_date, self._end_date = q.one()
+            self.update_cached_data('_start_date')
+
         return self._start_date, self._end_date
 
     @property

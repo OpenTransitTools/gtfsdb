@@ -59,11 +59,8 @@ class Stop(Base):
     def headsigns(self):
         '''Returns a dictionary of all unique (route_id, headsign) tuples used
         at the stop and the number of trips the head sign is used'''
-        from gtfsdb.model.stop_time import StopTime
-
-        try:
-            self._headsigns
-        except AttributeError:
+        if not hasattr(self, '_headsigns'):
+            from gtfsdb.model.stop_time import StopTime
             self._headsigns = defaultdict(int)
             session = object_session(self)
             log.info("QUERY StopTime")
@@ -73,6 +70,7 @@ class Stop(Base):
             for r in q:
                 headsign = r.stop_headsign or r.trip.trip_headsign
                 self._headsigns[(r.trip.route, headsign)] += 1
+
         return self._headsigns
 
     @property

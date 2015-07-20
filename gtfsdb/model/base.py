@@ -51,6 +51,42 @@ class _Base(object):
 
         return ret_val
 
+    def get_up_date_name(self, attribute_name):
+        ''' return attribute name of where we'll store an update variable
+        '''
+        return "{0}_update_utc".format(attribute_name)
+
+    def is_cached_data_valid(self, attribute_name, max_age=2):
+        ''' we have to see both the attribute name exist in our object, as well as
+            that object having a last update date (@see update_cached_data below)
+            and that update date being less than 2 days ago...
+        '''
+        ret_val = False
+        try:
+            #import pdb; pdb.set_trace()
+            if hasattr(self, attribute_name):
+                attribute_update = self.get_up_date_name(attribute_name)
+                if hasattr(self, attribute_update):
+                    epoch = datetime.datetime.utcfromtimestamp(0)
+                    delta = getattr(self, attribute_update) - epoch
+                    if delta.days <= max_age:
+                        ret_val = True
+        except:
+            log.warn("is_cached_data_valid(): saw a cache exception with attribute {0}".format(attribute_name))
+            ret_val = False
+
+        return ret_val
+
+    def update_cached_data(self, attribute_name):
+        '''
+        '''
+        try:
+            #import pdb; pdb.set_trace()
+            attribute_update = self.get_up_date_name(attribute_name)
+            setattr(self, attribute_update, datetime.datetime.now())
+        except:
+            log.warn("update_cached_data(): threw an exception with attribute {0}".format(attribute_name))
+
     @classmethod
     def load(cls, db, **kwargs):
         '''Load method for ORM
@@ -70,8 +106,6 @@ class _Base(object):
             directory = kwargs.get('gtfs_directory')
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
-
-        #import pdb; pdb.set_trace()
 
         records = []
         file_path = os.path.join(directory, cls.filename)
