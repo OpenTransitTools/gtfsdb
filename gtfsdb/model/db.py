@@ -31,13 +31,15 @@ class Database(object):
 
     def create(self):
         '''Drop/create GTFS database'''
-        for cls in self.sorted_classes:
-            log.debug("create table: {0}".format(cls.__table__))
-            try:
-                cls.__table__.drop(self.engine, checkfirst=True)
-            except:
-                log.info("NOTE: couldn't drop table")
-            cls.__table__.create(self.engine)
+        from gtfsdb.model.base import Base
+        Base.metadata.create_all(self.engine)
+        #for cls in self.sorted_classes:
+        #    log.debug("create table: {0}".format(cls.__table__))
+        #    try:
+        #        cls.__table__.drop(self.engine, checkfirst=True)
+        #    except:
+        #        log.info("NOTE: couldn't drop table")
+        #    cls.__table__.create(self.engine)
 
     @property
     def dialect_name(self):
@@ -79,12 +81,20 @@ class Database(object):
 
     @property
     def sorted_classes(self):
+        return self._sort_classes(config.SORTED_CLASS_NAMES)
+
+    @property
+    def bootstrap_classes(self):
+        return self._sort_classes(config.INITIAL_LOAD_CLASS)
+
+    def _sort_classes(self, names):
         classes = []
-        for class_name in config.SORTED_CLASS_NAMES:
+        for class_name in names:
             cls = next((c for c in self.classes if c.__name__ == class_name), None)
             if cls:
                 classes.append(cls)
         return classes
+
 
     @property
     def url(self):

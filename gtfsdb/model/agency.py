@@ -12,7 +12,7 @@ class Agency(Base):
     __tablename__ = 'agency'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    agency_id = Column(String(255), index=True, unique=True)
+    agency_id = Column(String(255), index=True, unique=True, nullable=False)
     agency_name = Column(String(255), nullable=False)
     agency_url = Column(String(255), nullable=False)
     agency_timezone = Column(String(50), nullable=False)

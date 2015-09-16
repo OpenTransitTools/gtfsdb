@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 class _Base(object):
 
     filename = None
+    unique_id = None
 
     @property
     def session(self):
@@ -125,14 +126,17 @@ class _Base(object):
             reader = csv.DictReader(utf8_file)
             reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
             table = cls.__table__
-            try:
-                db.engine.execute(table.delete())
-            except:
-                log.debug("NOTE: couldn't delete this table")
+            #try:
+            #    db.engine.execute(table.delete())
+            #except:
+            #    log.debug("NOTE: couldn't delete this table")
 
             i = 0
             for row in reader:
-                records.append(cls.make_record(row))
+                record = cls.make_record(row)
+                if 'agency_id' in table.c:
+                    record['agency_id'] = str(cls.unique_id)
+                records.append(record)
                 i += 1
                 if i >= batch_size:
                     db.engine.execute(table.insert(), records)
@@ -165,9 +169,13 @@ class _Base(object):
                     if (k not in cls.__table__.c):
                         del row[k]
                     elif not v:
+                        if k == 'agency_id':
+                            row[k]=cls.unique_id
                         row[k] = None
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
+                    elif '_id' in k:
+                        row[k]=v+'-'+str(cls.unique_id)
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
             except Exception, e:
