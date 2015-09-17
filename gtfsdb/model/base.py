@@ -174,7 +174,7 @@ class _Base(object):
                         row[k] = None
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
-                    elif '_id' in k and k is not 'direction_id':
+                    elif '_id' in k:
                         row[k]=v+'-'+str(cls.unique_id)
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
