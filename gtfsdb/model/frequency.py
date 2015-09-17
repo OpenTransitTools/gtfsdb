@@ -10,7 +10,7 @@ class Frequency(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'frequencies.txt'
 
-    __tablename__ = 'frequencies'
+    __tablename__ = 'gtfs_frequencies'
 
     trip_id = Column(String(255), primary_key=True)
     start_time = Column(String(8), primary_key=True)

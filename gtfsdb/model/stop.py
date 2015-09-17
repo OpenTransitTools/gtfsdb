@@ -17,7 +17,7 @@ class Stop(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'stops.txt'
 
-    __tablename__ = 'stops'
+    __tablename__ = 'gtfs_stops'
 
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     stop_code = Column(String(50))
@@ -34,6 +34,7 @@ class Stop(Base):
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
+    geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     stop_features = relationship(
         'StopFeature',
@@ -69,7 +70,8 @@ class Stop(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+        #todo get rid of this
+        pass
 
     @classmethod
     def add_geom_to_dict(cls, row):

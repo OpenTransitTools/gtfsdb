@@ -24,18 +24,22 @@ DATASOURCE_GTFS = 1
 DATASOURCE_LOOKUP = 2
 
 '''Geometry constants'''
-SRID = 4326
+SRID = 900913
 
 '''Order list of class names, used for creating & populating tables'''
-SORTED_CLASS_NAMES = [
+
+INITIAL_LOAD_CLASS = [
     'RouteType',
-    'RouteFilter',
+    'RouteFilter'
+]
+
+SORTED_CLASS_NAMES = [
     'FeedInfo',
     'Agency',
     'Calendar',
     'CalendarDate',
     'Route',
-    'RouteDirection',
+    #'RouteDirection',
     'Stop',
     'StopFeature',
     'Transfer',
@@ -43,9 +47,9 @@ SORTED_CLASS_NAMES = [
     'Pattern',
     'Trip',
     'StopTime',
-    'RouteStop',
+    #'RouteStop',
     'Frequency',
     'FareAttribute',
     'FareRule',
-    'UniversalCalendar',
+    #'UniversalCalendar'
 ]

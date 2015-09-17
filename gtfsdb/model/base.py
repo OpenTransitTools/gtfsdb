@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 class _Base(object):
 
     filename = None
+    unique_id = None
 
     @property
     def session(self):
@@ -125,14 +126,17 @@ class _Base(object):
             reader = csv.DictReader(utf8_file)
             reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
             table = cls.__table__
-            try:
-                db.engine.execute(table.delete())
-            except:
-                log.debug("NOTE: couldn't delete this table")
+            #try:
+            #    db.engine.execute(table.delete())
+            #except:
+            #    log.debug("NOTE: couldn't delete this table")
 
             i = 0
             for row in reader:
-                records.append(cls.make_record(row))
+                record = cls.make_record(row)
+                if 'agency_id' in table.c:
+                    record['agency_id'] = str(cls.unique_id)
+                records.append(record)
                 i += 1
                 if i >= batch_size:
                     db.engine.execute(table.insert(), records)
@@ -158,16 +162,23 @@ class _Base(object):
     def make_record(cls, row):
         for k, v in row.items():
             if isinstance(v, basestring):
-                row[k] = v.strip()
+                row[k] = v.strip()[:254]
 
             try:
                 if k:
                     if (k not in cls.__table__.c):
                         del row[k]
+                    elif k == 'agency_id':
+                        row[k] = str(cls.unique_id)
+                    elif k == 'direction_id':
+                        row[k] = int(v)
                     elif not v:
                         row[k] = None
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
+                    elif '_id' in k:
+                        value = v+'-'+str(cls.unique_id)
+                        row[k]= value[:255]
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
             except Exception, e:

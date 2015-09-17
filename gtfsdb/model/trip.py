@@ -10,7 +10,7 @@ class Trip(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'trips.txt'
 
-    __tablename__ = 'trips'
+    __tablename__ = 'gtfs_trips'
 
     route_id = Column(String(255), index=True, nullable=False)
     service_id = Column(String(255), index=True, nullable=False)

@@ -11,6 +11,7 @@ from sqlalchemy.sql import func
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from geoalchemy2 import Geometry
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 
@@ -18,7 +19,7 @@ __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 class RouteType(Base):
     datasource = config.DATASOURCE_LOOKUP
     filename = 'route_type.txt'
-    __tablename__ = 'route_type'
+    __tablename__ = 'gtfs_route_type'
 
     route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
     route_type_name = Column(String(255))
@@ -29,7 +30,7 @@ class Route(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'routes.txt'
 
-    __tablename__ = 'routes'
+    __tablename__ = 'gtfs_routes'
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
@@ -41,6 +42,7 @@ class Route(Base):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer, index=True)
+    geom = Column(Geometry('MULTILINESTRING'))
 
     trips = relationship(
         'Trip',
@@ -117,7 +119,7 @@ class Route(Base):
     @classmethod
     def load_geoms(cls, db):
         '''load derived geometries, currently only written for PostgreSQL'''
-        from gtfsdb.model.shape import Pattern
+        from gtfsdb.model.shape import ShapeGeom
         from gtfsdb.model.trip import Trip
 
         if db.is_geospatial and db.is_postgresql:
@@ -125,11 +127,11 @@ class Route(Base):
             session = db.session
             routes = session.query(Route).all()
             for route in routes:
-                s = func.st_collect(Pattern.geom)
+                s = func.st_collect(ShapeGeom.geom)
                 s = func.st_multi(s)
                 s = func.st_astext(s).label('geom')
                 q = session.query(s)
-                q = q.filter(Pattern.trips.any((Trip.route == route)))
+                q = q.filter(ShapeGeom.trips.any((Trip.route == route)))
                 route.geom = q.first().geom
                 session.merge(route)
             session.commit()
@@ -139,8 +141,8 @@ class Route(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        from geoalchemy2 import Geometry
-        cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+        #todo get rid of this
+        pass
 
     @classmethod
     def active_routes(cls, session, date=None):
@@ -172,14 +174,16 @@ class Route(Base):
         return ret_val
 
 class RouteDirection(Base):
+    #TODO Inactive until we add agency ID to all records
     datasource = config.DATASOURCE_GTFS
     filename = 'route_directions.txt'
 
-    __tablename__ = 'route_directions'
+    __tablename__ = 'gtfs_directions'
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
     direction_name = Column(String(255))
+    #TODO add agency here?
 
 
 class RouteStop(Base):
@@ -217,6 +221,7 @@ class RouteStop(Base):
             the load is a two part process, where part A finds a list of unique stop ids, and
             part B creates the RouteStop (and potentially RouteDirections ... if not in GTFS) records
         '''
+        #TODO: This is inactive until we associate agency ID with all records
         start_time = time.time()
         session = db.session
         routes = session.query(Route).all()
