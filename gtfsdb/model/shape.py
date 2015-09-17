@@ -76,12 +76,11 @@ class Shape(Base):
     shape_pt_lon = Column(Numeric(12, 9))
     shape_pt_sequence = Column(Integer, primary_key=True, index=True)
     shape_dist_traveled = Column(Numeric(20, 10))
-    geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     @classmethod
     def add_geometry_column(cls):
-        #TODO: Get Rid of this
-        pass
+        if 'geom' not in cls.__table__.c:
+            cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     @classmethod
     def add_geom_to_dict(cls, row):
