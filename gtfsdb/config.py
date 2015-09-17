@@ -44,7 +44,7 @@ SORTED_CLASS_NAMES = [
     'StopFeature',
     'Transfer',
     'Shape',
-    #'Pattern',
+    'Pattern',
     'Trip',
     'StopTime',
     #'RouteStop',

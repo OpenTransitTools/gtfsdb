@@ -23,7 +23,6 @@ sources = ['/Users/rhunter/Desktop/action_20150129_0101.zip']
 db_string = 'postgresql://censio:insecure@test-gtfs.cvklf6ftrsse.us-east-1.rds.amazonaws.com:5432/gtfs_data'
 
 db = Database(url=db_string, is_geospatial=True)
-db.create()
 try:
     GTFS.bootstrab_db(db)
 except IntegrityError:

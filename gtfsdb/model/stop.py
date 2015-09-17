@@ -34,6 +34,7 @@ class Stop(Base):
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
+    geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     stop_features = relationship(
         'StopFeature',
@@ -69,8 +70,8 @@ class Stop(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        if 'geom' not in cls.__table__.c:
-            cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+        #todo get rid of this
+        pass
 
     @classmethod
     def add_geom_to_dict(cls, row):

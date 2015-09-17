@@ -11,6 +11,7 @@ from sqlalchemy.sql import func
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from geoalchemy2 import Geometry
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 
@@ -41,6 +42,7 @@ class Route(Base):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer, index=True)
+    geom = Column(Geometry('MULTILINESTRING'))
 
     trips = relationship(
         'Trip',
@@ -139,8 +141,8 @@ class Route(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        from geoalchemy2 import Geometry
-        cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+        #todo get rid of this
+        pass
 
     @classmethod
     def active_routes(cls, session, date=None):
