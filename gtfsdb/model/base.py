@@ -175,7 +175,8 @@ class _Base(object):
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                     elif '_id' in k:
-                        row[k]=v+'-'+str(cls.unique_id)
+                        value = v+'-'+str(cls.unique_id)
+                        row[k]= value[:255]
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
             except Exception, e:
