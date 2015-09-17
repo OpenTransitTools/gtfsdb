@@ -35,7 +35,7 @@ def process_source(source):
         print e
       
 
-Parallel(n_jobs=2)(delayed(process_source)(source) for source in sources)
+Parallel(n_jobs=36)(delayed(process_source)(source) for source in sources)
 
 
 for source in sources:
