@@ -162,7 +162,7 @@ class _Base(object):
     def make_record(cls, row):
         for k, v in row.items():
             if isinstance(v, basestring):
-                row[k] = v.strip()
+                row[k] = v.strip()[:254]
 
             try:
                 if k:
