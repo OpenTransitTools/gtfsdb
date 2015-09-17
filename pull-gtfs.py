@@ -18,7 +18,7 @@ sources = source_zips
 #db_string = 'sqlite:///gtfs.db'
 db_string = 'postgresql://censio:insecure@test-gtfs.cvklf6ftrsse.us-east-1.rds.amazonaws.com:5432/gtfs_data'
 #Parallel(n_jobs=2)(delayed(database_load)(filename=source, url=db_string) for source in sources)
-db = Database(url=db_string)
+db = Database(url=db_string, is_geospatial=True)
 db.create()
 try:
     GTFS.bootstrab_db(db)
@@ -29,7 +29,7 @@ except IntegrityError:
 def process_source(source):
     try:
     	gtfs = GTFS(filename=source)
-    	p_db = Database(url=db_string)
+    	p_db = Database(url=db_string, is_geospatial=True)
     	gtfs.load(p_db, filename=source)
     except Exception, e:
         print e
