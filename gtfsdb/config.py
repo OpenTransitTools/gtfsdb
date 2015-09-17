@@ -24,7 +24,7 @@ DATASOURCE_GTFS = 1
 DATASOURCE_LOOKUP = 2
 
 '''Geometry constants'''
-SRID = 4326
+SRID = 900913
 
 '''Order list of class names, used for creating & populating tables'''
 
@@ -39,7 +39,7 @@ SORTED_CLASS_NAMES = [
     'Calendar',
     'CalendarDate',
     'Route',
-    'RouteDirection',
+    #'RouteDirection',
     'Stop',
     'StopFeature',
     'Transfer',

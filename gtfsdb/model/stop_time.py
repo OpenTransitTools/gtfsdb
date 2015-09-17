@@ -15,7 +15,7 @@ class StopTime(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'stop_times.txt'
 
-    __tablename__ = 'stop_times'
+    __tablename__ = 'gtfs_stop_times'
 
     trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
     arrival_time = Column(String(8))

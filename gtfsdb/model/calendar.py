@@ -21,7 +21,7 @@ class Calendar(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'calendar.txt'
 
-    __tablename__ = 'calendar'
+    __tablename__ = 'gtfs_calendar'
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
     service_id = Column(String(255), primary_key=True, index=True, nullable=False)
@@ -55,7 +55,7 @@ class CalendarDate(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'calendar_dates.txt'
 
-    __tablename__ = 'calendar_dates'
+    __tablename__ = 'gtfs_calendar_dates'
 
     service_id = Column(String(255), primary_key=True, index=True, nullable=False)
     date = Column(Date, primary_key=True, index=True, nullable=False)

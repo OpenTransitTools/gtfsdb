@@ -168,9 +168,11 @@ class _Base(object):
                 if k:
                     if (k not in cls.__table__.c):
                         del row[k]
+                    elif k == 'agency_id':
+                        row[k] = str(cls.unique_id)
+                    elif k == 'direction_id':
+                        row[k] = int(v)
                     elif not v:
-                        if k == 'agency_id':
-                            row[k]=cls.unique_id
                         row[k] = None
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
