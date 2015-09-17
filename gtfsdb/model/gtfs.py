@@ -5,6 +5,7 @@ import tempfile
 import time
 from urllib import urlretrieve
 import zipfile
+import uuid
 
 from gtfsdb import config
 from .route import Route
@@ -17,7 +18,15 @@ class GTFS(object):
 
     def __init__(self, filename):
         self.file = filename
+        log.debug("Fetching {}".format(filename))
         self.local_file = urlretrieve(filename)[0]
+        log.debug("Done Fetching {}".format(filename))
+        self.unique_id = uuid.uuid4()
+
+    @staticmethod
+    def bootstrab_db(db):
+        for cls in db.bootstrap_classes:
+            cls.load(db)
 
     def load(self, db, **kwargs):
         '''Load GTFS into database'''
@@ -31,6 +40,7 @@ class GTFS(object):
             gtfs_directory=gtfs_directory,
         )
         for cls in db.sorted_classes:
+            cls.unique_id = self.unique_id
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 

@@ -27,9 +27,13 @@ DATASOURCE_LOOKUP = 2
 SRID = 4326
 
 '''Order list of class names, used for creating & populating tables'''
-SORTED_CLASS_NAMES = [
+
+INITIAL_LOAD_CLASS = [
     'RouteType',
-    'RouteFilter',
+    'RouteFilter'
+]
+
+SORTED_CLASS_NAMES = [
     'FeedInfo',
     'Agency',
     'Calendar',
@@ -40,12 +44,12 @@ SORTED_CLASS_NAMES = [
     'StopFeature',
     'Transfer',
     'Shape',
-    'Pattern',
+    #'Pattern',
     'Trip',
     'StopTime',
-    'RouteStop',
+    #'RouteStop',
     'Frequency',
     'FareAttribute',
     'FareRule',
-    'UniversalCalendar',
+    #'UniversalCalendar'
 ]
