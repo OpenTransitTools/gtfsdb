@@ -29,18 +29,6 @@ class Database(object):
             return [c for c in Base.__subclasses__() if c.__tablename__ in self.tables]
         return Base.__subclasses__()
 
-    def create(self):
-        '''Drop/create GTFS database'''
-        from gtfsdb.model.base import Base
-        Base.metadata.create_all(self.engine)
-        #for cls in self.sorted_classes:
-        #    log.debug("create table: {0}".format(cls.__table__))
-        #    try:
-        #        cls.__table__.drop(self.engine, checkfirst=True)
-        #    except:
-        #        log.info("NOTE: couldn't drop table")
-        #    cls.__table__.create(self.engine)
-
     @property
     def dialect_name(self):
         return self.engine.url.get_dialect().name
