@@ -6,6 +6,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DBAPIError
 
 from gtfsdb import config
+from math import pow
 import time
 
 
@@ -110,7 +111,7 @@ class Database(object):
             except DBAPIError, e:
                 tries += 1
                 log.warning("Got a db error: {} Attempt: #{}".format(e, tries))
-                time.sleep(2*tries) #backoff time
+                time.sleep(pow(2, tries)) #exponential backoff time
                 continue
         log.error("Too manny attempts, failing hard!")
 
