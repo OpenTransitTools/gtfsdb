@@ -171,7 +171,10 @@ class _Base(object):
                     elif k == 'agency_id':
                         row[k] = str(cls.unique_id)
                     elif k == 'direction_id':
-                        row[k] = int(v)
+                        if v == "":
+                            row[k] = None
+                        else:
+                            row[k] = int(v)
                     elif not v:
                         row[k] = None
                     elif k.endswith('date'):
