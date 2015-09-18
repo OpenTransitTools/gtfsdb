@@ -25,8 +25,8 @@ class Trip(Base):
     wheelchair_accessible = Column(Integer, default=0)
 
     pattern = relationship(
-        'Pattern',
-        primaryjoin='Trip.shape_id==Pattern.shape_id',
+        'ShapeGeom',
+        primaryjoin='Trip.shape_id==ShapeGeom.shape_id',
         foreign_keys='(Trip.shape_id)',
         uselist=False, viewonly=True)
 

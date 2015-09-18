@@ -20,9 +20,9 @@ sources = ['/Users/rhunter/Desktop/action_20150129_0101.zip']
 #sources = ['/Users/rhunter/Desktop/action_20150129_0101.zip', '/Users/rhunter/Desktop/abq-ride_20150802_0107.zip']
 
 #db_string = 'sqlite:///gtfs.db'
-db_string = 'postgresql://censio:insecure@test-gtfs.cvklf6ftrsse.us-east-1.rds.amazonaws.com:5432/gtfs_data'
+#db_string = 'postgresql://censio:insecure@test-gtfs.cvklf6ftrsse.us-east-1.rds.amazonaws.com:5432/gtfs_data'
 
-#db_string = 'postgresql://postgres:insecure@localhost:5432/gtfs_data'
+db_string = 'postgresql://postgres:insecure@localhost:5432/gtfs_data'
 
 db = Database(url=db_string, is_geospatial=True)
 db.create()
