@@ -140,7 +140,7 @@ class _Base(object):
             for row in reader:
                 record = cls.make_record(row)
                 if 'agency_id' in table.c:
-                    record['agency_id'] = str(cls.unique_id)
+                    record['agency_id'] = cls.unique_id
                 records.append(record)
                 i += 1
                 if i >= batch_size:
@@ -176,13 +176,13 @@ class _Base(object):
                     elif not v or v.strip() == "":
                         row[k] = None
                     elif k == 'agency_id':
-                        row[k] = str(cls.unique_id)
+                        row[k] = cls.unique_id
                     elif k == 'direction_id':
                         row[k] = int(v)
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                     elif '_id' in k:
-                        value = v+'-'+str(cls.unique_id)
+                        value = v+'-'+cls.unique_id
                         row[k] = value[:255]
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
@@ -193,6 +193,5 @@ class _Base(object):
         if hasattr(cls, 'geom') and hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
         return row
-
 
 Base = declarative_base(cls=_Base)

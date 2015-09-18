@@ -16,12 +16,12 @@ log = logging.getLogger(__name__)
 
 class GTFS(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, unique_id=None):
         self.file = filename
         log.debug("Fetching {}".format(filename))
         self.local_file = urlretrieve(filename)[0]
         log.debug("Done Fetching {}".format(filename))
-        self.unique_id = uuid.uuid4()
+        self.unique_id = unique_id if unique_id else str(uuid.uuid4())
 
     @staticmethod
     def bootstrab_db(db):
@@ -44,6 +44,7 @@ class GTFS(object):
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 
+
         '''load route geometries derived from shapes.txt'''
         if Route in db.classes:
             Route.load_geoms(db)
@@ -63,3 +64,14 @@ class GTFS(object):
         except Exception, e:
             log.warning(e)
         return path
+
+    def delete_agency_data(self, db, agency_id):
+        session = db.get_session()
+        def delete(cls):
+            session.query(cls).filter_by(agency_id=agency_id).delete()
+        for cls in reversed(db.sorted_classes):
+            delete(cls)
+        for cls in set(db.classes)-set(db.sorted_classes):
+            delete(cls)
+        session.commit()
+        session.close()
