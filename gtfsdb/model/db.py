@@ -103,11 +103,11 @@ class Database(object):
     def url(self):
         return self._url
 
-    def execute(self, *args, **kwargs):
+    def execute(self, command, values):
         tries = 0
         while tries < config.DB_ATTEMPTS:
             try:
-                return self.engine.execute(*args, **kwargs)
+                return self.engine.execute(command, values)
             except DBAPIError, e:
                 tries += 1
                 log.warning("Got a db error: {} Attempt: #{}".format(e, tries))
