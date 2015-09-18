@@ -3,7 +3,7 @@ log = logging.getLogger(__file__)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from gtfsdb import config
 from math import pow
@@ -108,6 +108,8 @@ class Database(object):
         while tries < config.DB_ATTEMPTS:
             try:
                 return self.engine.execute(command, values)
+            except IntegrityError, e:
+                raise e
             except DBAPIError, e:
                 tries += 1
                 log.warning("Got a db error: {} Attempt: #{}".format(e, tries))
