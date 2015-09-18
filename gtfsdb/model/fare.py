@@ -20,7 +20,6 @@ class FareAttribute(Base):
     payment_method = Column(Integer, nullable=False)
     transfers = Column(Integer)
     transfer_duration = Column(Integer)
-    agency_id = Column(String(255))
 
 
 class FareRule(Base):

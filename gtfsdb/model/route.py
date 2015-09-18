@@ -33,7 +33,6 @@ class Route(Base):
     __tablename__ = 'gtfs_routes'
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), index=True, nullable=True)
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
     route_desc = Column(String(255))
@@ -309,7 +308,6 @@ class RouteFilter(Base):
     __tablename__ = 'route_filters'
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), index=True, nullable=True)
     description = Column(String)
 
 
