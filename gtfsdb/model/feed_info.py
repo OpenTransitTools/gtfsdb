@@ -15,7 +15,8 @@ class FeedInfo(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'feed_info.txt'
 
-    __tablename__ = 'feed_info'
+    __tablename__ = 'gtfs_feed_info'
+    #TODO create relation with agency to handle cases where multiple agency for single provider
 
     feed_publisher_name = Column(String(255), primary_key=True)
     feed_publisher_url = Column(String(255), nullable=False)

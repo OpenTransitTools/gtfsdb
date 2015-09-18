@@ -12,7 +12,7 @@ class FareAttribute(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'fare_attributes.txt'
 
-    __tablename__ = 'fare_attributes'
+    __tablename__ = 'gtfs_fare_attributes'
 
     fare_id = Column(String(255), primary_key=True)
     price = Column(Numeric(10, 2), nullable=False)
@@ -27,7 +27,7 @@ class FareRule(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'fare_rules.txt'
 
-    __tablename__ = 'fare_rules'
+    __tablename__ = 'gtfs_fare_rules'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     fare_id = Column(String(255), index=True, nullable=False)

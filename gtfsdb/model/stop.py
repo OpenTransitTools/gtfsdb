@@ -17,7 +17,7 @@ class Stop(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'stops.txt'
 
-    __tablename__ = 'stops'
+    __tablename__ = 'gtfs_stops'
 
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     stop_code = Column(String(50))
@@ -70,6 +70,7 @@ class Stop(Base):
 
     @classmethod
     def add_geometry_column(cls):
+        #todo remove
         pass
 
     @classmethod

@@ -10,14 +10,14 @@ class Trip(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'trips.txt'
 
-    __tablename__ = 'trips'
+    __tablename__ = 'gtfs_trips'
 
     route_id = Column(String(255), index=True, nullable=False)
     service_id = Column(String(255), index=True, nullable=False)
     trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))
-    direction_id = Column(String(255))
+    direction_id = Column(Integer)
     block_id = Column(String(255))
     shape_id = Column(String(255), index=True, nullable=True)
     trip_type = Column(String(255))
@@ -25,8 +25,8 @@ class Trip(Base):
     wheelchair_accessible = Column(Integer, default=0)
 
     pattern = relationship(
-        'Pattern',
-        primaryjoin='Trip.shape_id==Pattern.shape_id',
+        'ShapeGeom',
+        primaryjoin='Trip.shape_id==ShapeGeom.shape_id',
         foreign_keys='(Trip.shape_id)',
         uselist=False, viewonly=True)
 

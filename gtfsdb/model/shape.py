@@ -10,29 +10,31 @@ from gtfsdb import config
 from gtfsdb.model.base import Base
 
 
-__all__ = ['Pattern', 'Shape']
+__all__ = ['ShapeGeom', 'Shape']
 
 
 log = logging.getLogger(__name__)
 
 
-class Pattern(Base):
+class ShapeGeom(Base):
+    #TODO: Disabled until we have agency ID tied to everything
     datasource = config.DATASOURCE_DERIVED
 
-    __tablename__ = 'patterns'
+    __tablename__ = 'gtfs_shape_geoms'
 
     shape_id = Column(String(255), primary_key=True, index=True)
-    pattern_dist = Column(Numeric(20, 10))
+    geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID))
 
     trips = relationship(
         'Trip',
-        primaryjoin='Pattern.shape_id==Trip.shape_id',
-        foreign_keys='(Pattern.shape_id)',
+        primaryjoin='ShapeGeom.shape_id==Trip.shape_id',
+        foreign_keys='(ShapeGeom.shape_id)',
         uselist=True, viewonly=True)
 
     @classmethod
     def add_geometry_column(cls):
-        cls.geom = deferred(Column(Geometry(geometry_type='LINESTRING', srid=config.SRID)))
+        #TODO Get rid of this
+        pass
 
     def geom_from_shape(self, points):
         coords = ['{0} {1}'.format(r.shape_pt_lon, r.shape_pt_lat) for r in points]
@@ -63,12 +65,11 @@ class Pattern(Base):
         log.debug('{0}.load ({1:.0f} seconds)'.format(
             cls.__name__, processing_time))
 
-
 class Shape(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'shapes.txt'
 
-    __tablename__ = 'shapes'
+    __tablename__ = 'gtfs_shapes'
 
     shape_id = Column(String(255), primary_key=True, index=True)
     shape_pt_lat = Column(Numeric(12, 9))
@@ -79,6 +80,7 @@ class Shape(Base):
 
     @classmethod
     def add_geometry_column(cls):
+        #TODO: Get Rid of this
         pass
 
     @classmethod
