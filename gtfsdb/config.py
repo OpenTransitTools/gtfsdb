@@ -46,7 +46,7 @@ SORTED_CLASS_NAMES = [
     'Shape',
     'ShapeGeom',
     'Trip',
-    'StopTime',
+    #'StopTime',
     #'RouteStop',
     'Frequency',
     'FareAttribute',
