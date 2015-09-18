@@ -16,8 +16,8 @@ sources = source_zips
 sources = ['/Users/rhunter/Desktop/action_20150129_0101.zip',
            '/Users/rhunter/Desktop/abq-ride_20150802_0107.zip']
 #db_string = 'sqlite:///gtfs.db'
-#db_string = 'postgresql://censio:insecure@test-gtfs.cvklf6ftrsse.us-east-1.rds.amazonaws.com:5432/gtfs_data'
-db_string = 'postgresql://postgres:insecure@localhost:5432/gtfs_data'
+db_string = 'postgresql://censio:insecure@test-gtfs.cvklf6ftrsse.us-east-1.rds.amazonaws.com:5432/gtfs_data'
+#db_string = 'postgresql://postgres:insecure@localhost:5432/gtfs_data'
 #Parallel(n_jobs=2)(delayed(database_load)(filename=source, url=db_string) for source in sources)
 db = Database(url=db_string, is_geospatial=True)
 db.create()
