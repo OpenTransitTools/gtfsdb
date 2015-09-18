@@ -117,6 +117,8 @@ class Database(object):
                 continue
         log.error("Too manny attempts, failing hard!")
 
+    def get_session(self):
+        return self.session_factory()
 
     @url.setter
     def url(self, val):
@@ -124,5 +126,5 @@ class Database(object):
         self.engine = create_engine(val)
         if self.is_sqlite:
             self.engine.connect().connection.connection.text_factory = str
-        session_factory = sessionmaker(self.engine)
-        self.session = scoped_session(session_factory)
+        self.session_factory = sessionmaker(self.engine)
+        self.session = scoped_session(self.session_factory)
