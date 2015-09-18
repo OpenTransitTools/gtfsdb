@@ -3,8 +3,10 @@ log = logging.getLogger(__file__)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.exc import DBAPIError
 
 from gtfsdb import config
+import time
 
 
 class Database(object):
@@ -99,6 +101,19 @@ class Database(object):
     @property
     def url(self):
         return self._url
+
+    def execute(self, *args, **kwargs):
+        tries = 0
+        while tries < config.DB_ATTEMPTS:
+            try:
+                return self.engine.execute(*args, **kwargs)
+            except DBAPIError, e:
+                tries += 1
+                log.warning("Got a db error: {} Attempt: #{}".format(e, tries))
+                time.sleep(2*tries) #backoff time
+                continue
+        log.error("Too manny attempts, failing hard!")
+
 
     @url.setter
     def url(self, val):

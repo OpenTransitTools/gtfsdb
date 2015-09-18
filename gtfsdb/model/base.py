@@ -139,12 +139,12 @@ class _Base(object):
                 records.append(record)
                 i += 1
                 if i >= batch_size:
-                    db.engine.execute(table.insert(), records)
+                    db.execute(table.insert(), records)
                     sys.stdout.write('*')
                     records = []
                     i = 0
             if len(records) > 0:
-                db.engine.execute(table.insert(), records)
+                db.execute(table.insert(), records)
             f.close()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))

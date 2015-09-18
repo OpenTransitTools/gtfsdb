@@ -11,7 +11,7 @@ config.read(ini_file)
 if config.has_section('loggers'):
     logging.config.fileConfig(ini_file, disable_existing_loggers=False)
 
-
+DB_ATTEMPTS = 4
 '''Application defaults'''
 DEFAULT_BATCH_SIZE = 10000
 DEFAULT_DATABASE_URL = 'sqlite://'
