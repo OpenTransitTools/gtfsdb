@@ -6,13 +6,13 @@ from sqlalchemy.exc import IntegrityError
 
 
 def get_sources():
-response = requests.get('http://www.gtfs-data-exchange.com/api/agencies')
-agencies = response.json()['data']
-source_zips = []
-for agency in agencies:
-    feed = agency['feed_baseurl']
-    if '.zip' in feed:
-        source_zips.append(feed)
+    response = requests.get('http://www.gtfs-data-exchange.com/api/agencies')
+    agencies = response.json()['data']
+    source_zips = []
+    for agency in agencies:
+        feed = agency['feed_baseurl']
+        if '.zip' in feed:
+            source_zips.append(feed)
     print "Found {} Feeds".format(len(source_zips))
 
 #sources = get_sources()
