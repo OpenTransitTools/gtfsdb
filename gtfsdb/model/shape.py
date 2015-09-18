@@ -23,7 +23,7 @@ class ShapeGeom(Base):
     __tablename__ = 'gtfs_shape_geoms'
 
     shape_id = Column(String(255), primary_key=True, index=True)
-    the_geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID))
+    geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID))
 
     trips = relationship(
         'Trip',
