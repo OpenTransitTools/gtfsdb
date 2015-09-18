@@ -168,20 +168,17 @@ class _Base(object):
                 if k:
                     if (k not in cls.__table__.c):
                         del row[k]
+                    elif not v or v.strip() == "":
+                        row[k] = None
                     elif k == 'agency_id':
                         row[k] = str(cls.unique_id)
                     elif k == 'direction_id':
-                        if v == "":
-                            row[k] = None
-                        else:
-                            row[k] = int(v)
-                    elif not v:
-                        row[k] = None
+                        row[k] = int(v)
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                     elif '_id' in k:
                         value = v+'-'+str(cls.unique_id)
-                        row[k]= value[:255]
+                        row[k] = value[:255]
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
             except Exception, e:
