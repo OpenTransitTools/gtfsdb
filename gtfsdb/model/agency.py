@@ -12,7 +12,7 @@ class Agency(Base):
     __tablename__ = 'gtfs_agency'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    agency_name = Column(String(255), nullable=False, unique=True)
+    agency_name = Column(String(255), nullable=False)
     agency_url = Column(String(255), nullable=False)
     agency_timezone = Column(String(50), nullable=False)
     agency_lang = Column(String(10))
