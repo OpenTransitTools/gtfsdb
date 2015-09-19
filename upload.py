@@ -7,7 +7,13 @@ from joblib import Parallel, delayed
 from gtfsdb.model.db import Database
 from gtfsdb.model.gtfs import GTFS
 from gtfsdb.api import database_load
+from gtfsdb.import_api.custom import gtfs_source_list
 
+def zip_sources():
+    return ['data/action_20150129_0101.zip', 'data/abq-ride_20150802_0107.zip']
+
+def gtfs_dump():
+    return [ datafile['file_url'] for datafile in gtfs_source_list('data/file_list.pkl') ]
 
 def main(database, parallel=False):
     db = Database(url=database, is_geospatial=True)
@@ -17,8 +23,8 @@ def main(database, parallel=False):
     except IntegrityError:
         pass
 
-    sources = ['data/action_20150129_0101.zip',
-               'data/abq-ride_20150802_0107.zip']
+    #sources = gtfs_dump()
+    sources = zip_sources()
 
     if parallel:
         concurrent_run(sources, database)
@@ -32,7 +38,7 @@ def serial_run(sources, database):
 
 
 def concurrent_run(sources, database):
-    Parallel(n_jobs=36)(delayed(database_load)(source, database) for source in sources)
+    Parallel(n_jobs=6)(delayed(database_load)(source, database) for source in sources)
 
 
 

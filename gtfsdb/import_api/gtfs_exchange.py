@@ -15,5 +15,6 @@ def get_gtfs_agency_details(agency):
 
 def get_most_recent_file(agency):
     full_details = get_gtfs_agency_details(agency)
-    if full_details and len(full_details['datafiles']) > 0:
-        return { 'name': agency['name'], 'file': max(full_details['datafiles'], key = lambda k: k['date_added'])}
+    return { 'name': agency['name'], 'file': recent_file(full_details['datafiles'])}
+
+

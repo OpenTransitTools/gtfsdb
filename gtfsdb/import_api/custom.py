@@ -17,11 +17,10 @@ from gtfsdb.import_api.gtfs_exchange import recent_file
 
 def gtfs_source_list(pickle_file_location):
     data_feed = pickle.load(open(pickle_file_location, 'rb'))
+    file_feed = []
     for f in data_feed:
         if f:
-            inpu = recent_file(f['datafiles'])
-            print inpu['agencies']
+            datafile = recent_file(f['datafiles'])
+            file_feed.append({ 'file_url': datafile['file_url'] })
+    return file_feed
 
-
-if __name__ == '__main__':
-    gtfs_source_list(os.path.expanduser('data/file_list.pkl'))
