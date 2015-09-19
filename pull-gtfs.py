@@ -3,6 +3,8 @@ from gtfsdb import Database, GTFS
 from joblib import Parallel, delayed
 from sqlalchemy.exc import IntegrityError
 
+from gtfsdb.api import database_load
+
 
 
 def get_sources():
@@ -16,7 +18,7 @@ def get_sources():
     print "Found {} Feeds".format(len(source_zips))
 
 #sources = get_sources()
-sources = ['/Users/rhunter/Desktop/action_20150129_0101.zip']
+sources = []
 #sources = ['/Users/rhunter/Desktop/action_20150129_0101.zip', '/Users/rhunter/Desktop/abq-ride_20150802_0107.zip']
 
 #db_string = 'sqlite:///gtfs.db'
@@ -31,6 +33,15 @@ try:
 except IntegrityError:
     pass
 
+meta =  {
+    'dataexchange_id': "action",
+    'file_url': '/Users/rhunter/Desktop/action_20150129_0101.zip',
+    'file_name': "action_20150129_0101.zip",
+    'file_checksum': "MD5123123123123",
+    'date_added': 1213154234.0
+}
+
+database_load(meta, db_url=db_string)
 
 def process_source(source):
     try:
