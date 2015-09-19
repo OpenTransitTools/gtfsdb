@@ -1,6 +1,11 @@
 __author__ = 'rhunter'
 from gtfsdb.import_api.common import get_url
 
+def recent_file(datafiles):
+    if datafiles and len(datafiles) > 0:
+        return max(datafiles, key = lambda k: k['date_added'])
+
+
 def get_gtfs_agencies():
     return get_url('http://www.gtfs-data-exchange.com/api/agencies')
 
