@@ -34,7 +34,7 @@ class Stop(Base):
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
-    geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     stop_features = relationship(
         'StopFeature',
@@ -76,7 +76,7 @@ class Stop(Base):
     @classmethod
     def add_geom_to_dict(cls, row):
         args = (config.SRID, row['stop_lon'], row['stop_lat'])
-        row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
+        row['the_geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
 
 
     """ TODO: rewrite the cache to use timeout checking in Base.py """

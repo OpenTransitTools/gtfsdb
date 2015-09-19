@@ -37,7 +37,7 @@ class _Base(object):
     def make_geom_lazy(cls):
         from sqlalchemy.orm import deferred 
         try:
-            cls.__mapper__.add_property('geom', deferred(cls.__table__.c.geom))
+            cls.__mapper__.add_property('the_geom', deferred(cls.__table__.c.the_geom))
         except Exception, e:
             log.warn(e)
 
@@ -190,7 +190,7 @@ class _Base(object):
                 log.warning(e)
 
         '''if this is a geospatially enabled database, add a geom'''
-        if hasattr(cls, 'geom') and hasattr(cls, 'add_geom_to_dict'):
+        if hasattr(cls, 'the_geom') and hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
         return row
 
