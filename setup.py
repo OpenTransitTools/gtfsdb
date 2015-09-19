@@ -19,8 +19,8 @@ if sys.version_info[:2] <= (2, 6):
     extras_require['dev'].append('unittest2')
 
 setup(
-    name='gtfsdb',
-    version='0.1.6dev',
+    name='censio-gtfsdb',
+    version='0.1.UNKNOWN',
     description='GTFS Database',
     long_description=open('README').read(),
     keywords='GTFS',
