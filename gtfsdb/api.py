@@ -1,20 +1,33 @@
 from gtfsdb import Database, GTFS
+from gtfsdb.model.feed_info import DataexchangeInfo
+import logging
+import datetime
 
-def database_load(filename, **kwargs):
-    '''Basic API to load a GTFS zip file into a database
+log = logging.getLogger(__name__)
 
-    arguments:
-        filename: URL or local path to GTFS zip file
+'''
+{
+    'dataexchange_id': "",
+    'file_url': "URL",
+    'file_name': "Filename",
+    'file_checksum' : "MD5Has"
+    'date_added': 1213154234.0
+}
+'''
 
-    keyword arguments:
-        batch_size: record batch size for memory management
-        is_geospatial: if database is support geo functions
-        schema: database schema name
-        tables: limited list of tables to load
-        url: SQLAlchemy database url
-    '''
-    db = Database(**kwargs)
-    db.create()
-    gtfs = GTFS(filename)
-    gtfs.load(db, **kwargs)
-    return db
+
+def database_load(source_meta, db_url, force=False):
+    db = Database(url=db_url, is_geospatial=True)
+    exchange_record = DataexchangeInfo(
+        agency_id=source_meta['dataexchange_id'], **source_meta)
+    if force or DataexchangeInfo.overwrite(db, exchange_record):
+        gtfs = GTFS(filename=source_meta['file_url'], unique_id=source_meta['dataexchange_id'])
+        gtfs.load(db)
+        exchange_record.completed=True
+        exchange_record.completed_on = datetime.datetime.utcnow()
+        session = db.get_session()
+        session.merge(exchange_record)
+        session.commit()
+    else:
+        rec = db.session.query(DataexchangeInfo).get(source_meta['dataexchange_id'])
+        logging.debug("Feed '{}' already uploaded on: {}".format(rec.dataexchange_id, rec.completed_on))
