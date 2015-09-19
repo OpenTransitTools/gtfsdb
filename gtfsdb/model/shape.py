@@ -23,7 +23,7 @@ class ShapeGeom(Base):
     __tablename__ = 'gtfs_shape_geoms'
 
     shape_id = Column(String(255), primary_key=True, index=True)
-    geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID))
+    the_geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID))
 
     trips = relationship(
         'Trip',
@@ -38,7 +38,7 @@ class ShapeGeom(Base):
 
     def geom_from_shape(self, points):
         coords = ['{0} {1}'.format(r.shape_pt_lon, r.shape_pt_lat) for r in points]
-        self.geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
+        self.the_geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
 
     @classmethod
     def load(cls, db, **kwargs):
@@ -54,7 +54,7 @@ class ShapeGeom(Base):
             pattern.agency_id = cls.unique_id
             pattern.shape_id = shape.shape_id
             pattern.pattern_dist = shape.dist
-            if hasattr(cls, 'geom'):
+            if hasattr(cls, 'the_geom'):
                 q = session.query(Shape)
                 q = q.filter(Shape.shape_id == shape.shape_id)
                 q = q.order_by(Shape.shape_pt_sequence)
@@ -77,7 +77,7 @@ class Shape(Base):
     shape_pt_lon = Column(Numeric(12, 9))
     shape_pt_sequence = Column(Integer, primary_key=True, index=True)
     shape_dist_traveled = Column(Numeric(20, 10))
-    geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     @classmethod
     def add_geometry_column(cls):
@@ -87,4 +87,4 @@ class Shape(Base):
     @classmethod
     def add_geom_to_dict(cls, row):
         args = (config.SRID, row['shape_pt_lon'], row['shape_pt_lat'])
-        row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
+        row['the_geom'] = 'SRID={0};POINT({1} {2})'.format(*args)

@@ -41,7 +41,7 @@ class Route(Base):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer, index=True)
-    geom = deferred(Column(Geometry('MULTILINESTRING')))
+    the_geom = deferred(Column(Geometry('MULTILINESTRING')))
 
     trips = relationship(
         'Trip',
@@ -126,12 +126,12 @@ class Route(Base):
             session = db.session
             routes = session.query(Route).all()
             for route in routes:
-                s = func.st_collect(ShapeGeom.geom)
+                s = func.st_collect(ShapeGeom.the_geom)
                 s = func.st_multi(s)
-                s = func.st_astext(s).label('geom')
+                s = func.st_astext(s).label('the_geom')
                 q = session.query(s)
                 q = q.filter(ShapeGeom.trips.any((Trip.route == route)))
-                route.geom = q.first().geom
+                route.the_geom = q.first().the_geom
                 session.merge(route)
             session.commit()
             processing_time = time.time() - start_time
