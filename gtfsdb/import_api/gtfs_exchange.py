@@ -1,4 +1,4 @@
-import cPickle
+import json
 from gtfsdb.import_api.common import get_url
 from pkg_resources import resource_filename
 import os.path
@@ -7,12 +7,12 @@ __author__ = 'rhunter'
 
 
 class GTFSExchange(object):
-    def __init__(self, offline=True, src_name='gtfs_db_1442772880.pkl'):
+    def __init__(self, offline=True, src_name='gtfs_db_1442779052.json'):
         self.offline = offline
         if offline:
             data_dir = resource_filename('gtfsdb', 'data')
             src_file = os.path.join(data_dir, src_name)
-            f = cPickle.load(open(src_file, 'rb'))
+            f = json.load(open(src_file, 'r'))
             self.agency_list = f['agencies']
             self.details = f['details']
 
