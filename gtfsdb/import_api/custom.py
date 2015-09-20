@@ -1,7 +1,7 @@
 __author__ = 'rhunter'
 import pickle
 import os.path
-from gtfsdb.import_api.gtfs_exchange import recent_file
+from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 from pkg_resources import resource_filename
 
 '''
@@ -23,7 +23,7 @@ def gtfs_source_list():
     file_feed = []
     for f in data_feed:
         if f:
-            datafile = recent_file(f['datafiles'])
+            datafile = GTFSExchange.recent_file(f['datafiles'])
             file_feed.append({ 'file_url': datafile['file_url'] })
     return file_feed
 

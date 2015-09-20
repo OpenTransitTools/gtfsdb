@@ -24,7 +24,10 @@ def main(database, parallel=False):
         pass
 
     #sources = gtfs_dump()
-    sources = zip_sources()
+    #sources = zip_sources()
+
+    import json
+    sources = json.load(open('ex_files.json', 'r'))['file_list']
 
     if parallel:
         concurrent_run(sources, database)
