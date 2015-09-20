@@ -2,6 +2,7 @@ __author__ = 'rhunter'
 import pickle
 import os.path
 from gtfsdb.import_api.gtfs_exchange import recent_file
+from pkg_resources import resource_filename
 
 '''
 {
@@ -15,8 +16,10 @@ from gtfsdb.import_api.gtfs_exchange import recent_file
 
 '''
 
-def gtfs_source_list(pickle_file_location):
-    data_feed = pickle.load(open(pickle_file_location, 'rb'))
+def gtfs_source_list():
+    data_dir = resource_filename('gtfsdb', 'data')
+    src_file = os.path.join(data_dir, 'url_list.pkl')
+    data_feed = pickle.load(open(src_file, 'rb'))
     file_feed = []
     for f in data_feed:
         if f:
