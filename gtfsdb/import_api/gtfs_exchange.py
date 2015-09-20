@@ -1,20 +1,39 @@
-__author__ = 'rhunter'
+import cPickle
 from gtfsdb.import_api.common import get_url
+from pkg_resources import resource_filename
+import os.path
 
-def recent_file(datafiles):
-    if datafiles and len(datafiles) > 0:
-        return max(datafiles, key = lambda k: k['date_added'])
-
-
-def get_gtfs_agencies():
-    return get_url('http://www.gtfs-data-exchange.com/api/agencies')
+__author__ = 'rhunter'
 
 
-def get_gtfs_agency_details(agency):
-    return get_url('http://www.gtfs-data-exchange.com/api/agency?agency={}'.format(agency['dataexchange_id']))
+class GTFSExchange(object):
+    def __init__(self, offline=True, src_name='gtfs_db_1442772880.pkl'):
+        self.offline = offline
+        if offline:
+            data_dir = resource_filename('gtfsdb', 'data')
+            src_file = os.path.join(data_dir, src_name)
+            f = cPickle.load(open(src_file, 'rb'))
+            self.agency_list = f['agencies']
+            self.details = f['details']
 
-def get_most_recent_file(agency):
-    full_details = get_gtfs_agency_details(agency)
-    return { 'name': agency['name'], 'file': recent_file(full_details['datafiles'])}
+    @staticmethod
+    def recent_file(datafiles):
+        if datafiles and len(datafiles) > 0:
+            return max(datafiles, key=lambda k: k['date_added'])
 
+    def get_gtfs_agencies(self):
+        if self.offline:
+            return self.agency_list
+        else:
+            return get_url('http://www.gtfs-data-exchange.com/api/agencies')
 
+    def get_gtfs_agency_details(self, agency):
+        agency_id = agency['dataexchange_id']
+        if self.offline:
+            return self.details[agency_id]
+        else:
+            return get_url('http://www.gtfs-data-exchange.com/api/agency?agency={}'.format(agency_id))
+
+    def get_most_recent_file(self, agency):
+        full_details = self.get_gtfs_agency_details(agency)
+        return {'name': agency['name'], 'file': self.recent_file(full_details['datafiles'])}
