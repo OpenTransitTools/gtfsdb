@@ -21,11 +21,21 @@ class GTFSExchange(object):
         if datafiles and len(datafiles) > 0:
             return max(datafiles, key=lambda k: k['date_added'])
 
-    def get_gtfs_agencies(self):
+    def _get_all_gtfs_agencies(self):
         if self.offline:
             return self.agency_list
         else:
             return get_url('http://www.gtfs-data-exchange.com/api/agencies')
+
+    def get_gtfs_agencies(self, official_only=False):
+        agencies = self._get_all_gtfs_agencies()
+        if official_only:
+            filtered_list = []
+            for agency in agencies:
+                if agency['is_official']:
+                    filtered_list.append(agency)
+            return filtered_list
+        return agencies
 
     def get_gtfs_agency_details(self, agency):
         agency_id = agency['dataexchange_id']
