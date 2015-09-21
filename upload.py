@@ -11,6 +11,7 @@ from gtfsdb.model.metaTracking import Meta
 from gtfsdb.model.gtfs import GTFS
 from gtfsdb.api import database_load
 from gtfsdb.import_api.custom import gtfs_source_list
+from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 import datetime
 
 def zip_sources():
