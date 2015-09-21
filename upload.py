@@ -7,9 +7,11 @@ import json
 import os
 
 from gtfsdb.model.db import Database
+from gtfsdb.model.metaTracking import Meta
 from gtfsdb.model.gtfs import GTFS
 from gtfsdb.api import database_load
 from gtfsdb.import_api.custom import gtfs_source_list
+import datetime
 
 def zip_sources():
     return ['data/action_20150129_0101.zip', 'data/abq-ride_20150802_0107.zip']
@@ -28,6 +30,17 @@ def internal_file():
                 file_list.append(os.path.join(root, f))
     return file_list
 
+
+def tag_meta(source, database):
+    db = Database(url=database)
+    meta = Meta(file_name=source)
+    db.session.add(meta)
+    db.session.commit()
+    database_load(source, database)
+    meta.completed = True
+    meta.upload_date = datetime.datetime.utcnow()
+    db.session.commit()
+
 def main(database, parallel=False):
     db = Database(url=database, is_geospatial=True)
     db.create()
@@ -38,9 +51,9 @@ def main(database, parallel=False):
 
     sources = []
     #sources += gtfs_dump()
-    #sources += zip_sources()
-    sources += internal_file()
-    sources += gtfs_ex_sources()
+    sources += zip_sources()
+    #sources += internal_file()
+    #sources += gtfs_ex_sources()
 
     if parallel:
         concurrent_run(sources, database)
@@ -50,12 +63,11 @@ def main(database, parallel=False):
 
 def serial_run(sources, database):
     for source in sources:
-        database_load(source, database)
+        tag_meta(source, database)
 
 
 def concurrent_run(sources, database):
-    Parallel(n_jobs=16)(delayed(database_load)(source, database) for source in sources)
-
+    Parallel(n_jobs=16)(delayed(tag_meta)(source, database) for source in sources)
 
 
 if __name__ == '__main__':
