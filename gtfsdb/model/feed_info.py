@@ -36,26 +36,26 @@ class FeedInfo(Base):
             log.warning(e)
 
 
-class DataexchangeInfo(Base):
-
-    __tablename__ = "gtfs_meta"
-
-    dataexchange_id = Column(String(255), primary_key=True, nullable=False)
-    file_name = Column(String(255))
-    file_url = Column(String(255))
-    file_checksum = Column(String(32))
-    date_added = Column(Integer)
-    completed = Column(Boolean, default=False)
-    completed_on = Column(DateTime)
-
-    @classmethod
-    def overwrite(cls, db, new_record):
-        session = db.get_session()
-        old_record = session.query(DataexchangeInfo).get(new_record.dataexchange_id)
-        if not old_record or not old_record.completed \
-            or old_record.date_added < new_record.date_added:
-            session.merge(new_record)
-            session.commit()
-            return True
-        return False
+#class DataexchangeInfo(AgencyBase):
+#
+#    __tablename__ = "gtfs_meta"
+#
+#    dataexchange_id = Column(String(255), primary_key=True, nullable=False)
+#    file_name = Column(String(255))
+#    file_url = Column(String(255))
+#    file_checksum = Column(String(32))
+#    date_added = Column(Integer)
+#    completed = Column(Boolean, default=False)
+#    completed_on = Column(DateTime)
+#
+#    @classmethod
+#    def overwrite(cls, db, new_record):
+#        session = db.get_session()
+#        old_record = session.query(DataexchangeInfo).get(new_record.dataexchange_id)
+#        if not old_record or not old_record.completed \
+#            or old_record.date_added < new_record.date_added:
+#            session.merge(new_record)
+#            session.commit()
+#            return True
+#        return False
 
