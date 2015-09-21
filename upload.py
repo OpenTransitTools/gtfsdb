@@ -23,6 +23,15 @@ def gtfs_dump():
 def gtfs_ex_sources():
     return json.load(open('ex_files.json', 'r'))['file_list']
 
+def gtfs_ex_api():
+    file_list = []
+    gtfs_api = GTFSExchange()
+    for agency in gtfs_api.get_gtfs_agencies(official_only=False):
+        file = gtfs_api.get_most_recent_file(agency)
+        if file:
+            file_list.append(file['file']['file_url'])
+    return file_list
+
 def internal_file():
     file_list = []
     for root, dirs, files in os.walk('internal_data/'):
@@ -52,9 +61,10 @@ def main(database, parallel=False):
 
     sources = []
     #sources += gtfs_dump()
-    sources += zip_sources()
-    #sources += internal_file()
+    #sources += zip_sources()
+    sources += internal_file()
     #sources += gtfs_ex_sources()
+    sources += gtfs_ex_api()
 
     if parallel:
         concurrent_run(sources, database)

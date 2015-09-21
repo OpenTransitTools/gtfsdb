@@ -46,4 +46,5 @@ class GTFSExchange(object):
 
     def get_most_recent_file(self, agency):
         full_details = self.get_gtfs_agency_details(agency)
-        return {'name': agency['name'], 'file': self.recent_file(full_details['datafiles'])}
+        if full_details:
+            return {'name': agency['name'], 'file': self.recent_file(full_details['datafiles']) if full_details['datafiles'] else None}
