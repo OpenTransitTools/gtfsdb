@@ -3,6 +3,8 @@ __author__ = 'rhunter'
 import argparse
 from sqlalchemy.exc import IntegrityError
 from joblib import Parallel, delayed
+import json
+import os
 
 from gtfsdb.model.db import Database
 from gtfsdb.model.gtfs import GTFS
@@ -15,6 +17,17 @@ def zip_sources():
 def gtfs_dump():
     return [ datafile['file_url'] for datafile in gtfs_source_list('data/file_list.pkl') ]
 
+def gtfs_ex_sources():
+    return json.load(open('ex_files.json', 'r'))['file_list']
+
+def internal_file():
+    file_list = []
+    for root, dirs, files in os.walk('internal_data/'):
+        for f in files:
+            if ".zip" in f:
+                file_list.append(os.path.join(root, f))
+    return file_list
+
 def main(database, parallel=False):
     db = Database(url=database, is_geospatial=True)
     db.create()
@@ -23,11 +36,11 @@ def main(database, parallel=False):
     except IntegrityError:
         pass
 
-    #sources = gtfs_dump()
-    #sources = zip_sources()
-
-    import json
-    sources = json.load(open('ex_files.json', 'r'))['file_list']
+    sources = []
+    #sources += gtfs_dump()
+    #sources += zip_sources()
+    sources += internal_file()
+    sources += gtfs_ex_sources()
 
     if parallel:
         concurrent_run(sources, database)
@@ -41,7 +54,7 @@ def serial_run(sources, database):
 
 
 def concurrent_run(sources, database):
-    Parallel(n_jobs=6)(delayed(database_load)(source, database) for source in sources)
+    Parallel(n_jobs=16)(delayed(database_load)(source, database) for source in sources)
 
 
 
