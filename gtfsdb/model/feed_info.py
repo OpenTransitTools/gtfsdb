@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-from gtfsdb.model.uuid import GUID
+from gtfsdb.model.guuid import GUID
 import logging
 
 log = logging.getLogger(__name__)

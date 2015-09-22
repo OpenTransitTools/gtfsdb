@@ -5,7 +5,7 @@ from sqlalchemy.types import Integer, String
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.route import Route
-
+from gtfsdb.model.guuid import GUID
 
 class Trip(Base):
     datasource = config.DATASOURCE_GTFS
@@ -14,7 +14,7 @@ class Trip(Base):
     __tablename__ = 'gtfs_trips'
 
     trip_id = Column(String(255), primary_key=True, nullable=False)
-    route_id = Column(String(255), ForeignKey(Route.__tablename__+'.route_id', ondelete='cascade'))
+    route_id = Column(GUID(), ForeignKey(Route.__tablename__+'.route_id', ondelete='cascade'))
     service_id = Column(String(255), nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))

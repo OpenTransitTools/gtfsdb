@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.feed_info import FeedInfo
-from gtfsdb.model.uuid import GUID
+from gtfsdb.model.guuid import GUID
 
 
 class Agency(Base):

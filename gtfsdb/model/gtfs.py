@@ -5,7 +5,7 @@ import tempfile
 import time
 from urllib import urlretrieve
 import zipfile
-import uuid
+import guuid
 
 from gtfsdb import config
 from .route import Route
@@ -21,7 +21,6 @@ class GTFS(object):
         log.debug("Fetching {}".format(filename))
         self.local_file = urlretrieve(filename)[0]
         log.debug("Done Fetching {}".format(filename))
-        self.unique_id = unique_id if unique_id else str(uuid.uuid4())
 
     @staticmethod
     def bootstrab_db(db):

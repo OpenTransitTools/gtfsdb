@@ -13,7 +13,7 @@ from geoalchemy2 import Geometry
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.agency import Agency
-from gtfsdb.model.uuid import GUID
+from gtfsdb.model.guuid import GUID
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 
@@ -34,7 +34,7 @@ class Route(Base):
 
     __tablename__ = 'gtfs_routes'
 
-    route_id = Column(GUID(255), primary_key=True, nullable=False)
+    route_id = Column(GUID(), primary_key=True, nullable=False)
     agency_id = Column(GUID(), ForeignKey(Agency.__tablename__+'.agency_id', ondelete='cascade'))
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
@@ -179,7 +179,7 @@ class RouteDirection(Base):
     __tablename__ = 'gtfs_directions'
 
     direction_id = Column(Integer, primary_key=True, nullable=False)
-    route_id = Column(String(255),ForeignKey(Route.route_id))
+    route_id = Column(GUID(),ForeignKey(Route.route_id))
     direction_name = Column(String(255))
 
 class RouteStop(Base):
