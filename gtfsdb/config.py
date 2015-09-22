@@ -13,10 +13,10 @@ if config.has_section('loggers'):
 
 DB_ATTEMPTS = 4
 '''Application defaults'''
-DEFAULT_BATCH_SIZE = 10000
+DEFAULT_BATCH_SIZE = 100000
 DEFAULT_DATABASE_URL = 'sqlite://'
 DEFAULT_IS_GEOSPATIAL = False
-DEFAULT_SCHEMA = None
+DEFAULT_SCHEMA = 'public'
 
 '''Data source constants'''
 DATASOURCE_DERIVED = 3
@@ -24,7 +24,7 @@ DATASOURCE_GTFS = 1
 DATASOURCE_LOOKUP = 2
 
 '''Geometry constants'''
-SRID = 4326
+SRID = 900913
 
 '''Order list of class names, used for creating & populating tables'''
 

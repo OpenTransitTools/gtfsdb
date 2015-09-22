@@ -64,7 +64,7 @@ def main(database, parallel=False):
     #sources += zip_sources()
     sources += internal_file()
     #sources += gtfs_ex_sources()
-    sources += gtfs_ex_api()
+    #sources += gtfs_ex_api()
 
     if parallel:
         concurrent_run(sources, database)
