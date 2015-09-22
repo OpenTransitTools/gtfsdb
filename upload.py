@@ -54,10 +54,10 @@ def tag_meta(source, database):
 def main(database, parallel=0):
     db = Database(url=database, is_geospatial=True)
     db.create()
-    try:
-        GTFS.bootstrab_db(db)
-    except IntegrityError:
-        pass
+    #try:
+    #    GTFS.bootstrab_db(db)
+    #except IntegrityError:
+    #    pass
 
     sources = []
     #sources += gtfs_dump()
