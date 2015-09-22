@@ -33,14 +33,16 @@ class GTFS(object):
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
+        key_lookup = dict()
+
         '''load known GTFS files, derived tables & lookup tables'''
         gtfs_directory = self.unzip()
         load_kwargs = dict(
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
+            key_lookup=key_lookup
         )
         for cls in db.sorted_classes:
-            cls.unique_id = self.unique_id
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 

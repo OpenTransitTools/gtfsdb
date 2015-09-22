@@ -19,16 +19,16 @@ class StopTime(Base):
 
     __tablename__ = 'gtfs_stop_times'
     stop_time_id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    stop_id = Column(String(255), ForeignKey(Stop.__tablename__+'.stop_id'), index=True)
-    trip_id = Column(String(255), ForeignKey(Trip.__tablename__+'.trip_id'), index=True)
+    stop_id = Column(String(255), ForeignKey(Stop.__tablename__+'.stop_id', ondelete='cascade'))
+    trip_id = Column(String(255), ForeignKey(Trip.__tablename__+'.trip_id', ondelete='cascade'))
     arrival_time = Column(String(8))
-    departure_time = Column(String(8), index=True)
+    departure_time = Column(String(8))
     stop_sequence = Column(Integer, nullable=False)
     stop_headsign = Column(String(255))
     pickup_type = Column(Integer, default=0)
     drop_off_type = Column(Integer, default=0)
     shape_dist_traveled = Column(Numeric(20, 10))
-    timepoint = Column(Boolean, index=True, default=False)
+    timepoint = Column(Boolean, default=False)
 
 
     def __init__(self, *args, **kwargs):

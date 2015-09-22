@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.uuid import GUID
 import logging
 
 log = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class FeedInfo(Base):
 
     __tablename__ = 'gtfs_feed_info'
 
-    feed_id = Column(String(255), primary_key=True)
+    feed_id = Column(GUID(), primary_key=True)
     feed_publisher_name = Column(String(255))
     feed_publisher_url = Column(String(255), nullable=False)
     feed_lang = Column(String(255), nullable=False)
@@ -32,17 +33,16 @@ class FeedInfo(Base):
 
     @classmethod
     def load(cls, db, **kwargs):
-        try:
-            super(FeedInfo, cls).load(db, **kwargs)
-        except IntegrityError, e:
-            log.warning(e)
+        pass
+
+
 
 
 class DataexchangeInfo(Base):
 
     __tablename__ = "gtfs_meta"
 
-    dataexchange_id = Column(String(255), primary_key=True, nullable=False)
+    dataexchange_id = Column(GUID(), primary_key=True, nullable=False)
     file_name = Column(String(255))
     file_url = Column(String(255))
     file_checksum = Column(String(32))

@@ -5,6 +5,7 @@ import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
 import time
+import uuid
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
@@ -15,7 +16,6 @@ from sqlalchemy import Column
 
 
 log = logging.getLogger(__name__)
-
 
 class _Base(object):
 
@@ -102,7 +102,7 @@ class _Base(object):
             log.warn("update_cached_data(): threw an exception with attribute {0}".format(attribute_name))
 
     @classmethod
-    def load(cls, db, **kwargs):
+    def load(cls, db, key_lookup, **kwargs):
         '''Load method for ORM
 
         arguments:
@@ -132,7 +132,7 @@ class _Base(object):
 
             i = 0
             for row in reader:
-                record = cls.make_record(row)
+                record = cls.make_record(row, key_lookup)
                 records.append(record)
                 i += 1
                 if i >= batch_size:
@@ -156,30 +156,31 @@ class _Base(object):
         pass
 
     @classmethod
-    def make_record(cls, row):
+    def make_record(cls, row, key_lookup):
         for k, v in row.items():
             if isinstance(v, basestring):
                 row[k] = v.strip()[:254]
-
             try:
                 if k:
                     if (k not in cls.__table__.c):
                         del row[k]
                     elif not v or v.strip() == "":
                         row[k] = None
-                    elif k == 'agency_id':
-                        row[k] = cls.unique_id
                     elif k == 'direction_id':
                         row[k] = int(v)
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                     elif '_id' in k:
-                        value = v+'-'+cls.unique_id
-                        row[k] = value[:255]
+                        v_san = str(v)
+                        if k not in key_lookup.keys():
+                            key_lookup[k] = dict()
+                        if v_san not in key_lookup[k].keys():
+                            key_lookup[k][v_san] = str(uuid.uuid4())
+                        row[k] = key_lookup[k][v_san]
                 else:
-                    log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
+                    log.warning("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
             except Exception, e:
-                log.warning(e)
+                log.error(e)
 
         '''if this is a geospatially enabled database, add a geom'''
         if hasattr(cls, 'the_geom') and hasattr(cls, 'add_geom_to_dict'):

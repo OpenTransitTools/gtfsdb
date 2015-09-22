@@ -14,7 +14,7 @@ class Transfer(Base):
     transfer_id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     from_stop_id = Column(String(255), ForeignKey(Stop.__tablename__+'.stop_id'))
     to_stop_id = Column(String(255), ForeignKey(Stop.__tablename__+'.stop_id'))
-    transfer_type = Column(Integer, index=True, default=0)
+    transfer_type = Column(Integer, default=0)
     min_transfer_time = Column(Integer)
 
     from_stop = relationship('Stop', primaryjoin='Stop.stop_id==Transfer.from_stop_id')

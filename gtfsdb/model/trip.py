@@ -13,14 +13,14 @@ class Trip(Base):
 
     __tablename__ = 'gtfs_trips'
 
-    trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    route_id = Column(String(255), ForeignKey(Route.__tablename__+'.route_id'))
-    service_id = Column(String(255), index=True, nullable=False)
+    trip_id = Column(String(255), primary_key=True, nullable=False)
+    route_id = Column(String(255), ForeignKey(Route.__tablename__+'.route_id', ondelete='cascade'))
+    service_id = Column(String(255), nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))
     direction_id = Column(Integer)
     block_id = Column(String(255))
-    shape_id = Column(String(255), index=True, nullable=True) # The forgien key here is going to be difficult
+    shape_id = Column(String(255), nullable=True) # The forgien key here is going to be difficult
     trip_type = Column(String(255))
     bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)

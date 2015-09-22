@@ -13,6 +13,7 @@ from geoalchemy2 import Geometry
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.agency import Agency
+from gtfsdb.model.uuid import GUID
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 
@@ -22,7 +23,7 @@ class RouteType(Base):
     filename = 'route_type.txt'
     __tablename__ = 'gtfs_route_type'
 
-    route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    route_type = Column(Integer, primary_key=True, autoincrement=False)
     route_type_name = Column(String(255))
     route_type_desc = Column(String(255))
 
@@ -33,20 +34,26 @@ class Route(Base):
 
     __tablename__ = 'gtfs_routes'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), ForeignKey(Agency.__tablename__+'.agency_id', ondelete='cascade'))
+    route_id = Column(GUID(255), primary_key=True, nullable=False)
+    agency_id = Column(GUID(), ForeignKey(Agency.__tablename__+'.agency_id', ondelete='cascade'))
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
     route_desc = Column(String(255))
-    route_type = Column(Integer, index=True, nullable=False)
+    route_type = Column(Integer, nullable=False)
     route_url = Column(String(255))
     route_color = Column(String(6))
     route_text_color = Column(String(6))
-    route_sort_order = Column(Integer, index=True)
+    route_sort_order = Column(Integer)
     the_geom = deferred(Column(Geometry('MULTILINESTRING')))
 
     trips = relationship('Trip', backref='route', cascade='delete')
     directions = relationship('RouteDirection', cascade='delete')
+
+    @classmethod
+    def make_record(cls, row, key_lookup):
+        if 'agency_id' not in row.keys():
+            row['agency_id']='1'
+        return super(Route, cls).make_record(row, key_lookup)
 
     @property
     def is_active(self, date=None):
@@ -171,7 +178,7 @@ class RouteDirection(Base):
 
     __tablename__ = 'gtfs_directions'
 
-    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
+    direction_id = Column(Integer, primary_key=True, nullable=False)
     route_id = Column(String(255),ForeignKey(Route.route_id))
     direction_name = Column(String(255))
 
@@ -180,10 +187,10 @@ class RouteStop(Base):
 
     __tablename__ = 'route_stops'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    order = Column(Integer, index=True, nullable=False)
+    route_id = Column(String(255), primary_key=True, nullable=False)
+    direction_id = Column(Integer, primary_key=True, nullable=False)
+    stop_id = Column(String(255), primary_key=True, nullable=False)
+    order = Column(Integer, nullable=False)
 
     route = relationship(
         'Route',
@@ -297,7 +304,7 @@ class RouteFilter(Base):
     filename = 'route_filter.txt'
     __tablename__ = 'route_filters'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route_id = Column(String(255), primary_key=True, nullable=False)
     description = Column(String)
 
 
