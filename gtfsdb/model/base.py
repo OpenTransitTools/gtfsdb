@@ -22,8 +22,6 @@ class _Base(object):
     filename = None
     unique_id = None
 
-    agency_id = Column(String(255), index=True)
-
     @property
     def session(self):
         ret_val = None
@@ -131,16 +129,10 @@ class _Base(object):
             reader = csv.DictReader(utf8_file)
             reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
             table = cls.__table__
-            #try:
-            #    db.engine.execute(table.delete())
-            #except:
-            #    log.debug("NOTE: couldn't delete this table")
 
             i = 0
             for row in reader:
                 record = cls.make_record(row)
-                if 'agency_id' in table.c:
-                    record['agency_id'] = cls.unique_id
                 records.append(record)
                 i += 1
                 if i >= batch_size:

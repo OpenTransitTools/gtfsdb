@@ -36,17 +36,14 @@ class Stop(Base):
     position = Column(String(50))
     the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
+    stop_times = relationship('StopTime', uselist=True, backref="stop")
+
     stop_features = relationship(
         'StopFeature',
         primaryjoin='Stop.stop_id==StopFeature.stop_id',
         foreign_keys='(Stop.stop_id)',
         uselist=True, viewonly=True)
 
-    stop_times = relationship(
-        'StopTime',
-        primaryjoin='Stop.stop_id==StopTime.stop_id',
-        foreign_keys='(Stop.stop_id)',
-        uselist=True, viewonly=True)
 
     @property
     def is_active(self, date=None):

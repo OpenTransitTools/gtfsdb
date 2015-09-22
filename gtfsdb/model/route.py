@@ -4,14 +4,15 @@ import sys
 import logging
 log = logging.getLogger(__name__)
 
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
+from geoalchemy2 import Geometry
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-from geoalchemy2 import Geometry
+from gtfsdb.model.agency import Agency
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 
@@ -33,6 +34,7 @@ class Route(Base):
     __tablename__ = 'gtfs_routes'
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    agency_id = Column(String(255), ForeignKey(Agency.__tablename__+'.agency_id', ondelete='cascade'))
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
     route_desc = Column(String(255))
@@ -43,17 +45,8 @@ class Route(Base):
     route_sort_order = Column(Integer, index=True)
     the_geom = deferred(Column(Geometry('MULTILINESTRING')))
 
-    trips = relationship(
-        'Trip',
-        primaryjoin='Route.route_id==Trip.route_id',
-        foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True)
-
-    directions = relationship(
-        'RouteDirection',
-        primaryjoin='Route.route_id==RouteDirection.route_id',
-        foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True, lazy='joined')
+    trips = relationship('Trip', backref='route', cascade='delete')
+    directions = relationship('RouteDirection', cascade='delete')
 
     @property
     def is_active(self, date=None):
@@ -173,17 +166,14 @@ class Route(Base):
         return ret_val
 
 class RouteDirection(Base):
-    #TODO Inactive until we add agency ID to all records
     datasource = config.DATASOURCE_GTFS
     filename = 'route_directions.txt'
 
     __tablename__ = 'gtfs_directions'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
+    route_id = Column(String(255),ForeignKey(Route.route_id))
     direction_name = Column(String(255))
-    #TODO add agency here?
-
 
 class RouteStop(Base):
     datasource = config.DATASOURCE_DERIVED

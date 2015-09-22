@@ -61,8 +61,8 @@ def main(database, parallel=0):
 
     sources = []
     #sources += gtfs_dump()
-    #sources += zip_sources()
-    sources += internal_file()
+    sources += [zip_sources()[0]]
+    #sources += internal_file()
     #sources += gtfs_ex_sources()
     #sources += gtfs_ex_api()
 

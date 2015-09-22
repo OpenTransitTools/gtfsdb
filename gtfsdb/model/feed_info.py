@@ -2,6 +2,7 @@ from sqlalchemy import Column, Sequence
 from sqlalchemy.types import Date, DateTime, String, Integer, Boolean
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
+from sqlalchemy.orm import relationship
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -17,9 +18,8 @@ class FeedInfo(Base):
     filename = 'feed_info.txt'
 
     __tablename__ = 'gtfs_feed_info'
-    #TODO create relation with agency to handle cases where multiple agency for single provider
 
-    agency_id = Column(String(255), primary_key=True)
+    feed_id = Column(String(255), primary_key=True)
     feed_publisher_name = Column(String(255))
     feed_publisher_url = Column(String(255), nullable=False)
     feed_lang = Column(String(255), nullable=False)
@@ -27,6 +27,8 @@ class FeedInfo(Base):
     feed_end_date = Column(Date)
     feed_version = Column(String(255))
     feed_license = Column(String(255))
+
+    agencies = relationship('Agency', backref="feed", cascade='delete')
 
     @classmethod
     def load(cls, db, **kwargs):

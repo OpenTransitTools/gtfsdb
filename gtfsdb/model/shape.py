@@ -2,7 +2,7 @@ import logging
 import time
 
 from geoalchemy2 import Geometry
-from sqlalchemy import Column, Integer, Numeric, String
+from sqlalchemy import Column, Integer, Numeric, String, Sequence
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 
@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 
 
 class ShapeGeom(Base):
-    #TODO: Disabled until we have agency ID tied to everything
     datasource = config.DATASOURCE_DERIVED
 
     __tablename__ = 'gtfs_shape_geoms'
@@ -72,7 +71,8 @@ class Shape(Base):
 
     __tablename__ = 'gtfs_shapes'
 
-    shape_id = Column(String(255), primary_key=True, index=True)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    shape_id = Column(String(255), index=True)
     shape_pt_lat = Column(Numeric(12, 9))
     shape_pt_lon = Column(Numeric(12, 9))
     shape_pt_sequence = Column(Integer, primary_key=True, index=True)

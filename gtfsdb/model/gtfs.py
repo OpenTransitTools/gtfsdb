@@ -33,8 +33,6 @@ class GTFS(object):
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
-        self.delete_agency_data(db, self.unique_id)
-
         '''load known GTFS files, derived tables & lookup tables'''
         gtfs_directory = self.unzip()
         load_kwargs = dict(
@@ -66,14 +64,3 @@ class GTFS(object):
         except Exception, e:
             log.warning(e)
         return path
-
-    def delete_agency_data(self, db, agency_id):
-        session = db.get_session()
-        def delete(cls):
-            session.query(cls).filter_by(agency_id=agency_id).delete()
-        for cls in reversed(db.sorted_classes):
-            delete(cls)
-        for cls in set(db.classes)-set(db.sorted_classes):
-            delete(cls)
-        session.commit()
-        session.close()
