@@ -51,7 +51,7 @@ def tag_meta(source, database):
     meta.upload_date = datetime.datetime.utcnow()
     db.session.commit()
 
-def main(database, parallel=False):
+def main(database, parallel=0):
     db = Database(url=database, is_geospatial=True)
     db.create()
     try:
@@ -67,7 +67,7 @@ def main(database, parallel=False):
     #sources += gtfs_ex_api()
 
     if parallel:
-        concurrent_run(sources, database)
+        concurrent_run(sources, database, parallel)
     else:
         serial_run(sources, database)
 
@@ -77,14 +77,14 @@ def serial_run(sources, database):
         tag_meta(source, database)
 
 
-def concurrent_run(sources, database):
-    Parallel(n_jobs=16)(delayed(tag_meta)(source, database) for source in sources)
+def concurrent_run(sources, database, num_jobs):
+    Parallel(n_jobs=int(num_jobs))(delayed(tag_meta)(source, database) for source in sources)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--database', help='the database url')
-    parser.add_argument('-p', '--parallel', action='store_true')
+    parser.add_argument('-p', '--parallel')
     args = parser.parse_args()
     main(database=args.database, parallel=args.parallel)
 
