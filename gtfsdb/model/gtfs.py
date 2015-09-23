@@ -47,8 +47,9 @@ class GTFS(object):
 
 
         '''load route geometries derived from shapes.txt'''
-        if Route in db.classes:
-            Route.load_geoms(db)
+        # Lets not use updates while importing
+        #if Route in db.classes:
+        #    Route.load_geoms(db)
 
         for cls in db.sorted_classes:
             cls.post_process(db)
