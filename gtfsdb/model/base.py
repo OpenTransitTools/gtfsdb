@@ -167,8 +167,6 @@ class _Base(object):
                         del row[k]
                     elif not v or v.strip() == "":
                         row[k] = None
-                    elif k == 'direction_id':
-                        row[k] = int(v)
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                     elif '_id' in k:

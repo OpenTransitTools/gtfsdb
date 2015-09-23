@@ -17,7 +17,7 @@ class Trip(Base):
     service_id = Column(String(255), nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))
-    direction_id = Column(Integer)
+    direction_id = Column(GUID())
     block_id = Column(String(255))
     shape_id = Column(String(255), nullable=True) # The forgien key here is going to be difficult
     trip_type = Column(String(255))

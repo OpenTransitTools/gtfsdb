@@ -180,7 +180,7 @@ class RouteDirection(Base):
 
     __tablename__ = 'gtfs_directions'
 
-    direction_id = Column(Integer, primary_key=True, nullable=False)
+    direction_id = Column(GUID(), primary_key=True, nullable=False)
     route_id = Column(GUID())
     direction_name = Column(String(255))
 
@@ -190,7 +190,7 @@ class RouteStop(Base):
     __tablename__ = 'route_stops'
 
     route_id = Column(GUID(), primary_key=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, nullable=False)
+    direction_id = Column(GUID(), primary_key=True, nullable=False)
     stop_id = Column(GUID(), primary_key=True, nullable=False)
     order = Column(Integer, nullable=False)
 
