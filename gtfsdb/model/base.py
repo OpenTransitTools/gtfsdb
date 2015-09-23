@@ -7,6 +7,8 @@ import sys
 import time
 import uuid
 
+from concurrent.futures import ThreadPoolExecutor
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
 from gtfsdb import config, util
@@ -121,7 +123,10 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
+        thread_pool = ThreadPoolExecutor()
+
         records = []
+        futures = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
             f = open(file_path, 'r')
@@ -136,13 +141,15 @@ class _Base(object):
                 records.append(record)
                 i += 1
                 if i >= batch_size:
-                    db.execute(table.insert(), records)
-                    sys.stdout.write('*')
+                    futures.append(thread_pool.submit(db.execute, table.insert(), records))
                     records = []
                     i = 0
             if len(records) > 0:
-                db.execute(table.insert(), records)
+                futures.append(thread_pool.submit(db.execute, table.insert(), records))
             f.close()
+
+        for future in futures:
+            future.result()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
 
