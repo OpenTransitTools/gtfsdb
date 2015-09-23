@@ -36,6 +36,7 @@ def database_load(filename, db_url):
         db = Database(url=db_url, is_geospatial=True)
         gtfs = GTFS(filename=filename)
         gtfs.load(db)
+        #gtfs.post_process(db)
         return True
     except Exception, e:
         log.error('Error processing: {} Message: {}'.format(filename,e))

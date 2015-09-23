@@ -40,24 +40,33 @@ class ShapeGeom(Base):
         self.the_geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
 
     @classmethod
-    def load(cls, db, **kwargs):
-        start_time = time.time()
-        session = db.get_session()
+    def get_shape_list(cls, session):
         q = session.query(
             Shape.shape_id,
             func.max(Shape.shape_dist_traveled).label('dist')
         )
-        shapes = q.group_by(Shape.shape_id)
+        return q.group_by(Shape.shape_id)
+
+    @classmethod
+    def create_shape_geom(cls, shape_id, shape_dist, session):
+        shape_geom = cls()
+        shape_geom.shape_id = shape_id
+        shape_geom.pattern_dist = shape_dist
+        if hasattr(cls, 'the_geom'):
+            q = session.query(Shape)
+            q = q.filter(Shape.shape_id == shape_id)
+            q = q.order_by(Shape.shape_pt_sequence)
+            shape_geom.geom_from_shape(q)
+        return shape_geom
+
+    @classmethod
+    def load(cls, db, **kwargs):
+        start_time = time.time()
+        session = db.get_session()
+        shapes = cls.get_shape_list(session)
         for shape in shapes:
-            pattern = cls()
-            pattern.shape_id = shape.shape_id
-            pattern.pattern_dist = shape.dist
-            if hasattr(cls, 'the_geom'):
-                q = session.query(Shape)
-                q = q.filter(Shape.shape_id == shape.shape_id)
-                q = q.order_by(Shape.shape_pt_sequence)
-                pattern.geom_from_shape(q)
-            session.add(pattern)
+            shape_geom = cls.create_shape_geom(shape.shape_id, shape.dist, session)
+            session.merge(shape_geom)
         session.commit()
         session.close()
         processing_time = time.time() - start_time

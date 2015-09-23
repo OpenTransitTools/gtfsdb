@@ -2,7 +2,7 @@ import datetime
 import logging
 log = logging.getLogger(__name__)
 
-from sqlalchemy import Column
+from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship, joinedload_all
 from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
@@ -20,7 +20,7 @@ class StopTime(Base):
     filename = 'stop_times.txt'
 
     __tablename__ = 'gtfs_stop_times'
-    id = Column(GUID(), default=uuid.uuid4, primary_key=True)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
     stop_id = Column(GUID())
     trip_id = Column(GUID())
     arrival_time = Column(String(8))

@@ -12,7 +12,7 @@ class Transfer(Base):
 
     __tablename__ = 'gtfs_transfers'
 
-    id = Column(GUID(), default=uuid.uuid4, primary_key=True)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
     from_stop_id = Column(GUID())
     to_stop_id = Column(GUID())
     transfer_type = Column(Integer, default=0)

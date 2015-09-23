@@ -51,11 +51,13 @@ class GTFS(object):
         #if Route in db.classes:
         #    Route.load_geoms(db)
 
-        #for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
-        #    cls.post_process(db)
-
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
+
+    def post_process(self, db):
+        for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
+            cls.post_process(db)
+        pass
 
     def unzip(self, path=None):
         '''Unzip GTFS files from URL/directory to path.'''

@@ -24,7 +24,8 @@ DATASOURCE_GTFS = 1
 DATASOURCE_LOOKUP = 2
 
 '''Geometry constants'''
-SRID = 900913
+#SRID = 900913
+SRID = 4326
 
 '''Order list of class names, used for creating & populating tables'''
 
