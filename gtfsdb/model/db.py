@@ -109,18 +109,19 @@ class Database(object):
         return self._url
 
     def execute(self, command, values):
-        tries = 0
-        while tries < config.DB_ATTEMPTS:
-            try:
-                return self.engine.execute(command, values)
-            except IntegrityError, e:
-                raise e
-            except DBAPIError, e:
-                tries += 1
-                log.warning("Got a db error: {} Attempt: #{}".format(e, tries))
-                time.sleep(pow(2, tries)) #exponential backoff time
-                continue
-        log.error("Too manny attempts, failing hard!")
+        return self.engine.execute(command, values)
+        #tries = 0
+        #while tries < config.DB_ATTEMPTS:
+        #    try:
+        #        return self.engine.execute(command, values)
+        #    except IntegrityError, e:
+        #        raise e
+        #    except DBAPIError, e:
+        #        tries += 1
+        #        log.warning("Got a db error: {} Attempt: #{}".format(e, tries))
+        #        time.sleep(pow(2, tries)) #exponential backoff time
+        #        continue
+        #log.error("Too manny attempts, failing hard!")
 
     def get_session(self):
         return self.session_factory()

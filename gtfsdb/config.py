@@ -13,7 +13,7 @@ if config.has_section('loggers'):
 
 DB_ATTEMPTS = 4
 '''Application defaults'''
-DEFAULT_BATCH_SIZE = 100000
+DEFAULT_BATCH_SIZE = 10000
 DEFAULT_DATABASE_URL = 'sqlite://'
 DEFAULT_IS_GEOSPATIAL = False
 DEFAULT_SCHEMA = 'public'
