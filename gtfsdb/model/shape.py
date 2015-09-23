@@ -47,10 +47,9 @@ class ShapeGeom(Base):
             Shape.shape_id,
             func.max(Shape.shape_dist_traveled).label('dist')
         )
-        shapes = q.filter_by(agency_id=str(cls.unique_id)).group_by(Shape.shape_id)
+        shapes = q.group_by(Shape.shape_id)
         for shape in shapes:
             pattern = cls()
-            pattern.agency_id = cls.unique_id
             pattern.shape_id = shape.shape_id
             pattern.pattern_dist = shape.dist
             if hasattr(cls, 'the_geom'):

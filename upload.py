@@ -59,10 +59,10 @@ def main(database, parallel=0):
     #    pass
 
     sources = []
-    #sources += ['data/sample-feed.zip'] * 8
+    sources += ['data/sample-feed.zip'] * 8
     #sources += gtfs_dump()
     #sources += [zip_sources()[0]]
-    sources += internal_file()
+    #sources += internal_file()
     #sources += gtfs_ex_sources()
     #sources += gtfs_ex_api()
 

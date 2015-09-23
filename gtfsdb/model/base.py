@@ -159,7 +159,8 @@ class _Base(object):
     def make_record(cls, row, key_lookup):
         for k, v in row.items():
             if isinstance(v, basestring):
-                row[k] = v.strip()[:254]
+                v = v.strip()
+                row[k] = v[:254]
             try:
                 if k:
                     if (k not in cls.__table__.c):

@@ -41,7 +41,7 @@ class GTFS(object):
             gtfs_directory=gtfs_directory,
             key_lookup=key_lookup
         )
-        for cls in db.sorted_classes:
+        for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 
@@ -51,8 +51,8 @@ class GTFS(object):
         #if Route in db.classes:
         #    Route.load_geoms(db)
 
-        for cls in db.sorted_classes:
-            cls.post_process(db)
+        #for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
+        #    cls.post_process(db)
 
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))

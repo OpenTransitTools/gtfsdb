@@ -82,8 +82,13 @@ class Database(object):
         for cls in self.classes:
             cls.__table__.schema = val
 
-    @property
-    def sorted_classes(self):
+    def sorted_classes(self, key=None):
+        if key:
+            sorted_classes = []
+            for cls in self._sort_classes(config.SORTED_CLASS_NAMES):
+                if key(cls):
+                   sorted_classes.append(cls)
+            return sorted_classes
         return self._sort_classes(config.SORTED_CLASS_NAMES)
 
     @property

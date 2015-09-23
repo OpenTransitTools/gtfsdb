@@ -28,7 +28,7 @@ class Agency(Base):
 
     @classmethod
     def make_record(cls, row, key_lookup):
-        if 'agency_id' not in row.keys():
+        if 'agency_id' not in row.keys() or not row['agency_id']:
             row['agency_id']='1'
         return super(Agency, cls).make_record(row, key_lookup)
 
