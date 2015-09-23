@@ -33,6 +33,9 @@ def database_load_versioned(source_meta, db_url, force=False):
 
 
 def database_load(filename, db_url):
-    db = Database(url=db_url, is_geospatial=True)
-    gtfs = GTFS(filename=filename)
-    gtfs.load(db)
+    try:
+        db = Database(url=db_url, is_geospatial=True)
+        gtfs = GTFS(filename=filename)
+        gtfs.load(db)
+    except Exception, e:
+        log.error('Error processing: {} Message: {}'.format(filename,e))
