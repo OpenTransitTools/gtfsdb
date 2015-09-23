@@ -35,7 +35,7 @@ class Route(Base):
     __tablename__ = 'gtfs_routes'
 
     route_id = Column(GUID(), primary_key=True, nullable=False)
-    agency_id = Column(GUID(), ForeignKey(Agency.__tablename__+'.agency_id', ondelete='cascade'))
+    agency_id = Column(GUID(), nullable=False)
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
     route_desc = Column(String(255))
@@ -46,8 +46,10 @@ class Route(Base):
     route_sort_order = Column(Integer)
     the_geom = deferred(Column(Geometry('MULTILINESTRING')))
 
-    trips = relationship('Trip', backref='route', cascade='delete')
-    directions = relationship('RouteDirection', cascade='delete')
+    trips = relationship('Trip', backref='route', primaryjoin='Trip.route_id==Route.route_id',
+                         foreign_keys='(Trip.route_id)', cascade='delete')
+    directions = relationship('RouteDirection', primaryjoin='RouteDirection.route_id==Route.route_id',
+                              foreign_keys='(RouteDirection.route_id)', cascade='delete')
 
     @classmethod
     def make_record(cls, row, key_lookup):
@@ -179,7 +181,7 @@ class RouteDirection(Base):
     __tablename__ = 'gtfs_directions'
 
     direction_id = Column(Integer, primary_key=True, nullable=False)
-    route_id = Column(GUID(),ForeignKey(Route.route_id))
+    route_id = Column(GUID())
     direction_name = Column(String(255))
 
 class RouteStop(Base):
@@ -187,9 +189,9 @@ class RouteStop(Base):
 
     __tablename__ = 'route_stops'
 
-    route_id = Column(String(255), primary_key=True, nullable=False)
+    route_id = Column(GUID(), primary_key=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, nullable=False)
-    stop_id = Column(String(255), primary_key=True, nullable=False)
+    stop_id = Column(GUID(), primary_key=True, nullable=False)
     order = Column(Integer, nullable=False)
 
     route = relationship(
@@ -304,7 +306,7 @@ class RouteFilter(Base):
     filename = 'route_filter.txt'
     __tablename__ = 'route_filters'
 
-    route_id = Column(String(255), primary_key=True, nullable=False)
+    route_id = Column(GUID(), primary_key=True, nullable=False)
     description = Column(String)
 
 

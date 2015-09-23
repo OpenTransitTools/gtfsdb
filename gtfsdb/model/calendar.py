@@ -9,6 +9,7 @@ from sqlalchemy.types import Boolean, Date, Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.guuid import GUID
 
 
 __all__ = ['Calendar', 'CalendarDate', 'UniversalCalendar']
@@ -24,7 +25,7 @@ class Calendar(Base):
     __tablename__ = 'gtfs_calendar'
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
-    service_id = Column(String(255), primary_key=True, nullable=False)
+    service_id = Column(GUID(), primary_key=True, nullable=False)
     monday = Column(Boolean, nullable=False)
     tuesday = Column(Boolean, nullable=False)
     wednesday = Column(Boolean, nullable=False)

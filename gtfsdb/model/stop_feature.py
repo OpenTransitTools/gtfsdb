@@ -4,6 +4,8 @@ from sqlalchemy.types import Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.guuid import GUID
+import uuid
 
 
 __all__ = ['StopFeature']
@@ -15,7 +17,7 @@ class StopFeature(Base):
 
     __tablename__ = 'stop_features'
 
-    id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    stop_id = Column(String(255), nullable=False)
+    id = Column(GUID(), default=uuid.uuid4, primary_key=True)
+    stop_id = Column(GUID(), nullable=False)
     feature_type = Column(String(50), nullable=False)
     feature_name = Column(String(255))

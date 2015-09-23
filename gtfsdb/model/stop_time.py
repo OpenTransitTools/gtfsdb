@@ -2,7 +2,7 @@ import datetime
 import logging
 log = logging.getLogger(__name__)
 
-from sqlalchemy import Column, ForeignKey, Sequence
+from sqlalchemy import Column
 from sqlalchemy.orm import relationship, joinedload_all
 from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
@@ -11,6 +11,8 @@ from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.trip import Trip
 from gtfsdb.model.stop import Stop
+from gtfsdb.model.guuid import GUID
+import uuid
 
 
 class StopTime(Base):
@@ -18,9 +20,9 @@ class StopTime(Base):
     filename = 'stop_times.txt'
 
     __tablename__ = 'gtfs_stop_times'
-    stop_time_id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    stop_id = Column(String(255), ForeignKey(Stop.__tablename__+'.stop_id', ondelete='cascade'))
-    trip_id = Column(String(255), ForeignKey(Trip.__tablename__+'.trip_id', ondelete='cascade'))
+    id = Column(GUID(), default=uuid.uuid4, primary_key=True)
+    stop_id = Column(GUID())
+    trip_id = Column(GUID())
     arrival_time = Column(String(8))
     departure_time = Column(String(8))
     stop_sequence = Column(Integer, nullable=False)

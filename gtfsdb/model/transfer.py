@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, Sequence, String, ForeignKey
+from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.orm import relationship
+import uuid
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-from gtfsdb.model.stop import Stop
+from gtfsdb.model.guuid import GUID
 
 class Transfer(Base):
     datasource = config.DATASOURCE_GTFS
@@ -11,11 +12,11 @@ class Transfer(Base):
 
     __tablename__ = 'gtfs_transfers'
 
-    transfer_id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    from_stop_id = Column(String(255), ForeignKey(Stop.__tablename__+'.stop_id'))
-    to_stop_id = Column(String(255), ForeignKey(Stop.__tablename__+'.stop_id'))
+    id = Column(GUID(), default=uuid.uuid4, primary_key=True)
+    from_stop_id = Column(GUID())
+    to_stop_id = Column(GUID())
     transfer_type = Column(Integer, default=0)
     min_transfer_time = Column(Integer)
 
-    from_stop = relationship('Stop', primaryjoin='Stop.stop_id==Transfer.from_stop_id')
-    to_stop = relationship('Stop', primaryjoin='Stop.stop_id==Transfer.to_stop_id')
+    from_stop = relationship('Stop', primaryjoin='Stop.stop_id==Transfer.from_stop_id', foreign_keys='(Stop.stop_id)')
+    to_stop = relationship('Stop', primaryjoin='Stop.stop_id==Transfer.to_stop_id', foreign_keys='(Stop.stop_id)')

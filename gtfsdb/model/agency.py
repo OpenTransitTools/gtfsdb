@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column
 from sqlalchemy.types import String
 from sqlalchemy.orm import relationship
 
@@ -15,7 +15,7 @@ class Agency(Base):
     __tablename__ = 'gtfs_agency'
 
     agency_id = Column(GUID(), primary_key=True)
-    feed_id = Column(GUID(), ForeignKey(FeedInfo.__tablename__+'.feed_id'))
+    feed_id = Column(GUID())
     agency_name = Column(String(255), nullable=False)
     agency_url = Column(String(255), nullable=False)
     agency_timezone = Column(String(50), nullable=False)
@@ -23,7 +23,8 @@ class Agency(Base):
     agency_phone = Column(String(50))
     agency_fare_url = Column(String(255))
 
-    routes = relationship('Route', backref='agency')
+    routes = relationship('Route', backref='agency', primaryjoin='Route.agency_id==Agency.agency_id',
+                          foreign_keys='(Route.agency_id)')
 
     @classmethod
     def make_record(cls, row, key_lookup):

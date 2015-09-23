@@ -1,10 +1,9 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-from gtfsdb.model.route import Route
 from gtfsdb.model.guuid import GUID
 
 class Trip(Base):
@@ -13,8 +12,8 @@ class Trip(Base):
 
     __tablename__ = 'gtfs_trips'
 
-    trip_id = Column(String(255), primary_key=True, nullable=False)
-    route_id = Column(GUID(), ForeignKey(Route.__tablename__+'.route_id', ondelete='cascade'))
+    trip_id = Column(GUID(), primary_key=True, nullable=False)
+    route_id = Column(GUID())
     service_id = Column(String(255), nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))
@@ -25,7 +24,8 @@ class Trip(Base):
     bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)
 
-    stop_times = relationship('StopTime', uselist=True, backref='trip', cascade='delete')
+    stop_times = relationship('StopTime', primaryjoin='Trip.trip_id==StopTime.trip_id',
+                              foreign_keys='(StopTime.trip_id)', uselist=True, backref='trip', cascade='delete')
 
     universal_calendar = relationship(
         'UniversalCalendar',

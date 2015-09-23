@@ -175,7 +175,7 @@ class _Base(object):
                         if k not in key_lookup.keys():
                             key_lookup[k] = dict()
                         if v_san not in key_lookup[k].keys():
-                            key_lookup[k][v_san] = str(uuid.uuid4())
+                            key_lookup[k][v_san] = uuid.uuid4()
                         row[k] = key_lookup[k][v_san]
                 else:
                     log.warning("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
