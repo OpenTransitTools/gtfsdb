@@ -14,10 +14,6 @@ from gtfsdb.import_api.custom import gtfs_source_list
 from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 import datetime
 
-import logging
-
-log = logging.getLogger(__name__)
-
 def zip_sources():
     return ['data/action_20150129_0101.zip', 'data/abq-ride_20150802_0107.zip']
 
@@ -50,30 +46,26 @@ def tag_meta(source, database):
     meta = Meta(file_name=source)
     db.session.add(meta)
     db.session.commit()
-    try:
-        database_load(source, database)
-    except Exception, e:
-        log.error(e)
+    database_load(source, database)
     meta.completed = True
     meta.upload_date = datetime.datetime.utcnow()
     db.session.commit()
 
 def main(database, parallel=0):
-
-    sources = []
-    #sources += gtfs_dump()
-    #sources += zip_sources()
-    sources += internal_file()
-    #sources += gtfs_ex_sources()
-    sources += gtfs_ex_api()
-
     db = Database(url=database, is_geospatial=True)
     db.create()
-    try:
-        GTFS.bootstrab_db(db)
-    except IntegrityError:
-        pass
+    #try:
+    #    GTFS.bootstrab_db(db)
+    #except IntegrityError:
+    #    pass
 
+    sources = []
+    sources += ['data/sample-feed.zip']
+    #sources += gtfs_dump()
+    #sources += [zip_sources()[0]]
+    #sources += internal_file()
+    #sources += gtfs_ex_sources()
+    #sources += gtfs_ex_api()
 
     if parallel:
         concurrent_run(sources, database, parallel)
