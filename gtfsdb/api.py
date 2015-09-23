@@ -21,8 +21,7 @@ def database_load_versioned(source_meta, db_url, force=False):
     exchange_record = DataexchangeInfo(
         agency_id=source_meta['dataexchange_id'], **source_meta)
     if force or DataexchangeInfo.overwrite(db, exchange_record):
-        database_load(source_meta['file_url'], db_url=db_url)
-        exchange_record.completed=True
+        exchange_record.completed=database_load(source_meta['file_url'], db_url=db_url)
         exchange_record.completed_on = datetime.datetime.utcnow()
         session = db.get_session()
         session.merge(exchange_record)
@@ -37,5 +36,7 @@ def database_load(filename, db_url):
         db = Database(url=db_url, is_geospatial=True)
         gtfs = GTFS(filename=filename)
         gtfs.load(db)
+        return True
     except Exception, e:
         log.error('Error processing: {} Message: {}'.format(filename,e))
+        return False
