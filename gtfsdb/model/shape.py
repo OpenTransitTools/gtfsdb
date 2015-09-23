@@ -22,7 +22,7 @@ class ShapeGeom(Base):
     __tablename__ = 'gtfs_shape_geoms'
 
     shape_id = Column(String(255), primary_key=True)
-    the_geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID))
+    the_geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID, spatial_index=False))
 
     trips = relationship(
         'Trip',
@@ -85,7 +85,7 @@ class Shape(Base):
     shape_pt_lon = Column(Numeric(12, 9))
     shape_pt_sequence = Column(Integer, primary_key=True)
     shape_dist_traveled = Column(Numeric(20, 10))
-    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID, spatial_index=False))
 
     @classmethod
     def add_geometry_column(cls):

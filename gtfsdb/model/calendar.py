@@ -23,7 +23,7 @@ class Calendar(Base):
     filename = 'calendar.txt'
 
     __tablename__ = 'gtfs_calendar'
-    __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
+    #__table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
     service_id = Column(GUID(), primary_key=True, nullable=False)
     monday = Column(Boolean, nullable=False)

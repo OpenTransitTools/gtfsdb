@@ -44,7 +44,7 @@ class Route(Base):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer)
-    the_geom = deferred(Column(Geometry('MULTILINESTRING')))
+    the_geom = deferred(Column(Geometry('MULTILINESTRING', spatial_index=False)))
 
     trips = relationship('Trip', backref='route', primaryjoin='Trip.route_id==Route.route_id',
                          foreign_keys='(Trip.route_id)', cascade='delete')
