@@ -40,15 +40,14 @@ def database_load_versioned(feed_meta, file_meta, db_url):
 
     try:
         database_load(filename=feed_file.file_url, db_url=db_url, file_id=feed_file.md5sum)
+        feed_file.completed = True
     except Exception, e:
         log.error("Error processing feed: {} {}".format(feed_file.filename or feed_file.file_url, e))
-        return
-    feed_file.completed = True
-    feed_file.censio_upload_date = datetime.utcnow()
-    session = db.get_session()
-    session.merge(feed_file)
-    session.commit()
-    return
+        feed_file.censio_upload_date = datetime.utcnow()
+    finally:
+        session = db.get_session()
+        session.merge(feed_file)
+        session.commit()
 
 def create_shapes_geoms(db_url):
     db = Database(url=db_url, is_geospatial=True)
