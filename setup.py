@@ -13,7 +13,7 @@ extras_require = dict(
     postgresql=postgresql_extras,
 )
 
-install_requires = ['geoalchemy2>=0.2.4', 'sqlalchemy>=0.9', 'joblib', 'requests', 'futures', 'psycopg2']
+install_requires = ['geoalchemy2>=0.2.4', 'sqlalchemy>=0.9', 'joblib', 'requests', 'futures', 'psycopg2', 'alembic']
 if sys.version_info[:2] <= (2, 6):
     install_requires.append('argparse>=1.2.1')
     extras_require['dev'].append('unittest2')

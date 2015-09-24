@@ -13,11 +13,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
 from gtfsdb import config, util
 
-from sqlalchemy.types import String
-from sqlalchemy import Column
-
-
 log = logging.getLogger(__name__)
+
 
 class _Base(object):
 
