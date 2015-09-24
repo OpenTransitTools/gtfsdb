@@ -2,6 +2,7 @@
 [a-z].py
 *.py[cod]
 .settings
+.cache/
 COMMIT_EDITMSG
 .git/
 .git/*
