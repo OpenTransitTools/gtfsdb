@@ -5,7 +5,7 @@ import tempfile
 import time
 from urllib import urlretrieve
 import zipfile
-import uuid
+import guuid
 
 from gtfsdb import config
 from .route import Route
@@ -21,7 +21,6 @@ class GTFS(object):
         log.debug("Fetching {}".format(filename))
         self.local_file = urlretrieve(filename)[0]
         log.debug("Done Fetching {}".format(filename))
-        self.unique_id = unique_id if unique_id else str(uuid.uuid4())
 
     @staticmethod
     def bootstrab_db(db):
@@ -33,16 +32,16 @@ class GTFS(object):
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
-        self.delete_agency_data(db, self.unique_id)
+        key_lookup = dict()
 
         '''load known GTFS files, derived tables & lookup tables'''
         gtfs_directory = self.unzip()
         load_kwargs = dict(
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
+            key_lookup=key_lookup
         )
-        for cls in db.sorted_classes:
-            cls.unique_id = self.unique_id
+        for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 
@@ -52,11 +51,13 @@ class GTFS(object):
         #if Route in db.classes:
         #    Route.load_geoms(db)
 
-        for cls in db.sorted_classes:
-            cls.post_process(db)
-
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
+
+    def post_process(self, db):
+        for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
+            cls.post_process(db)
+        pass
 
     def unzip(self, path=None):
         '''Unzip GTFS files from URL/directory to path.'''
@@ -67,14 +68,3 @@ class GTFS(object):
         except Exception, e:
             log.warning(e)
         return path
-
-    def delete_agency_data(self, db, agency_id):
-        session = db.get_session()
-        def delete(cls):
-            session.query(cls).filter_by(agency_id=agency_id).delete()
-        for cls in reversed(db.sorted_classes):
-            delete(cls)
-        for cls in set(db.classes)-set(db.sorted_classes):
-            delete(cls)
-        session.commit()
-        session.close()

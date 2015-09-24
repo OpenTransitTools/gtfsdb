@@ -4,7 +4,7 @@ from sqlalchemy.types import Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-
+from gtfsdb.model.guuid import GUID
 
 class Trip(Base):
     datasource = config.DATASOURCE_GTFS
@@ -12,36 +12,20 @@ class Trip(Base):
 
     __tablename__ = 'gtfs_trips'
 
-    route_id = Column(String(255), index=True, nullable=False)
-    service_id = Column(String(255), index=True, nullable=False)
-    trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    trip_id = Column(GUID(), primary_key=True, nullable=False)
+    route_id = Column(GUID())
+    service_id = Column(String(255), nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))
-    direction_id = Column(Integer)
+    direction_id = Column(GUID())
     block_id = Column(String(255))
-    shape_id = Column(String(255), index=True, nullable=True)
+    shape_id = Column(String(255), nullable=True) # The forgien key here is going to be difficult
     trip_type = Column(String(255))
     bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)
 
-    pattern = relationship(
-        'ShapeGeom',
-        primaryjoin='Trip.shape_id==ShapeGeom.shape_id',
-        foreign_keys='(Trip.shape_id)',
-        uselist=False, viewonly=True)
-
-    route = relationship(
-        'Route',
-        primaryjoin='Trip.route_id==Route.route_id',
-        foreign_keys='(Trip.route_id)',
-        uselist=False, viewonly=True)
-
-    stop_times = relationship(
-        'StopTime',
-        primaryjoin='Trip.trip_id==StopTime.trip_id',
-        foreign_keys='(Trip.trip_id)',
-        order_by='StopTime.stop_sequence',
-        uselist=True, viewonly=True)
+    stop_times = relationship('StopTime', primaryjoin='Trip.trip_id==StopTime.trip_id',
+                              foreign_keys='(StopTime.trip_id)', uselist=True, backref='trip', cascade='delete')
 
     universal_calendar = relationship(
         'UniversalCalendar',

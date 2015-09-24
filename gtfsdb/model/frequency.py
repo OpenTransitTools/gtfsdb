@@ -1,9 +1,11 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.guuid import GUID
+import uuid
 
 
 class Frequency(Base):
@@ -12,8 +14,9 @@ class Frequency(Base):
 
     __tablename__ = 'gtfs_frequencies'
 
-    trip_id = Column(String(255), primary_key=True)
-    start_time = Column(String(8), primary_key=True)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    trip_id = Column(GUID())
+    start_time = Column(String(8))
     end_time = Column(String(8))
     headway_secs = Column(Integer)
     exact_times = Column(Integer)

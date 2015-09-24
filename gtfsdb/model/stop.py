@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload_all, object_session, relationship
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.guuid import GUID
 
 
 log = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class Stop(Base):
 
     __tablename__ = 'gtfs_stops'
 
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    stop_id = Column(GUID(), primary_key=True, nullable=False)
     stop_code = Column(String(50))
     stop_name = Column(String(255), nullable=False)
     stop_desc = Column(String(255))
@@ -27,14 +28,17 @@ class Stop(Base):
     stop_lon = Column(Numeric(12, 9), nullable=False)
     zone_id = Column(String(50))
     stop_url = Column(String(255))
-    location_type = Column(Integer, index=True, default=0)
+    location_type = Column(Integer, default=0)
     parent_station = Column(String(255))
     stop_timezone = Column(String(50))
     wheelchair_boarding = Column(Integer, default=0)
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
-    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID, spatial_index=False))
+
+    stop_times = relationship('StopTime', primaryjoin="Stop.stop_id==StopTime.stop_id",
+                              foreign_keys='(StopTime.stop_id)', uselist=True, backref="stop")
 
     stop_features = relationship(
         'StopFeature',
@@ -42,11 +46,6 @@ class Stop(Base):
         foreign_keys='(Stop.stop_id)',
         uselist=True, viewonly=True)
 
-    stop_times = relationship(
-        'StopTime',
-        primaryjoin='Stop.stop_id==StopTime.stop_id',
-        foreign_keys='(Stop.stop_id)',
-        uselist=True, viewonly=True)
 
     @property
     def is_active(self, date=None):

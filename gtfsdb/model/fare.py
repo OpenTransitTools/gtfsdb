@@ -1,8 +1,10 @@
 from sqlalchemy import Column, Sequence
 from sqlalchemy.types import Integer, Numeric, String
+import uuid
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.guuid import GUID
 
 
 __all__ = ['FareAttribute', 'FareRule']
@@ -14,7 +16,7 @@ class FareAttribute(Base):
 
     __tablename__ = 'gtfs_fare_attributes'
 
-    fare_id = Column(String(255), primary_key=True)
+    fare_id = Column(GUID(), primary_key=True)
     price = Column(Numeric(10, 2), nullable=False)
     currency_type = Column(String(255), nullable=False)
     payment_method = Column(Integer, nullable=False)
@@ -28,8 +30,8 @@ class FareRule(Base):
 
     __tablename__ = 'gtfs_fare_rules'
 
-    id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    fare_id = Column(String(255), index=True, nullable=False)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    fare_id = Column(GUID(), nullable=False)
     route_id = Column(String(255))
     origin_id = Column(String(255))
     destination_id = Column(String(255))

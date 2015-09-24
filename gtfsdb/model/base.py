@@ -5,6 +5,9 @@ import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
 import time
+import uuid
+
+from concurrent.futures import ThreadPoolExecutor
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
@@ -16,13 +19,10 @@ from sqlalchemy import Column
 
 log = logging.getLogger(__name__)
 
-
 class _Base(object):
 
     filename = None
     unique_id = None
-
-    agency_id = Column(String(255), index=True)
 
     @property
     def session(self):
@@ -104,7 +104,7 @@ class _Base(object):
             log.warn("update_cached_data(): threw an exception with attribute {0}".format(attribute_name))
 
     @classmethod
-    def load(cls, db, **kwargs):
+    def load(cls, db, key_lookup, **kwargs):
         '''Load method for ORM
 
         arguments:
@@ -123,7 +123,10 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
+        thread_pool = ThreadPoolExecutor(max_workers=3)
+
         records = []
+        futures = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
             f = open(file_path, 'r')
@@ -131,26 +134,22 @@ class _Base(object):
             reader = csv.DictReader(utf8_file)
             reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
             table = cls.__table__
-            #try:
-            #    db.engine.execute(table.delete())
-            #except:
-            #    log.debug("NOTE: couldn't delete this table")
 
             i = 0
             for row in reader:
-                record = cls.make_record(row)
-                if 'agency_id' in table.c:
-                    record['agency_id'] = cls.unique_id
+                record = cls.make_record(row, key_lookup)
                 records.append(record)
                 i += 1
                 if i >= batch_size:
-                    db.execute(table.insert(), records)
-                    sys.stdout.write('*')
+                    futures.append(thread_pool.submit(db.execute, table.insert(), records))
                     records = []
                     i = 0
             if len(records) > 0:
-                db.execute(table.insert(), records)
+                futures.append(thread_pool.submit(db.execute, table.insert(), records))
             f.close()
+
+        for future in futures:
+            future.result()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
 
@@ -164,30 +163,30 @@ class _Base(object):
         pass
 
     @classmethod
-    def make_record(cls, row):
+    def make_record(cls, row, key_lookup):
         for k, v in row.items():
             if isinstance(v, basestring):
-                row[k] = v.strip()[:254]
-
+                v = v.strip()
+                row[k] = v[:254]
             try:
                 if k:
                     if (k not in cls.__table__.c):
                         del row[k]
                     elif not v or v.strip() == "":
                         row[k] = None
-                    elif k == 'agency_id':
-                        row[k] = cls.unique_id
-                    elif k == 'direction_id':
-                        row[k] = int(v)
                     elif k.endswith('date'):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                     elif '_id' in k:
-                        value = v+'-'+cls.unique_id
-                        row[k] = value[:255]
+                        v_san = str(v)
+                        if k not in key_lookup.keys():
+                            key_lookup[k] = dict()
+                        if v_san not in key_lookup[k].keys():
+                            key_lookup[k][str(v_san)] = uuid.uuid4()
+                        row[k] = key_lookup[k][str(v_san)]
                 else:
-                    log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
+                    log.warning("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
             except Exception, e:
-                log.warning(e)
+                log.error(e)
 
         '''if this is a geospatially enabled database, add a geom'''
         if hasattr(cls, 'the_geom') and hasattr(cls, 'add_geom_to_dict'):

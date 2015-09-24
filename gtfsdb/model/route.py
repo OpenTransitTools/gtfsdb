@@ -4,14 +4,16 @@ import sys
 import logging
 log = logging.getLogger(__name__)
 
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey, Sequence
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
+from geoalchemy2 import Geometry
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-from geoalchemy2 import Geometry
+from gtfsdb.model.agency import Agency
+from gtfsdb.model.guuid import GUID
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteStop', 'RouteFilter']
 
@@ -21,7 +23,7 @@ class RouteType(Base):
     filename = 'route_type.txt'
     __tablename__ = 'gtfs_route_type'
 
-    route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    route_type = Column(Integer, primary_key=True, autoincrement=False)
     route_type_name = Column(String(255))
     route_type_desc = Column(String(255))
 
@@ -32,28 +34,28 @@ class Route(Base):
 
     __tablename__ = 'gtfs_routes'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route_id = Column(GUID(), primary_key=True, nullable=False)
+    agency_id = Column(GUID(), nullable=False)
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
     route_desc = Column(String(255))
-    route_type = Column(Integer, index=True, nullable=False)
+    route_type = Column(Integer, nullable=False)
     route_url = Column(String(255))
     route_color = Column(String(6))
     route_text_color = Column(String(6))
-    route_sort_order = Column(Integer, index=True)
-    the_geom = deferred(Column(Geometry('MULTILINESTRING')))
+    route_sort_order = Column(Integer)
+    the_geom = deferred(Column(Geometry('MULTILINESTRING', spatial_index=False)))
 
-    trips = relationship(
-        'Trip',
-        primaryjoin='Route.route_id==Trip.route_id',
-        foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True)
+    trips = relationship('Trip', backref='route', primaryjoin='Trip.route_id==Route.route_id',
+                         foreign_keys='(Trip.route_id)', cascade='delete')
+    directions = relationship('RouteDirection', primaryjoin='RouteDirection.route_id==Route.route_id',
+                              foreign_keys='(RouteDirection.route_id)', cascade='delete')
 
-    directions = relationship(
-        'RouteDirection',
-        primaryjoin='Route.route_id==RouteDirection.route_id',
-        foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True, lazy='joined')
+    @classmethod
+    def make_record(cls, row, key_lookup):
+        if 'agency_id' not in row.keys() or not row['agency_id']:
+            row['agency_id']='1'
+        return super(Route, cls).make_record(row, key_lookup)
 
     @property
     def is_active(self, date=None):
@@ -173,27 +175,26 @@ class Route(Base):
         return ret_val
 
 class RouteDirection(Base):
-    #TODO Inactive until we add agency ID to all records
     datasource = config.DATASOURCE_GTFS
     filename = 'route_directions.txt'
 
     __tablename__ = 'gtfs_directions'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    direction_id = Column(GUID(), nullable=False)
+    route_id = Column(GUID())
     direction_name = Column(String(255))
-    #TODO add agency here?
-
 
 class RouteStop(Base):
     datasource = config.DATASOURCE_DERIVED
 
     __tablename__ = 'route_stops'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    order = Column(Integer, index=True, nullable=False)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    route_id = Column(GUID(), nullable=False)
+    direction_id = Column(GUID(), nullable=False)
+    stop_id = Column(GUID(), nullable=False)
+    order = Column(Integer, nullable=False)
 
     route = relationship(
         'Route',
@@ -307,7 +308,7 @@ class RouteFilter(Base):
     filename = 'route_filter.txt'
     __tablename__ = 'route_filters'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route_id = Column(GUID(), primary_key=True, nullable=False)
     description = Column(String)
 
 

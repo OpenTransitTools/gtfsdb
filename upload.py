@@ -12,7 +12,11 @@ from gtfsdb.model.gtfs import GTFS
 from gtfsdb.api import database_load
 from gtfsdb.import_api.custom import gtfs_source_list
 from gtfsdb.import_api.gtfs_exchange import GTFSExchange
+from gtfsdb.model.metaTracking import Meta
 import datetime
+
+def failed(session):
+    return [ f.file_name for f in session.query(Meta).filter_by(completed=False).filter_by(upload_date=None).all()]
 
 def zip_sources():
     return ['data/action_20150129_0101.zip', 'data/abq-ride_20150802_0107.zip']
@@ -43,11 +47,12 @@ def internal_file():
 
 def tag_meta(source, database):
     db = Database(url=database)
-    meta = Meta(file_name=source)
-    db.session.add(meta)
-    db.session.commit()
-    database_load(source, database)
-    meta.completed = True
+    meta = db.session.query(Meta).filter_by(file_name=source).first()
+    if not meta:
+        meta = Meta(file_name=source)
+        db.session.add(meta)
+        db.session.commit()
+    meta.completed = database_load(source, database)
     meta.upload_date = datetime.datetime.utcnow()
     db.session.commit()
 
@@ -60,12 +65,23 @@ def main(database, parallel=0):
     #    pass
 
     sources = []
-    sources += ['data/sample-feed.zip'] * 8
+    #sources += ['data/sample-feed.zip'] * 8
+    sources = [ 'data/MBTA_GTFS.zip' ]
+    #sources = ['internal_data/AUSTIN/google_transit.zip']
     #sources += gtfs_dump()
     #sources += [zip_sources()[0]]
     #sources += internal_file()
     #sources += gtfs_ex_sources()
     #sources += gtfs_ex_api()
+    #sources += failed(db.get_session())
+
+
+
+    session = db.get_session()
+    for f in session.query(Meta).filter_by(completed=True):
+        if f.file_name in sources:
+            sources.remove(f.file_name)
+
 
     if parallel:
         concurrent_run(sources, database, parallel)
