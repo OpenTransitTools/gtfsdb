@@ -8,7 +8,7 @@ class Meta(Base):
     __tablename__ = 'feed_meta_data'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    file_name = Column(String(255))
+    file_name = Column(String(255), unique=True)
     completed = Column(Boolean, default=False)
     upload_date = Column(DateTime)
 

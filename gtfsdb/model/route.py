@@ -4,7 +4,7 @@ import sys
 import logging
 log = logging.getLogger(__name__)
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, Sequence
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
@@ -180,7 +180,8 @@ class RouteDirection(Base):
 
     __tablename__ = 'gtfs_directions'
 
-    direction_id = Column(GUID(), primary_key=True, nullable=False)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    direction_id = Column(GUID(), nullable=False)
     route_id = Column(GUID())
     direction_name = Column(String(255))
 
@@ -189,9 +190,10 @@ class RouteStop(Base):
 
     __tablename__ = 'route_stops'
 
-    route_id = Column(GUID(), primary_key=True, nullable=False)
-    direction_id = Column(GUID(), primary_key=True, nullable=False)
-    stop_id = Column(GUID(), primary_key=True, nullable=False)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    route_id = Column(GUID(), nullable=False)
+    direction_id = Column(GUID(), nullable=False)
+    stop_id = Column(GUID(), nullable=False)
     order = Column(Integer, nullable=False)
 
     route = relationship(

@@ -2,6 +2,8 @@ from gtfsdb import Database, GTFS
 from gtfsdb.model.feed_info import DataexchangeInfo
 import logging
 import datetime
+import traceback
+import sys
 
 log = logging.getLogger(__name__)
 
@@ -39,5 +41,6 @@ def database_load(filename, db_url):
         #gtfs.post_process(db)
         return True
     except Exception, e:
+        traceback.print_exc(file=sys.stdout)
         log.error('Error processing: {} Message: {}'.format(filename,e))
         return False
