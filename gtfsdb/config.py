@@ -50,7 +50,7 @@ SORTED_CLASS_NAMES = [
     'StopTime',
     'RouteStop',
     'Frequency',
-    'FareAttribute',
-    'FareRule',
+    #'FareAttribute',
+    #'FareRule',
     'UniversalCalendar'
 ]
