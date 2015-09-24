@@ -58,7 +58,7 @@ class Route(Base):
                               foreign_keys='(FareRule.route_id)', cascade='delete', backref='route')
 
     @classmethod
-    def make_record(cls, row, key_lookup):
+    def make_record(cls, row, key_lookup, **kwargs):
         if 'agency_id' not in row.keys() or not row['agency_id']:
             row['agency_id']='1'
         return super(Route, cls).make_record(row, key_lookup)

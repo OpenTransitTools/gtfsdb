@@ -24,7 +24,7 @@ class Transfer(Base):
                            foreign_keys='(Transfer.to_stop_id)')
 
     @classmethod
-    def make_record(cls, row, key_lookup):
+    def make_record(cls, row, key_lookup, **kwargs):
         row['from_stop_id'] = key_lookup['stop_id'][row['from_stop_id']]
         row['to_stop_id'] = key_lookup['stop_id'][row['to_stop_id']]
         return super(Transfer, cls).make_record(row, key_lookup)

@@ -32,3 +32,9 @@ class FeedInfo(Base):
     agencies = relationship('Agency', backref="feed", primaryjoin='Agency.feed_id==FeedInfo.feed_id',
                             foreign_keys='(Agency.feed_id)', cascade='delete')
 
+    @classmethod
+    def make_record(cls, row, key_lookup, **kwargs):
+        if 'feed_id' not in row.keys() or not row['feed_id']:
+            row['feed_id'] = '1'
+        return super(FeedInfo, cls).make_record(row, key_lookup, **kwargs)
+

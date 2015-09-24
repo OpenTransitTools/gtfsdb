@@ -120,7 +120,7 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
-        if 'thread_pool'  in kwargs.keys():
+        if 'thread_pool' in kwargs.keys():
             thread_pool = kwargs.get('thread_pool')
         else:
             thread_pool = ThreadPoolExecutor(max_workers=1)
@@ -137,7 +137,7 @@ class _Base(object):
 
             i = 0
             for row in reader:
-                record = cls.make_record(row, key_lookup)
+                record = cls.make_record(row, key_lookup, **kwargs)
                 records.append(record)
                 i += 1
                 if i >= batch_size:
@@ -167,7 +167,7 @@ class _Base(object):
         pass
 
     @classmethod
-    def make_record(cls, row, key_lookup):
+    def make_record(cls, row, key_lookup, **kwargs):
         for k, v in row.items():
             if isinstance(v, uuid.UUID):
                 continue
