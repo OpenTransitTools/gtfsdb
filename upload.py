@@ -13,8 +13,8 @@ import datetime
 
 from gtfsdb.model.agency import Agency
 
-def failed(session):
-    return [ f.file_name for f in session.query(Meta).filter_by(completed=False).filter_by(upload_date=None).all()]
+#def failed(session):
+#    return [ f.file_name for f in session.query(Meta).filter_by(completed=False).filter_by(upload_date=None).all()]
 
 def zip_sources():
     return ['data/action_20150129_0101.zip', 'data/abq-ride_20150802_0107.zip']
@@ -60,6 +60,8 @@ def get_gtfs_feeds():
     gtfs_api = GTFSExchange()
     feeds = []
     for feed in gtfs_api.get_gtfs_agencies(True):
+        if not feed['country'] == 'United States':
+            continue
         details = gtfs_api.get_gtfs_agency_details(feed)['agency']
         file = gtfs_api.get_most_recent_file(feed)
         feeds.append(dict(feed_meta=details, file_meta=file['file']))
