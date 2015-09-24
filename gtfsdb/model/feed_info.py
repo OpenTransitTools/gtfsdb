@@ -32,7 +32,3 @@ class FeedInfo(Base):
     agencies = relationship('Agency', backref="feed", primaryjoin='Agency.feed_id==FeedInfo.feed_id',
                             foreign_keys='(Agency.feed_id)', cascade='delete')
 
-    @classmethod
-    def load(cls, db, **kwargs):
-        pass
-

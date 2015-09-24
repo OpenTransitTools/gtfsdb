@@ -6,6 +6,7 @@ import time
 from urllib import urlretrieve
 import zipfile
 import guuid
+from concurrent.futures import ThreadPoolExecutor
 
 from gtfsdb import config
 from .route import Route
@@ -43,17 +44,19 @@ class GTFS(object):
         load_kwargs = dict(
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
-            key_lookup=key_lookup
+            key_lookup=key_lookup,
+            thread_pool=ThreadPoolExecutor(max_workers=1)
         )
+        futures = []
         for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
-            cls.load(db, **load_kwargs)
+            futures += cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 
-
-        '''load route geometries derived from shapes.txt'''
-        # Lets not use updates while importing
-        #if Route in db.classes:
-        #    Route.load_geoms(db)
+        log.debug('GTFS.load: Done parsing, finishing upload')
+        for future in futures:
+            while future.running():
+                time.sleep(0.1)
+            future.result()
 
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))

@@ -44,7 +44,12 @@ class Stop(Base):
         'StopFeature',
         primaryjoin='Stop.stop_id==StopFeature.stop_id',
         foreign_keys='(Stop.stop_id)',
-        uselist=True, viewonly=True)
+        uselist=True, cascade='delete')
+
+    transfers_out = relationship('Transfer', primaryjoin="Stop.stop_id==Transfer.from_stop_id",
+                                 foreign_keys='(Transfer.from_stop_id)', uselist=True, cascade='delete')
+    transfers_in = relationship('Transfer', primaryjoin="Stop.stop_id==Transfer.to_stop_id",
+                                 foreign_keys='(Transfer.to_stop_id)', uselist=True, cascade='delete')
 
 
     @property
