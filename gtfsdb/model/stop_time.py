@@ -32,6 +32,9 @@ class StopTime(Base):
     shape_dist_traveled = Column(Numeric(20, 10))
     timepoint = Column(Boolean, default=False)
 
+    stop = relationship('Stop', primaryjoin="Stop.stop_id==StopTime.stop_id",
+                        foreign_keys='(StopTime.stop_id)', uselist=True, cascade='delete')
+
 
     def __init__(self, *args, **kwargs):
         super(StopTime, self).__init__(*args, **kwargs)

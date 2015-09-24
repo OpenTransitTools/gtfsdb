@@ -26,7 +26,7 @@ class Stop(Base):
     stop_desc = Column(String(255))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
-    zone_id = Column(String(50))
+    zone_id = Column(GUID())
     stop_url = Column(String(255))
     location_type = Column(Integer, default=0)
     parent_station = Column(String(255))
@@ -38,13 +38,18 @@ class Stop(Base):
     the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID, spatial_index=False))
 
     stop_times = relationship('StopTime', primaryjoin="Stop.stop_id==StopTime.stop_id",
-                              foreign_keys='(StopTime.stop_id)', uselist=True, backref="stop")
+                              foreign_keys='(StopTime.stop_id)', uselist=True)
 
     stop_features = relationship(
         'StopFeature',
         primaryjoin='Stop.stop_id==StopFeature.stop_id',
         foreign_keys='(Stop.stop_id)',
-        uselist=True, viewonly=True)
+        uselist=True, cascade='delete')
+
+    transfers_out = relationship('Transfer', primaryjoin="Stop.stop_id==Transfer.from_stop_id",
+                                 foreign_keys='(Transfer.from_stop_id)', uselist=True, cascade='delete')
+    transfers_in = relationship('Transfer', primaryjoin="Stop.stop_id==Transfer.to_stop_id",
+                                 foreign_keys='(Transfer.to_stop_id)', uselist=True, cascade='delete')
 
 
     @property

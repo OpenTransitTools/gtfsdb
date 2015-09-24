@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.guuid import GUID
 
 
 __all__ = ['ShapeGeom', 'Shape']
@@ -21,7 +22,7 @@ class ShapeGeom(Base):
 
     __tablename__ = 'gtfs_shape_geoms'
 
-    shape_id = Column(String(255), primary_key=True)
+    shape_id = Column(GUID(), primary_key=True)
     the_geom = Column(Geometry(geometry_type='LINESTRING', srid=config.SRID, spatial_index=False))
 
     trips = relationship(
@@ -80,7 +81,7 @@ class Shape(Base):
     __tablename__ = 'gtfs_shapes'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    shape_id = Column(String(255))
+    shape_id = Column(GUID())
     shape_pt_lat = Column(Numeric(12, 9))
     shape_pt_lon = Column(Numeric(12, 9))
     shape_pt_sequence = Column(Integer, primary_key=True)

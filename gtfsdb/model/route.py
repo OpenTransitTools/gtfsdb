@@ -46,10 +46,16 @@ class Route(Base):
     route_sort_order = Column(Integer)
     the_geom = deferred(Column(Geometry('MULTILINESTRING', spatial_index=False)))
 
-    trips = relationship('Trip', backref='route', primaryjoin='Trip.route_id==Route.route_id',
-                         foreign_keys='(Trip.route_id)', cascade='delete')
+    trips = relationship('Trip', primaryjoin='Trip.route_id==Route.route_id',
+                         foreign_keys='(Trip.route_id)', uselist=True, backref='route',
+                         cascade='delete')
+
     directions = relationship('RouteDirection', primaryjoin='RouteDirection.route_id==Route.route_id',
-                              foreign_keys='(RouteDirection.route_id)', cascade='delete')
+                              foreign_keys='(RouteDirection.route_id)', uselist=True, cascade='delete',
+                              backref='route')
+
+    fare_rules = relationship('FareRule', primaryjoin='FareRule.route_id==Route.route_id',
+                              foreign_keys='(FareRule.route_id)', cascade='delete', backref='route')
 
     @classmethod
     def make_record(cls, row, key_lookup):

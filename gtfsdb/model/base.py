@@ -120,7 +120,10 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
-        thread_pool = ThreadPoolExecutor(max_workers=1)
+        if 'thread_pool'  in kwargs.keys():
+            thread_pool = kwargs.get('thread_pool')
+        else:
+            thread_pool = ThreadPoolExecutor(max_workers=1)
 
         records = []
         futures = []
@@ -145,12 +148,14 @@ class _Base(object):
                 futures.append(thread_pool.submit(db.execute, table.insert(), records))
             f.close()
 
-        for future in futures:
-            while future.running():
-                time.sleep(1)
-            future.result()
+        if 'thread_pool' not in kwargs.keys():
+            for future in futures:
+                while future.running():
+                    time.sleep(0.1)
+                future.result()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
+        return futures
 
 
     @classmethod
@@ -164,6 +169,8 @@ class _Base(object):
     @classmethod
     def make_record(cls, row, key_lookup):
         for k, v in row.items():
+            if isinstance(v, uuid.UUID):
+                continue
             if isinstance(v, basestring):
                 v = v.strip()
                 row[k] = v[:254]
