@@ -123,7 +123,7 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
-        thread_pool = ThreadPoolExecutor(max_workers=3)
+        thread_pool = ThreadPoolExecutor(max_workers=1)
 
         records = []
         futures = []
@@ -149,6 +149,8 @@ class _Base(object):
             f.close()
 
         for future in futures:
+            while future.running():
+                time.sleep(1)
             future.result()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
