@@ -26,12 +26,24 @@ class Trip(Base):
 
     stop_times = relationship('StopTime', primaryjoin='Trip.trip_id==StopTime.trip_id',
                               foreign_keys='(StopTime.trip_id)', uselist=True, backref='trip', cascade='delete')
+    frequencies = relationship('Frequency', primaryjoin='Trip.trip_id==Frequency.trip_id',
+                               foreign_keys='(Frequency.trip_id)', cascade='delete')
+
+    calendar = relationship('Calendar', primaryjoin='Trip.service_id==Calendar.service_id',
+                            foreign_keys='(Trip.service_id)', cascade='delete')
+
+    shape_points = relationship('Shape', primaryjoin='Trip.shape_id==Shape.shape_id', uselist=True,
+                                foreign_keys='(Trip.shape_id)', cascade='delete')
+
+    shape_geom = relationship('ShapeGeom', primaryjoin='Trip.shape_id==ShapeGeom.shape_id',
+                                foreign_keys='(Trip.shape_id)', cascade='delete')
+
 
     universal_calendar = relationship(
         'UniversalCalendar',
         primaryjoin='Trip.service_id==UniversalCalendar.service_id',
         foreign_keys='(Trip.service_id)',
-        uselist=True, viewonly=True)
+        uselist=True, cascade='delete')
 
     @property
     def end_stop(self):

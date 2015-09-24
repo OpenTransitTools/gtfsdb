@@ -38,7 +38,7 @@ class Stop(Base):
     the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID, spatial_index=False))
 
     stop_times = relationship('StopTime', primaryjoin="Stop.stop_id==StopTime.stop_id",
-                              foreign_keys='(StopTime.stop_id)', uselist=True, backref="stop")
+                              foreign_keys='(StopTime.stop_id)', uselist=True)
 
     stop_features = relationship(
         'StopFeature',

@@ -36,6 +36,9 @@ class Calendar(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
 
+    calendar_date = relationship('CalendarDate', primaryjoin='Calendar.service_id==CalendarDate.service_id',
+                                 foreign_keys='(CalendarDate.service_id)', cascade='delete')
+
     def weekday_list(self):
         weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3,
                             friday=4, saturday=5, sunday=6)
@@ -61,6 +64,7 @@ class CalendarDate(Base):
     service_id = Column(String(255), primary_key=True, nullable=False)
     date = Column(Date, primary_key=True, nullable=False)
     exception_type = Column(Integer, nullable=False)
+
 
     @hybrid_property
     def is_addition(self):

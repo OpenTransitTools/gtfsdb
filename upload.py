@@ -15,6 +15,8 @@ from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 from gtfsdb.model.metaTracking import Meta
 import datetime
 
+from gtfsdb.model.agency import Agency
+
 def failed(session):
     return [ f.file_name for f in session.query(Meta).filter_by(completed=False).filter_by(upload_date=None).all()]
 
@@ -65,8 +67,8 @@ def main(database, parallel=0):
     #    pass
 
     sources = []
-    #sources += ['data/sample-feed.zip'] * 8
-    sources = [ 'data/MBTA_GTFS.zip' ]
+    sources += ['data/sample-feed.zip']
+    #sources = [ 'data/MBTA_GTFS.zip' ]
     #sources = ['internal_data/AUSTIN/google_transit.zip']
     #sources += gtfs_dump()
     #sources += [zip_sources()[0]]
@@ -87,6 +89,14 @@ def main(database, parallel=0):
         concurrent_run(sources, database, parallel)
     else:
         serial_run(sources, database)
+
+    for agency in db.session.query(Agency).all():
+        db.session.delete(agency)
+    db.session.commit()
+
+    for cls in db.classes:
+        if not db.session.query(cls).count() == 0:
+            print cls
 
 
 def serial_run(sources, database):

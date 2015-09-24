@@ -24,7 +24,7 @@ class Agency(Base):
     agency_fare_url = Column(String(255))
 
     routes = relationship('Route', backref='agency', primaryjoin='Route.agency_id==Agency.agency_id',
-                          foreign_keys='(Route.agency_id)')
+                          foreign_keys='(Route.agency_id)', cascade='delete')
 
     @classmethod
     def make_record(cls, row, key_lookup):
