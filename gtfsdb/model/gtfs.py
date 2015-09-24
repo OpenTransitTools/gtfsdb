@@ -16,11 +16,12 @@ log = logging.getLogger(__name__)
 
 class GTFS(object):
 
-    def __init__(self, filename, unique_id=None):
-        self.file = filename
-        log.debug("Fetching {}".format(filename))
-        self.local_file = urlretrieve(filename)[0]
-        log.debug("Done Fetching {}".format(filename))
+    def __init__(self, filename=None, unique_id=None):
+        if filename:
+            self.file = filename
+            log.debug("Fetching {}".format(filename))
+            self.local_file = urlretrieve(filename)[0]
+            log.debug("Done Fetching {}".format(filename))
 
     @staticmethod
     def bootstrab_db(db):
@@ -29,6 +30,9 @@ class GTFS(object):
 
     def load(self, db, **kwargs):
         '''Load GTFS into database'''
+        if not self.file:
+            log.error("No Filename Specified")
+            return
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
@@ -53,6 +57,20 @@ class GTFS(object):
 
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
+
+    def load_derived(self, db, **kwargs):
+        '''Load GTFS into database'''
+        start_time = time.time()
+        log.debug('GTFS.load_derived')
+
+        load_kwargs = dict(
+            batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
+        )
+        for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_DERIVED):
+            cls.load(db, **load_kwargs)
+
+        process_time = time.time() - start_time
+        log.debug('GTFS.load_derived ({0:.0f} seconds)'.format(process_time))
 
     def post_process(self, db):
         for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):

@@ -9,7 +9,7 @@ import os
 from gtfsdb.model.db import Database
 from gtfsdb.model.metaTracking import Meta
 from gtfsdb.model.gtfs import GTFS
-from gtfsdb.api import database_load
+from gtfsdb.api import database_load, create_shapes_geoms
 from gtfsdb.import_api.custom import gtfs_source_list
 from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 from gtfsdb.model.metaTracking import Meta
