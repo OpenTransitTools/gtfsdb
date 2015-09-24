@@ -1,18 +1,14 @@
 __author__ = 'rhunter'
 
 import argparse
-from sqlalchemy.exc import IntegrityError
 from joblib import Parallel, delayed
 import json
 import os
 
 from gtfsdb.model.db import Database
-from gtfsdb.model.metaTracking import Meta
-from gtfsdb.model.gtfs import GTFS
-from gtfsdb.api import database_load, create_shapes_geoms
+from gtfsdb.api import database_load, create_shapes_geoms, database_load_versioned
 from gtfsdb.import_api.custom import gtfs_source_list
 from gtfsdb.import_api.gtfs_exchange import GTFSExchange
-from gtfsdb.model.metaTracking import Meta
 import datetime
 
 from gtfsdb.model.agency import Agency
@@ -33,6 +29,7 @@ def gtfs_ex_api():
     file_list = []
     gtfs_api = GTFSExchange()
     for agency in gtfs_api.get_gtfs_agencies(official_only=False):
+        details = gtfs_api.get_gtfs_agency_details(agency)
         file = gtfs_api.get_most_recent_file(agency)
         if file:
             file_list.append(file['file']['file_url'])
@@ -58,54 +55,35 @@ def tag_meta(source, database):
     meta.upload_date = datetime.datetime.utcnow()
     db.session.commit()
 
+
+def get_gtfs_feeds():
+    gtfs_api = GTFSExchange()
+    feeds = []
+    for feed in gtfs_api.get_gtfs_agencies(True):
+        details = gtfs_api.get_gtfs_agency_details(feed)['agency']
+        file = gtfs_api.get_most_recent_file(feed)
+        feeds.append(dict(feed_meta=details, file_meta=file['file']))
+    return feeds
+
 def main(database, parallel=0):
+
     db = Database(url=database, is_geospatial=True)
     db.create()
-    #try:
-    #    GTFS.bootstrab_db(db)
-    #except IntegrityError:
-    #    pass
 
-    sources = []
-    sources += ['data/sample-feed.zip']
-    #sources = [ 'data/MBTA_GTFS.zip' ]
-    #sources = ['internal_data/AUSTIN/google_transit.zip']
-    #sources += gtfs_dump()
-    #sources += [zip_sources()[0]]
-    #sources += internal_file()
-    #sources += gtfs_ex_sources()
-    #sources += gtfs_ex_api()
-    #sources += failed(db.get_session())
-
-
-
-    session = db.get_session()
-    for f in session.query(Meta).filter_by(completed=True):
-        if f.file_name in sources:
-            sources.remove(f.file_name)
-
+    feeds = get_gtfs_feeds()
 
     if parallel:
-        concurrent_run(sources, database, parallel)
+        concurrent_run(feeds, database, parallel)
     else:
-        serial_run(sources, database)
-
-    for agency in db.session.query(Agency).all():
-        db.session.delete(agency)
-    db.session.commit()
-
-    for cls in db.classes:
-        if not db.session.query(cls).count() == 0:
-            print cls
-
+        serial_run(feeds, database)
 
 def serial_run(sources, database):
     for source in sources:
-        tag_meta(source, database)
+        database_load_versioned(db_url=database, **source)
 
 
 def concurrent_run(sources, database, num_jobs):
-    Parallel(n_jobs=int(num_jobs))(delayed(tag_meta)(source, database) for source in sources)
+    Parallel(n_jobs=int(num_jobs))(delayed(database_load_versioned)(db_url=database, **source) for source in sources)
 
 
 if __name__ == '__main__':

@@ -17,8 +17,10 @@ log = logging.getLogger(__name__)
 
 class GTFS(object):
 
-    def __init__(self, filename=None, unique_id=None):
+    def __init__(self, filename=None, file_id=None):
+        self.file=None
         if filename:
+            self.file_id = file_id
             self.file = filename
             log.debug("Fetching {}".format(filename))
             self.local_file = urlretrieve(filename)[0]
@@ -45,7 +47,8 @@ class GTFS(object):
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
             key_lookup=key_lookup,
-            thread_pool=ThreadPoolExecutor(max_workers=1)
+            thread_pool=ThreadPoolExecutor(max_workers=1),
+            file_id=self.file_id
         )
         futures = []
         for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
@@ -56,6 +59,9 @@ class GTFS(object):
         for future in futures:
             while future.running():
                 time.sleep(0.1)
+            excp = future.exception()
+            if excp:
+                raise excp
             future.result()
 
         process_time = time.time() - start_time
