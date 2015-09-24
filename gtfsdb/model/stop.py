@@ -26,7 +26,7 @@ class Stop(Base):
     stop_desc = Column(String(255))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
-    zone_id = Column(String(50))
+    zone_id = Column(GUID())
     stop_url = Column(String(255))
     location_type = Column(Integer, default=0)
     parent_station = Column(String(255))

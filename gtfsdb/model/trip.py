@@ -14,12 +14,12 @@ class Trip(Base):
 
     trip_id = Column(GUID(), primary_key=True, nullable=False)
     route_id = Column(GUID())
-    service_id = Column(String(255), nullable=False)
+    service_id = Column(GUID(), nullable=False)
     trip_headsign = Column(String(255))
     trip_short_name = Column(String(255))
     direction_id = Column(GUID())
-    block_id = Column(String(255))
-    shape_id = Column(String(255), nullable=True) # The forgien key here is going to be difficult
+    block_id = Column(GUID())
+    shape_id = Column(GUID(), nullable=True) # The forgien key here is going to be difficult
     trip_type = Column(String(255))
     bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)

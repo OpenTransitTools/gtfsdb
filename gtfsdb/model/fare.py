@@ -35,10 +35,10 @@ class FareRule(Base):
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
     fare_id = Column(GUID(), nullable=False)
     route_id = Column(GUID(), nullable=False)
-    origin_id = Column(String(255))
-    destination_id = Column(String(255))
-    contains_id = Column(String(255))
-    service_id = Column(String(255))
+    origin_id = Column(GUID())
+    destination_id = Column(GUID())
+    contains_id = Column(GUID())
+    service_id = Column(GUID())
 
     fare_attributes = relationship('FareAttribute', primaryjoin='FareRule.fare_id==FareAttribute.fare_id',
                                    foreign_keys='(FareRule.fare_id)', backref='fare_rule', uselist=True,

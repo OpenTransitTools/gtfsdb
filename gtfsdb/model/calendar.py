@@ -61,7 +61,7 @@ class CalendarDate(Base):
 
     __tablename__ = 'gtfs_calendar_dates'
 
-    service_id = Column(String(255), primary_key=True, nullable=False)
+    service_id = Column(GUID(), primary_key=True, nullable=False)
     date = Column(Date, primary_key=True, nullable=False)
     exception_type = Column(Integer, nullable=False)
 
@@ -79,7 +79,7 @@ class UniversalCalendar(Base):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'universal_calendar'
 
-    service_id = Column(String(255), primary_key=True, nullable=False)
+    service_id = Column(GUID(), primary_key=True, nullable=False)
     date = Column(Date, primary_key=True, nullable=False)
 
     trips = relationship(
