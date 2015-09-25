@@ -43,8 +43,8 @@ def database_load_versioned(feed_meta, file_meta, db_url):
         feed_file.completed = True
     except Exception, e:
         log.error("Error processing feed: {} {}".format(feed_file.filename or feed_file.file_url, e))
-        feed_file.censio_upload_date = datetime.utcnow()
     finally:
+        feed_file.censio_upload_date = datetime.utcnow()
         session = db.get_session()
         session.merge(feed_file)
         session.commit()
