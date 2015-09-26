@@ -140,3 +140,4 @@ class Database(object):
         if self.is_sqlite:
             self.engine.connect().connection.connection.text_factory = str
         self.session_factory = sessionmaker(self.engine)
+        self.session=scoped_session(self.session_factory)
