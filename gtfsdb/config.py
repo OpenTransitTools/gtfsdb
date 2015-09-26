@@ -24,6 +24,8 @@ DATASOURCE_DERIVED = 3
 DATASOURCE_GTFS = 1
 DATASOURCE_LOOKUP = 2
 
+DEFAULT_CONFIG_FILE = '/etc/censio/gtfsdb.json'
+
 
 '''Geometry constants'''
 #SRID = 900913

@@ -33,7 +33,7 @@ setup(
     extras_require=extras_require,
     entry_points='''
         [console_scripts]
-        gtfsdb=gtfsdb.scripts:gtfsdb
+        gtfsdb=gtfsdb.scripts:gtfsdb_main
     ''',
     classifiers=(
         'Development Status :: 4 - Beta',
