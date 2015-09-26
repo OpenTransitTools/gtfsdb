@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Sequence
+from sqlalchemy import Column, Sequence, Index
 from sqlalchemy.types import Integer, Numeric, String
 from sqlalchemy.orm import relationship
 import uuid
@@ -25,6 +25,8 @@ class FareAttribute(Base):
     transfer_duration = Column(Integer)
 
 
+Index('ix_gtfs_fare_attributes_fare_id', FareAttribute.fare_id, postgresql_using='hash')
+
 
 class FareRule(Base):
     datasource = config.DATASOURCE_GTFS
@@ -44,3 +46,9 @@ class FareRule(Base):
                                    foreign_keys='(FareRule.fare_id)', backref='fare_rule', uselist=True,
                                    cascade='delete')
 
+Index('ix_gtfs_fare_rule_fare_id', FareRule.fare_id, postgresql_using='hash')
+Index('ix_gtfs_fare_rule_route_id', FareRule.route_id, postgresql_using='hash')
+Index('ix_gtfs_fare_rule_origin_id', FareRule.origin_id, postgresql_using='hash')
+Index('ix_gtfs_fare_rule_destination_id', FareRule.destination_id, postgresql_using='hash')
+Index('ix_gtfs_fare_rule_contains_id', FareRule.contains_id, postgresql_using='hash')
+Index('ix_gtfs_fare_rule_service_id', FareRule.service_id, postgresql_using='hash')

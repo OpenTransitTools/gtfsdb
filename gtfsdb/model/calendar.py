@@ -54,6 +54,8 @@ class Calendar(Base):
                 date_list.append(dict(service_id=self.service_id, date=d))
         return date_list
 
+Index('ix_gtfs_calendar_service_id', Calendar.service_id, postgresql_using='hash')
+
 
 class CalendarDate(Base):
     datasource = config.DATASOURCE_GTFS
@@ -74,6 +76,7 @@ class CalendarDate(Base):
     def is_removal(self):
         return self.exception_type == 2
 
+Index('ix_gtfs_calendar_dates_service_id', CalendarDate.service_id, postgresql_using='hash')
 
 class UniversalCalendar(Base):
     datasource = config.DATASOURCE_DERIVED
@@ -106,3 +109,5 @@ class UniversalCalendar(Base):
         session.commit()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
+
+Index('ix_universal_calendar_service_id', CalendarDate.service_id, postgresql_using='hash')

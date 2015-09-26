@@ -5,26 +5,38 @@ import tempfile
 import time
 from urllib import urlretrieve
 import zipfile
-import guuid
+import hashlib
 from concurrent.futures import ThreadPoolExecutor
 
 from gtfsdb import config
-from .route import Route
 
 
 log = logging.getLogger(__name__)
 
+class InputFileMismatch(Exception):
+    pass
 
 class GTFS(object):
 
     def __init__(self, filename=None, file_id=None):
         self.file=None
         if filename:
-            self.file_id = file_id
             self.file = filename
             log.debug("Fetching {}".format(filename))
             self.local_file = urlretrieve(filename)[0]
             log.debug("Done Fetching {}".format(filename))
+            md5 = self.gen_md5(self.local_file)
+            if file_id:
+                if not file_id == md5:
+                    raise InputFileMismatch('Input file does not match expected MD5 hash')
+            self.file_id = md5
+
+
+
+
+    @classmethod
+    def gen_md5(cls, input_file):
+        return hashlib.md5(open(input_file,'rb').read()).hexdigest()
 
     @staticmethod
     def bootstrab_db(db):
@@ -85,6 +97,7 @@ class GTFS(object):
         for cls in db.sorted_classes(lambda k: k.datasource == config.DATASOURCE_GTFS):
             cls.post_process(db)
         pass
+
 
     def unzip(self, path=None):
         '''Unzip GTFS files from URL/directory to path.'''

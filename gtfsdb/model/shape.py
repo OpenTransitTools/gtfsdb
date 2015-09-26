@@ -2,7 +2,7 @@ import logging
 import time
 
 from geoalchemy2 import Geometry
-from sqlalchemy import Column, Integer, Numeric, String, Sequence
+from sqlalchemy import Column, Integer, Numeric, String, Sequence, Index
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 
@@ -74,6 +74,8 @@ class ShapeGeom(Base):
         log.debug('{0}.load ({1:.0f} seconds)'.format(
             cls.__name__, processing_time))
 
+Index('ix_gtfs_shape_geom_shape_id', ShapeGeom.shape_id, postgresql_using='hash')
+
 class Shape(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'shapes.txt'
@@ -97,3 +99,6 @@ class Shape(Base):
     def add_geom_to_dict(cls, row):
         args = (config.SRID, row['shape_pt_lon'], row['shape_pt_lat'])
         row['the_geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
+
+Index('ix_gtfs_shape_shape_id', Shape.shape_id, postgresql_using='hash')
+Index('ix_gtfs_shape_shape_dist_traveled', Shape.shape_dist_traveled)

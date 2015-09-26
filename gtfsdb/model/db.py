@@ -4,7 +4,7 @@ log = logging.getLogger(__file__)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import DBAPIError, IntegrityError
-
+import concurrent.futures
 from gtfsdb import config
 from math import pow
 import time
@@ -36,13 +36,6 @@ class Database(object):
         '''Drop/create GTFS database'''
         from gtfsdb.model.base import Base
         Base.metadata.create_all(self.engine)
-        #for cls in self.sorted_classes:
-        #    log.debug("create table: {0}".format(cls.__table__))
-        #    try:
-        #        cls.__table__.drop(self.engine, checkfirst=True)
-        #    except:
-        #        log.info("NOTE: couldn't drop table")
-        #    cls.__table__.create(self.engine)
 
     @property
     def dialect_name(self):
@@ -103,6 +96,20 @@ class Database(object):
                 classes.append(cls)
         return classes
 
+    def drop_indexes(self):
+        for table_name, table in self.metadata.tables.iteritems():
+            for index in table.indexes:
+                index.drop(bind=self.engine)
+
+    def create_indexes(self):
+        thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=config.DB_THREADS)
+        futures = []
+        for table_name, table in self.metadata.tables.iteritems():
+            for index in table.indexes:
+                futures.append(thread_pool.submit(index.create, bind=self.engine))
+        for future in futures:
+            while future.running():
+                time.sleep(0.1)
 
     @property
     def url(self):
@@ -133,4 +140,4 @@ class Database(object):
         if self.is_sqlite:
             self.engine.connect().connection.connection.text_factory = str
         self.session_factory = sessionmaker(self.engine)
-        self.session = scoped_session(self.session_factory)
+        self.session=scoped_session(self.session_factory)
