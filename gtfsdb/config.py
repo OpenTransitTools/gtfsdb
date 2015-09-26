@@ -38,7 +38,7 @@ INITIAL_LOAD_CLASS = [
 
 SORTED_CLASS_NAMES = [
     'FeedInfo',
-    'Agency'
+    'Agency',
     'Calendar',
     'CalendarDate',
     'Route',

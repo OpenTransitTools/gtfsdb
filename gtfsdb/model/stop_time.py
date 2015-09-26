@@ -20,8 +20,8 @@ class StopTime(Base):
 
     __tablename__ = 'gtfs_stop_times'
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    stop_id = Column(GUID())
-    trip_id = Column(GUID())
+    stop_id = Column(GUID(), nullable=False)
+    trip_id = Column(GUID(), nullable=False)
     arrival_time = Column(String(8))
     departure_time = Column(String(8))
     stop_sequence = Column(Integer, nullable=False)

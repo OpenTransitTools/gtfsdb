@@ -52,7 +52,7 @@ class FeedFile(Base):
 class GTFSExAgency(Base):
     __tablename__ = 'gtfs_exchange_agencies'
 
-    dataexchange_id = Column(String(255), primary_key=True)
+    dataexchange_id = Column(String(255), primary_key=True, nullable=False)
     area = Column(String(255))
     country = Column(String(255))
     dataexchange_url = Column(String(255))

@@ -13,8 +13,8 @@ class Transfer(Base):
     __tablename__ = 'gtfs_transfers'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
-    from_stop_id = Column(GUID())
-    to_stop_id = Column(GUID())
+    from_stop_id = Column(GUID(), nullable=False)
+    to_stop_id = Column(GUID(), nullable=False)
     transfer_type = Column(Integer, default=0)
     min_transfer_time = Column(Integer)
 

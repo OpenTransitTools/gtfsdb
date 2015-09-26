@@ -34,7 +34,7 @@ class Stop(Base):
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
-    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID, spatial_index=False))
+    the_geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     stop_times = relationship('StopTime', primaryjoin="Stop.stop_id==StopTime.stop_id",
                               foreign_keys='(StopTime.stop_id)', uselist=True)

@@ -192,7 +192,7 @@ class RouteDirection(Base):
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
     direction_id = Column(GUID(), nullable=False)
-    route_id = Column(GUID())
+    route_id = Column(GUID(), nullable=False)
     direction_name = Column(String(255))
 
 Index('ix_gtfs_route_directions_direction_id', RouteDirection.direction_id, postgresql_using='hash')

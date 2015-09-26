@@ -6,7 +6,7 @@ import json
 import os
 
 from gtfsdb.model.db import Database
-from gtfsdb.api import database_load, database_load_versioned, load_external_agencies
+from gtfsdb.api import database_load, database_load_versioned, load_external_agencies, create_shapes_geoms
 from gtfsdb.import_api.custom import gtfs_source_list
 from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 from gtfsdb.model.metaTracking import FeedFile
@@ -81,6 +81,8 @@ def main(database, parallel=0):
         concurrent_run(feeds, database, parallel)
     else:
         serial_run(feeds, database)
+
+    create_shapes_geoms(db_url=database)
 
     db.create_indexes()
 
