@@ -1,64 +1,24 @@
-import argparse
+import click
 
-from gtfsdb import config
-from gtfsdb.model.base import Base
-from gtfsdb.api import database_load
+from gtfsdb.model.db import Database
 
+@click.option('--database', help="The database connection string")
+@click.group()
+@click.pass_context
+def gtfsdb(ctx, database):
+    """Simple program that greets NAME for a total of COUNT times."""
+    ctx.obj = dict(database=Database(url=database))
 
-def gtfsdb_load():
-    args, kwargs = get_args()
-    database_load(args.file, **kwargs)
+@gtfsdb.group()
+def index():
+    pass
 
-def route_stop_load():
-    ''' written as a test / debug method for RS table loader '''
-    from gtfsdb import Database, RouteStop
-    kwargs = get_args()[1]
-    db = Database(**kwargs)
-    RouteStop.load(db, **kwargs)
+@index.command()
+@click.pass_context
+def drop(ctx):
+    ctx.obj['database'].drop_indexes()
 
-def db_connect_tester():
-    ''' simple routine to connect to an existing database and list a few stops
-        bin/connect-tester --database_url sqlite:///gtfs.db _no_gtfs_zip_needed_
-    '''
-    from gtfsdb import Database, Stop, Route, StopTime
-    args, kwargs = get_args()
-    db = Database(**kwargs)
-    for s in db.session.query(Stop).limit(2):
-        print s.stop_name
-    for r in db.session.query(Route).limit(2):
-        print r.route_name
-    #import pdb; pdb.set_trace()
-    stop_times = StopTime.get_departure_schedule(db.session, stop_id='11411')
-    for st in stop_times:
-        print st.get_direction_name()
-        break
-
-def get_args():
-    ''' database load command-line arg parser and help util...
-    '''
-    tables = sorted([t.name for t in Base.metadata.sorted_tables])
-    parser = argparse.ArgumentParser(
-        prog='gtfsdb-load',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('file', help='URL or local path to GTFS zip FILE')
-    parser.add_argument('--batch_size', '-b', default=config.DEFAULT_BATCH_SIZE,
-                        help='BATCH SIZE to use for memory management')
-    parser.add_argument('--database_url', '-d', default=config.DEFAULT_DATABASE_URL,
-                        help='DATABASE URL with appropriate privileges')
-    parser.add_argument('--is_geospatial', '-g', action='store_true',
-                        default=config.DEFAULT_IS_GEOSPATIAL,
-                        help='Database supports GEOSPATIAL functions')
-    parser.add_argument('--schema', '-s', default=config.DEFAULT_SCHEMA,
-                        help='Database SCHEMA name')
-    parser.add_argument('--tables', choices=tables, default=None, nargs='*',
-                        help='Limited list of TABLES to load, if blank, load all tables')
-    args = parser.parse_args()
-
-    kwargs = dict(
-        batch_size=args.batch_size,
-        schema=args.schema,
-        is_geospatial=args.is_geospatial,
-        tables=args.tables,
-        url=args.database_url,
-    )
-    return args, kwargs
+@index.command()
+@click.pass_context
+def create(ctx):
+    ctx.obj['database'].create_indexes()

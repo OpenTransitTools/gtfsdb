@@ -13,7 +13,7 @@ extras_require = dict(
     postgresql=postgresql_extras,
 )
 
-install_requires = ['geoalchemy2>=0.2.4', 'sqlalchemy>=0.9', 'joblib', 'requests', 'futures', 'psycopg2', 'alembic']
+install_requires = ['geoalchemy2>=0.2.4', 'sqlalchemy>=0.9', 'joblib', 'requests', 'futures', 'psycopg2', 'alembic', 'click']
 if sys.version_info[:2] <= (2, 6):
     install_requires.append('argparse>=1.2.1')
     extras_require['dev'].append('unittest2')
@@ -31,13 +31,10 @@ setup(
     zip_safe=False,
     install_requires=install_requires,
     extras_require=extras_require,
-    entry_points={
-        'console_scripts': [
-            'gtfsdb-load = gtfsdb.scripts:gtfsdb_load',
-            'rs-test = gtfsdb.scripts:route_stop_load',
-            'connect-tester = gtfsdb.scripts:db_connect_tester'
-        ]
-    },
+    entry_points='''
+        [console_scripts]
+        gtfsdb=gtfsdb.scripts:gtfsdb
+    ''',
     classifiers=(
         'Development Status :: 4 - Beta',
         'Environment :: Console',
