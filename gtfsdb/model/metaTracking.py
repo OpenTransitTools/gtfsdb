@@ -1,37 +1,56 @@
 __author__ = 'rhunter'
 import uuid
 
-from sqlalchemy import Column, Integer, Boolean, String, Sequence, DateTime
+from sqlalchemy import Column, Integer, Boolean, String, DateTime, Table, ForeignKey
+from sqlalchemy.orm import relationship
 
 from gtfsdb.model.base import Base
 from gtfsdb.model.guuid import GUID
+import datetime
 
+feed_agency_table = Table('feed_agency', Base.metadata,
+    Column('file_id', String(32), ForeignKey('gtfs_ex_files.md5sum')),
+    Column('ex_agency_id', String(255), ForeignKey('gtfs_exchange_agencies.dataexchange_id'))
+)
 
 class FeedFile(Base):
     __tablename__ = 'gtfs_ex_files'
 
-    dataexchange_id = Column(String(255))
-    date_added=Column(DateTime)
+    md5sum = Column(String(32), primary_key=True)
+    date_added = Column(DateTime)
     description = Column(String(255))
     file_url = Column(String(255))
     filename = Column(String(255))
-    md5sum = Column(String(32), primary_key=True)
     size = Column(Integer)
     uploaded_by_user = Column(String(255))
 
     completed = Column(Boolean, default=False)
     censio_upload_date = Column(DateTime)
 
+    agencies = relationship('GTFSExAgency',
+                            secondary=feed_agency_table,
+                            backref='feeds')
+
     def __init__(self, agencies, **kwargs):
-        self.agencies = agencies
+        self.agencies = [GTFSExAgency(dataexchange_id=agency) for agency in agencies]
+        if 'date_added' in kwargs.keys():
+            kwargs['date_added'] = datetime.datetime.utcfromtimestamp(kwargs.get('date_added'))
         for key, value in kwargs.iteritems():
             if isinstance(value, basestring):
                 kwargs[key]=value[:255]
         super(FeedFile, self).__init__(**kwargs)
 
+    def __eq__(self, other):
+        if isinstance(other, FeedFile) and self.md5sum == other.md5sum:
+            return True
+        return False
 
-class GTFSExFeed(Base):
-    __tablename__ = 'gtfs_exchange_feeds'
+    def __hash__(self):
+        return hash(self.md5sum)
+
+
+class GTFSExAgency(Base):
+    __tablename__ = 'gtfs_exchange_agencies'
 
     dataexchange_id = Column(String(255), primary_key=True)
     area = Column(String(255))
@@ -48,8 +67,10 @@ class GTFSExFeed(Base):
 
     def __init__(self, **kwargs):
         for key, value in kwargs.iteritems():
+            if 'date_' in key:
+                kwargs[key]=datetime.datetime.utcfromtimestamp(value)
             if isinstance(value, basestring):
                 kwargs[key]=value[:255]
-        super(GTFSExFeed, self).__init__(**kwargs)
+        super(GTFSExAgency, self).__init__(**kwargs)
 
 

@@ -3,7 +3,7 @@ log = logging.getLogger(__file__)
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError
 import concurrent.futures
 from gtfsdb import config
 from math import pow
@@ -99,7 +99,10 @@ class Database(object):
     def drop_indexes(self):
         for table_name, table in self.metadata.tables.iteritems():
             for index in table.indexes:
-                index.drop(bind=self.engine)
+                try:
+                    index.drop(bind=self.engine)
+                except ProgrammingError:
+                    continue
 
     def create_indexes(self):
         thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=config.DB_THREADS)

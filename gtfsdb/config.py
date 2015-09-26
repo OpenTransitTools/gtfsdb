@@ -38,7 +38,7 @@ INITIAL_LOAD_CLASS = [
 
 SORTED_CLASS_NAMES = [
     'FeedInfo',
-    'Agency',
+    'Agency'
     'Calendar',
     'CalendarDate',
     'Route',
@@ -52,7 +52,7 @@ SORTED_CLASS_NAMES = [
     'StopTime',
     'RouteStop',
     'Frequency',
-    'FareAttribute',
-    'FareRule',
+    #'FareAttribute',
+    #'FareRule',
     'UniversalCalendar'
 ]

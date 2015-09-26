@@ -6,9 +6,10 @@ import json
 import os
 
 from gtfsdb.model.db import Database
-from gtfsdb.api import database_load, create_shapes_geoms, database_load_versioned
+from gtfsdb.api import database_load, database_load_versioned, load_external_agencies
 from gtfsdb.import_api.custom import gtfs_source_list
 from gtfsdb.import_api.gtfs_exchange import GTFSExchange
+from gtfsdb.model.metaTracking import FeedFile
 import datetime
 
 from gtfsdb.model.agency import Agency
@@ -56,15 +57,15 @@ def tag_meta(source, database):
     db.session.commit()
 
 
-def get_gtfs_feeds():
+def get_gtfs_feeds(session):
     gtfs_api = GTFSExchange()
     feeds = []
     for feed in gtfs_api.get_gtfs_agencies(True):
         if not feed['country'] == 'United States':
             continue
         details = gtfs_api.get_gtfs_agency_details(feed)['agency']
-        file = gtfs_api.get_most_recent_file(feed)
-        feeds.append(dict(feed_meta=details, file_meta=file['file']))
+        load_external_agencies(session, details)
+        feeds.append(FeedFile(**gtfs_api.get_most_recent_file(feed)['file']))
     return feeds
 
 def main(database, parallel=0):
@@ -72,20 +73,24 @@ def main(database, parallel=0):
     db = Database(url=database, is_geospatial=True)
     db.create()
 
-    feeds = get_gtfs_feeds()
+    feeds = set(get_gtfs_feeds(db.get_session()))
+
+    db.drop_indexes()
 
     if parallel:
         concurrent_run(feeds, database, parallel)
     else:
         serial_run(feeds, database)
 
+    db.create_indexes()
+
 def serial_run(sources, database):
     for source in sources:
-        database_load_versioned(db_url=database, **source)
+        database_load_versioned(db_url=database, feed_file=source)
 
 
 def concurrent_run(sources, database, num_jobs):
-    Parallel(n_jobs=int(num_jobs))(delayed(database_load_versioned)(db_url=database, **source) for source in sources)
+    Parallel(n_jobs=int(num_jobs))(delayed(database_load_versioned)(db_url=database, feed_file=source) for source in sources)
 
 
 if __name__ == '__main__':

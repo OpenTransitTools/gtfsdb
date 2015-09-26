@@ -3,7 +3,7 @@ import logging
 import traceback
 import sys
 from datetime import datetime
-from gtfsdb.model.metaTracking import FeedFile, GTFSExFeed
+from gtfsdb.model.metaTracking import FeedFile, GTFSExAgency
 
 log = logging.getLogger(__name__)
 
@@ -19,20 +19,19 @@ def database_load(filename, db_url, file_id=None):
         log.error('Error processing: {} Message: {}'.format(filename,e))
         return False
 
-def database_load_versioned(feed_meta, file_meta, db_url):
-    feed_meta['date_added'] = datetime.utcfromtimestamp(feed_meta['date_added'])
-    feed_meta['date_last_updated'] = datetime.utcfromtimestamp(feed_meta['date_last_updated'])
-    file_meta['date_added'] = datetime.utcfromtimestamp(file_meta['date_added'])
+
+def load_external_agencies(session, agency_meta):
+    session.merge(GTFSExAgency(**agency_meta))
+    session.commit()
+
+
+def database_load_versioned(feed_file, db_url):
     db = Database(url=db_url)
     session = db.get_session()
-    feed = GTFSExFeed(**feed_meta)
-    session.merge(feed)
-    feed_file = FeedFile(dataexchange_id=feed.dataexchange_id, **file_meta)
-    existing_file = session.query(FeedFile).filter_by(dataexchange_id=feed.dataexchange_id).filter_by(completed=True)\
-        .order_by(FeedFile.date_added.desc()).first()
+    existing_file = session.query(FeedFile).get(feed_file.md5sum)
 
-    if existing_file and existing_file.date_added >= feed_file.date_added:
-        log.debug("Feed: {} already at its newest.".format(feed.dataexchange_id))
+    if existing_file and existing_file.completed:
+        log.debug("FeedFile: {} already at its newest.".format(feed_file.file_url))
         return
 
     session.merge(feed_file)
