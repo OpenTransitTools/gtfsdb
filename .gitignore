@@ -1,4 +1,6 @@
 *~
+output.log
+.DS_STORE
 [a-z].py
 *.py[cod]
 .settings
