@@ -17,11 +17,13 @@ DEFAULT_BATCH_SIZE = 10000
 DEFAULT_DATABASE_URL = 'sqlite://'
 DEFAULT_IS_GEOSPATIAL = False
 DEFAULT_SCHEMA = None
+DB_THREADS = 5
 
 '''Data source constants'''
 DATASOURCE_DERIVED = 3
 DATASOURCE_GTFS = 1
 DATASOURCE_LOOKUP = 2
+
 
 '''Geometry constants'''
 #SRID = 900913
@@ -50,7 +52,7 @@ SORTED_CLASS_NAMES = [
     'StopTime',
     'RouteStop',
     'Frequency',
-    #'FareAttribute',
-    #'FareRule',
+    'FareAttribute',
+    'FareRule',
     'UniversalCalendar'
 ]

@@ -1,4 +1,4 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, Index
 from sqlalchemy.types import String
 from sqlalchemy.orm import relationship
 
@@ -39,3 +39,5 @@ class Agency(Base):
         row['file_id'] = kwargs.get('file_id')
         return row
 
+Index('ix_gtfs_agency_agency_id', Agency.agency_id, postgresql_using='hash')
+Index('ix_gtfs_agency_feed_id', Agency.feed_id, postgresql_using='hash')

@@ -44,4 +44,10 @@ class TestModel(unittest.TestCase):
         self.assertEqual(9, session.query(Stop).count())
         self.assertEqual(11, session.query(Trip).count())
 
+    def test_create_and_remove_index(self):
+        self.database.drop_indexes()
+        self.database.create_indexes()
+        pass
+
+
 

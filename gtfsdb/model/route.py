@@ -4,7 +4,7 @@ import sys
 import logging
 log = logging.getLogger(__name__)
 
-from sqlalchemy import Column, ForeignKey, Sequence
+from sqlalchemy import Column, ForeignKey, Sequence, Index
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.types import Integer, String
 from sqlalchemy.sql import func
@@ -180,6 +180,10 @@ class Route(Base):
 
         return ret_val
 
+Index('ix_gtfs_routes_route_id', Route.route_id, postgresql_using='hash')
+Index('ix_gtfs_routes_agency_id', Route.agency_id, postgresql_using='hash')
+
+
 class RouteDirection(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'route_directions.txt'
@@ -190,6 +194,9 @@ class RouteDirection(Base):
     direction_id = Column(GUID(), nullable=False)
     route_id = Column(GUID())
     direction_name = Column(String(255))
+
+Index('ix_gtfs_route_directions_direction_id', RouteDirection.direction_id, postgresql_using='hash')
+Index('ix_gtfs_route_directions_route_id', RouteDirection.route_id, postgresql_using='hash')
 
 class RouteStop(Base):
     datasource = config.DATASOURCE_DERIVED
@@ -304,6 +311,10 @@ class RouteStop(Base):
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
+Index('ix_gtfs_route_stops_route_id', RouteStop.route_id, postgresql_using='hash')
+Index('ix_gtfs_route_stops_direction_id', RouteStop.direction_id, postgresql_using='hash')
+Index('ix_gtfs_route_stops_stop_id', RouteStop.stop_id, postgresql_using='hash')
+
 
 class RouteFilter(Base):
     ''' list of filters to be used to cull routes from certain lists
@@ -318,3 +329,4 @@ class RouteFilter(Base):
     description = Column(String)
 
 
+Index('ix_gtfs_route_filter_route_id', RouteFilter.route_id, postgresql_using='hash')

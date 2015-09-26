@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Sequence
+from sqlalchemy import Column, Sequence, Index
 from sqlalchemy.types import Date, DateTime, String, Integer, Boolean
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
@@ -37,4 +37,6 @@ class FeedInfo(Base):
         if 'feed_id' not in row.keys() or not row['feed_id']:
             row['feed_id'] = '1'
         return super(FeedInfo, cls).make_record(row, key_lookup, **kwargs)
+
+Index('ix_gtfs_feed_info_feed_id', FeedInfo.feed_id, postgresql_using='hash')
 

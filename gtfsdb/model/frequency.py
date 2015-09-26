@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Sequence
+from sqlalchemy import Column, Sequence, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
@@ -26,3 +26,5 @@ class Frequency(Base):
         primaryjoin='Frequency.trip_id==Trip.trip_id',
         foreign_keys='(Frequency.trip_id)',
         uselist=False, viewonly=True)
+
+Index('ix_gtfs_frequencies_trip_id', Frequency.trip_id, postgresql_using='hash')
