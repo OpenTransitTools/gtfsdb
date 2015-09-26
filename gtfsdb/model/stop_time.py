@@ -2,7 +2,7 @@ import datetime
 import logging
 log = logging.getLogger(__name__)
 
-from sqlalchemy import Column, Sequence
+from sqlalchemy import Column, Sequence, Index
 from sqlalchemy.orm import relationship, joinedload_all
 from sqlalchemy.sql.expression import func
 from sqlalchemy.types import Boolean, Integer, Numeric, String
@@ -13,7 +13,6 @@ from gtfsdb.model.trip import Trip
 from gtfsdb.model.stop import Stop
 from gtfsdb.model.guuid import GUID
 import uuid
-
 
 class StopTime(Base):
     datasource = config.DATASOURCE_GTFS
@@ -154,3 +153,6 @@ class StopTime(Base):
 
         ret_val = q.all()
         return ret_val
+
+Index('ix_gtfs_stop_times_stop_id', StopTime.stop_id, postgresql_using='hash')
+Index('ix_gtfs_stop_times_trip_id', StopTime.trip_id, postgresql_using='hash')

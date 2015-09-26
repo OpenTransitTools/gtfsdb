@@ -1,10 +1,11 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.guuid import GUID
+
 
 class Trip(Base):
     datasource = config.DATASOURCE_GTFS
@@ -64,3 +65,10 @@ class Trip(Base):
     @property
     def trip_len(self):
         return len(self.stop_times)
+
+
+Index('ix_gtfs_trips_trip_id', Trip.trip_id, postgresql_using='hash')
+Index('ix_gtfs_trips_route_id', Trip.route_id, postgresql_using='hash')
+Index('ix_gtfs_trips_service_id', Trip.service_id, postgresql_using='hash')
+
+

@@ -3,7 +3,7 @@ import datetime
 from collections import defaultdict
 
 from geoalchemy2 import Geometry
-from sqlalchemy import Column, Integer, Numeric, String
+from sqlalchemy import Column, Integer, Numeric, String, Index
 from sqlalchemy.orm import joinedload_all, object_session, relationship
 
 from gtfsdb import config
@@ -12,7 +12,6 @@ from gtfsdb.model.guuid import GUID
 
 
 log = logging.getLogger(__name__)
-
 
 class Stop(Base):
     datasource = config.DATASOURCE_GTFS
@@ -120,3 +119,5 @@ class Stop(Base):
             q = q.order_by(Route.route_sort_order)
             self._routes = q.all()
         return self._routes
+
+Index('ix_gtfs_stops_stop_id', Stop.stop_id, postgresql_using='hash')

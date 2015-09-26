@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Sequence, String
+from sqlalchemy import Column, Integer, Sequence, String, Index
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -28,3 +28,6 @@ class Transfer(Base):
         row['from_stop_id'] = key_lookup['stop_id'][row['from_stop_id']]
         row['to_stop_id'] = key_lookup['stop_id'][row['to_stop_id']]
         return super(Transfer, cls).make_record(row, key_lookup)
+
+Index('ix_gtfs_transfers_from_stop_id', Transfer.from_stop_id, postgresql_using='hash')
+Index('ix_gtfs_transfers_to_stop_id', Transfer.to_stop_id, postgresql_using='hash')

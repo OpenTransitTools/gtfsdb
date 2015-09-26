@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Sequence
+from sqlalchemy import Column, Sequence, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
@@ -21,3 +21,5 @@ class StopFeature(Base):
     stop_id = Column(GUID(), nullable=False)
     feature_type = Column(String(50), nullable=False)
     feature_name = Column(String(255))
+
+Index('ix_gtfs_stop_features_stop_id', StopFeature.stop_id, postgresql_using='hash')
