@@ -26,7 +26,7 @@ def load_external_agencies(session, agency_meta):
     session.commit()
 
 
-def database_load_versioned(feed_file, db_url):
+def database_load_versioned(feed_file, db_url, **kwargs):
     db = Database(url=db_url)
     session = db.get_session()
     existing_file = session.query(FeedFile).get(feed_file.md5sum)
@@ -39,7 +39,7 @@ def database_load_versioned(feed_file, db_url):
     session.commit()
 
     try:
-        database_load(filename=feed_file.file_url, db_url=db_url, file_id=feed_file.md5sum)
+        database_load(filename=feed_file.file_url, db_url=db_url, file_id=feed_file.md5sum, **kwargs)
         feed_file.completed = True
     except Exception, e:
         log.error("Error processing feed: {} {}".format(feed_file.filename or feed_file.file_url, e))
