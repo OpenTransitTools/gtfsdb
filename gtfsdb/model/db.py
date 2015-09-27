@@ -37,6 +37,10 @@ class Database(object):
         from gtfsdb.model.base import Base
         Base.metadata.create_all(self.engine)
 
+    def drop_all(self):
+        from gtfsdb.model.base import Base
+        Base.metadata.drop_all(self.engine)
+
     @property
     def dialect_name(self):
         return self.engine.url.get_dialect().name
