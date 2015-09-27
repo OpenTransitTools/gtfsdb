@@ -8,10 +8,10 @@ from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 
 log = logging.getLogger(__name__)
 
-def database_load(filename, db_url, file_id=None):
+def database_load(filename, db_url, **kwargs):
     try:
         db = Database(url=db_url, is_geospatial=True)
-        gtfs = GTFS(filename=filename, file_id=file_id)
+        gtfs = GTFS(filename=filename, file_id=kwargs.get('file_id'))
         gtfs.load(db)
         #gtfs.post_process(db)
         return True
@@ -26,7 +26,7 @@ def load_external_agencies(session, agency_meta):
     session.commit()
 
 
-def database_load_versioned(feed_file, db_url):
+def database_load_versioned(feed_file, db_url, **kwargs):
     db = Database(url=db_url)
     session = db.get_session()
     existing_file = session.query(FeedFile).get(feed_file.md5sum)
@@ -39,7 +39,7 @@ def database_load_versioned(feed_file, db_url):
     session.commit()
 
     try:
-        database_load(filename=feed_file.file_url, db_url=db_url, file_id=feed_file.md5sum)
+        database_load(filename=feed_file.file_url, db_url=db_url, file_id=feed_file.md5sum, **kwargs)
         feed_file.completed = True
     except Exception, e:
         log.error("Error processing feed: {} {}".format(feed_file.filename or feed_file.file_url, e))

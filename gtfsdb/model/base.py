@@ -5,6 +5,7 @@ import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
 import time
+import libuuid
 import uuid
 
 from concurrent.futures import ThreadPoolExecutor
@@ -169,11 +170,11 @@ class _Base(object):
     @classmethod
     def make_record(cls, row, key_lookup, **kwargs):
         for k, v in row.items():
-            if isinstance(v, uuid.UUID):
-                continue
             if isinstance(v, basestring):
                 v = v.strip()
                 row[k] = v[:254]
+            elif isinstance(v, uuid.UUID):
+                continue
             try:
                 if k:
                     if (k not in cls.__table__.c):
@@ -184,10 +185,14 @@ class _Base(object):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                     elif '_id' in k:
                         v_san = str(v)
-                        if k not in key_lookup.keys():
+                        try:
+                            key_lookup[k]
+                        except KeyError:
                             key_lookup[k] = dict()
-                        if v_san not in key_lookup[k].keys():
-                            key_lookup[k][str(v_san)] = uuid.uuid4()
+                        try:
+                            row[k] = key_lookup[k][str(v_san)]
+                        except KeyError:
+                            key_lookup[k][str(v_san)] = libuuid.uuid4()
                         row[k] = key_lookup[k][str(v_san)]
                 else:
                     log.warning("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))

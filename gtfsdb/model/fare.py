@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Sequence, Index
 from sqlalchemy.types import Integer, Numeric, String
 from sqlalchemy.orm import relationship
-import uuid
 
 from gtfsdb import config
 from gtfsdb.model.base import Base

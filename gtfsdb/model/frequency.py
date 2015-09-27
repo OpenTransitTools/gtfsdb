@@ -5,7 +5,7 @@ from sqlalchemy.types import Integer, String
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.guuid import GUID
-import uuid
+import libuuid
 
 
 class Frequency(Base):
