@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Sequence, String, Index
 from sqlalchemy.orm import relationship
-import uuid
+import libuuid
 
 from gtfsdb import config
 from gtfsdb.model.base import Base

@@ -2,7 +2,7 @@ __author__ = 'rhunter'
 
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
+import libuuid
 
 class GUID(TypeDecorator):
     """Platform-independent GUID type.
@@ -25,8 +25,8 @@ class GUID(TypeDecorator):
         elif dialect.name == 'postgresql':
             return str(value)
         else:
-            if not isinstance(value, uuid.UUID):
-                return "%.32x" % uuid.UUID(value)
+            if not isinstance(value, libuuid.FastUUID):
+                return "%.32x" % libuuid.FastUUID(value)
             else:
                 # hexstring
                 return "%.32x" % value
@@ -35,4 +35,4 @@ class GUID(TypeDecorator):
         if value is None:
             return value
         else:
-            return uuid.UUID(value)
+            return libuuid.FastUUID(value)

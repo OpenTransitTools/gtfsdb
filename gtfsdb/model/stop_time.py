@@ -12,7 +12,7 @@ from gtfsdb.model.base import Base
 from gtfsdb.model.trip import Trip
 from gtfsdb.model.stop import Stop
 from gtfsdb.model.guuid import GUID
-import uuid
+import libuuid
 
 class StopTime(Base):
     datasource = config.DATASOURCE_GTFS

@@ -1,5 +1,5 @@
 __author__ = 'rhunter'
-import uuid
+import libuuid
 
 from sqlalchemy import Column, Integer, Boolean, String, DateTime, Table, ForeignKey
 from sqlalchemy.orm import relationship
