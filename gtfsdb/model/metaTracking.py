@@ -27,15 +27,18 @@ class FeedFile(Base):
     completed = Column(Boolean, default=False)
     censio_upload_date = Column(DateTime)
 
-    ex_agencies = relationship('GTFSExAgency',
+    agencies = relationship('GTFSExAgency',
                             secondary=feed_agency_table,
                             backref='feeds')
-    agencies = relationship('Agency', backref="feed_file", primaryjoin='Agency.file_id==FeedFile.md5sum',
+    gtfs_agencies = relationship('Agency', backref="feed_file", primaryjoin='Agency.file_id==FeedFile.md5sum',
                             foreign_keys='(Agency.file_id)', cascade='delete')
 
     def __init__(self, **kwargs):
-        if 'agencies' in kwargs.keys():
-            self.ex_agencies = [GTFSExAgency(dataexchange_id=agency) for agency in kwargs.get('agencies')]
+        self.ex_agencies = [GTFSExAgency(dataexchange_id=agency) for agency in kwargs.get('agencies', [])]
+        try:
+            del kwargs['agencies']
+        except KeyError:
+            pass
         if 'date_added' in kwargs.keys():
             kwargs['date_added'] = datetime.datetime.utcfromtimestamp(kwargs.get('date_added'))
         for key, value in kwargs.iteritems():
