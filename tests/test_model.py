@@ -6,7 +6,7 @@ import hashlib
 import testing.postgresql
 from geoalchemy2.functions import ST_AsText, ST_X, ST_Y
 
-from gtfsdb.api import database_load, create_shapes_geoms, database_load_versioned
+from gtfsdb.api import database_load, create_shapes_geom, database_load_versioned
 from gtfsdb.model.db import Database
 from gtfsdb.model.agency import Agency
 from gtfsdb.model.metaTracking import FeedFile
@@ -49,10 +49,10 @@ class TestModel(unittest.TestCase):
                              "Failed on table {}".format(table_cls))
 
     def test_create_geoms(self):
-        create_shapes_geoms(db_url=self.postgresql.url())
         session = self.database.get_session()
-        self.assertEqual(1, session.query(ShapeGeom).count())
-        session.query(ST_AsText(ShapeGeom.the_geom)).one()
+        shape_list = ShapeGeom.get_shape_list(session)
+        for shape_id in shape_list:
+            create_shapes_geom(self.database.url, shape_id[0])
 
     def test_import_feed(self):
         session = self.database.get_session()

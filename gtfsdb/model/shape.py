@@ -10,6 +10,9 @@ from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.guuid import GUID
 
+from sqlalchemy import distinct
+
+
 
 __all__ = ['ShapeGeom', 'Shape']
 
@@ -42,22 +45,18 @@ class ShapeGeom(Base):
 
     @classmethod
     def get_shape_list(cls, session):
-        q = session.query(
-            Shape.shape_id,
-            func.max(Shape.shape_dist_traveled).label('dist')
-        )
-        return q.group_by(Shape.shape_id)
+        shape_geoms = session.query(ShapeGeom.shape_id).subquery()
+        return session.query(distinct(Shape.shape_id))\
+            .filter(Shape.shape_id.notin_(shape_geoms)).all()
 
     @classmethod
-    def create_shape_geom(cls, shape_id, shape_dist, session):
+    def create_shape_geom(cls, shape_id, session):
         shape_geom = cls()
         shape_geom.shape_id = shape_id
-        shape_geom.pattern_dist = shape_dist
-        if hasattr(cls, 'the_geom'):
-            q = session.query(Shape)
-            q = q.filter(Shape.shape_id == shape_id)
-            q = q.order_by(Shape.shape_pt_sequence)
-            shape_geom.geom_from_shape(q)
+        q = session.query(Shape)\
+            .filter(Shape.shape_id == shape_id)\
+            .order_by(Shape.shape_pt_sequence)
+        shape_geom.geom_from_shape(q)
         return shape_geom
 
     @classmethod
@@ -66,7 +65,7 @@ class ShapeGeom(Base):
         session = db.get_session()
         shapes = cls.get_shape_list(session)
         for shape in shapes:
-            shape_geom = cls.create_shape_geom(shape.shape_id, shape.dist, session)
+            shape_geom = cls.create_shape_geom(shape.shape_id, session)
             session.merge(shape_geom)
         session.commit()
         session.close()

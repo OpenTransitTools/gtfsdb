@@ -5,6 +5,10 @@ import sys
 from datetime import datetime
 from gtfsdb.model.metaTracking import FeedFile, GTFSExAgency
 from gtfsdb.import_api.gtfs_exchange import GTFSExchange
+from gtfsdb.model.shape import Shape, ShapeGeom
+from sqlalchemy import distinct
+
+from joblib import Parallel, delayed
 
 log = logging.getLogger(__name__)
 
@@ -49,10 +53,12 @@ def database_load_versioned(feed_file, db_url, **kwargs):
         session.merge(feed_file)
         session.commit()
 
-def create_shapes_geoms(db_url):
+def create_shapes_geom(db_url, shape_id):
     db = Database(url=db_url, is_geospatial=True)
-    gtfs = GTFS()
-    gtfs.load_derived(db)
+    session = db.get_session()
+    session.merge(ShapeGeom.create_shape_geom(shape_id, session))
+    session.commit()
+
 
 def get_gtfs_feeds(session, dataexchangeid_list=[]):
     gtfs_api = GTFSExchange()

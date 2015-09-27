@@ -8,8 +8,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from gtfsdb.model.db import Database
 from gtfsdb.model.metaTracking import FeedFile
-from gtfsdb.api import create_shapes_geoms, get_gtfs_feeds, database_load_versioned
+from gtfsdb.api import create_shapes_geom, get_gtfs_feeds, database_load_versioned
 from gtfsdb.config import DEFAULT_CONFIG_FILE
+from gtfsdb.model.shape import ShapeGeom
 
 
 @click.option('--database', help="The database connection string")
@@ -29,9 +30,13 @@ def gtfsdb_main(ctx, database):
 
 
 @gtfsdb_main.command('create-geometry')
+@click.option('-p', '--parallel', default=1, help='Number of worker processes')
 @click.pass_context
-def create_geom(ctx):
-    create_shapes_geoms(ctx.obj['db_url'])
+def create_geom(ctx, parallel):
+    session = ctx.obj['database'].get_session()
+    shape_list = ShapeGeom.get_shape_list(session)
+    Parallel(n_jobs=parallel)(delayed(create_shapes_geom)(db_url=ctx.obj['db_url'],
+                                                          shape_id=shape_id[0]) for shape_id in shape_list)
 
 
 @gtfsdb_main.command('drop-index')
@@ -51,6 +56,7 @@ def create(ctx):
 @click.pass_context
 def load_gtfs_ex(ctx, feeds, parallel):
     db = ctx.obj['database']
+    db.create()
     feeds = set(get_gtfs_feeds(db.get_session(), feeds))
     click.echo("Ready to load {} feeds".format(len(feeds)))
     load_feeds(feeds, db, parallel)
@@ -67,14 +73,12 @@ def delete_feed_file(ctx, file_id):
         sys.exit(1)
     name = feed_file.filename
     click.echo("found feed file: {} ({})".format(name, file_id))
-    agencies = session.query()
     session.delete(feed_file)
     session.commit()
     session.close()
     click.echo("sucessfully deleted feed file: {} ({})".format(name, file_id))
 
 def load_feeds(feeds, database, parallel=0):
-    database.create()
     database.drop_indexes()
     if parallel:
         concurrent_run(feeds, database.url, parallel)
