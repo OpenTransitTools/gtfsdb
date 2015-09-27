@@ -8,10 +8,10 @@ from gtfsdb.import_api.gtfs_exchange import GTFSExchange
 
 log = logging.getLogger(__name__)
 
-def database_load(filename, db_url, file_id=None):
+def database_load(filename, db_url, **kwargs):
     try:
         db = Database(url=db_url, is_geospatial=True)
-        gtfs = GTFS(filename=filename, file_id=file_id)
+        gtfs = GTFS(filename=filename, file_id=kwargs.get('file_id'))
         gtfs.load(db)
         #gtfs.post_process(db)
         return True

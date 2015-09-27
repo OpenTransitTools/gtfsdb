@@ -59,7 +59,7 @@ class GTFS(object):
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
             key_lookup=key_lookup,
-            thread_pool=ThreadPoolExecutor(max_workers=config.DB_THREADS),
+            thread_pool=ThreadPoolExecutor(max_workers=kwargs.get('db_threads', config.DB_THREADS)),
             file_id=self.file_id
         )
         futures = []
