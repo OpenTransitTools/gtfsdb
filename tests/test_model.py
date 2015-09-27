@@ -1,14 +1,15 @@
 __author__ = 'rhunter'
 import unittest
 import os
+import hashlib
 
 import testing.postgresql
 from geoalchemy2.functions import ST_AsText, ST_X, ST_Y
 
-from gtfsdb.api import database_load, create_shapes_geoms
+from gtfsdb.api import database_load, create_shapes_geoms, database_load_versioned
 from gtfsdb.model.db import Database
 from gtfsdb.model.agency import Agency
-from gtfsdb.model.fare import FareAttribute, FareRule
+from gtfsdb.model.metaTracking import FeedFile
 from gtfsdb.model.calendar import Calendar, CalendarDate
 from gtfsdb.model.frequency import Frequency
 from gtfsdb.model.route import Route
@@ -26,7 +27,10 @@ class TestModel(unittest.TestCase):
         self.database.engine.execute('create extension postgis_topology;')
         self.database.create()
         self.root_dir = os.path.dirname(__file__)
-        database_load(os.path.join(self.root_dir, 'data/sample-feed.zip'), db_url=self.postgresql.url())
+        file_location = os.path.join(self.root_dir, 'data/sample-feed.zip')
+        md5 = hashlib.md5(open(file_location, 'rb').read()).hexdigest()
+        feed_file=FeedFile(md5sum=md5, file_url=file_location)
+        database_load_versioned(feed_file, self.postgresql.url())
 
     def tearDown(self):
         self.database.session_factory.close_all()
@@ -39,7 +43,10 @@ class TestModel(unittest.TestCase):
         session.delete(agency)
         session.commit()
         for table_cls in self.database.classes:
-            self.assertEqual(0, session.query(table_cls).count())
+            if table_cls == FeedFile:
+                continue
+            self.assertEqual(0, session.query(table_cls).count(),
+                             "Failed on table {}".format(table_cls))
 
     def test_create_geoms(self):
         create_shapes_geoms(db_url=self.postgresql.url())
