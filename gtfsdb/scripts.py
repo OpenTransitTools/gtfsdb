@@ -62,21 +62,22 @@ def load_gtfs_ex(ctx, feeds, parallel):
     load_feeds(feeds, db, parallel)
 
 @gtfsdb_main.command('delete-feed-file')
-@click.argument('file_id', nargs=1)
+@click.argument('file_id_list', nargs=-1)
 @click.pass_context
-def delete_feed_file(ctx, file_id):
+def delete_feed_file(ctx, file_id_list):
     session = ctx.obj['database'].get_session()
-    try:
-        feed_file = session.query(FeedFile).get(file_id)
-    except NoResultFound:
-        click.echo("Could not find file with id: {}".format(file_id))
-        sys.exit(1)
-    name = feed_file.filename
-    click.echo("found feed file: {} ({})".format(name, file_id))
-    session.delete(feed_file)
-    session.commit()
-    session.close()
-    click.echo("sucessfully deleted feed file: {} ({})".format(name, file_id))
+    for file_id in file_id_list:
+        try:
+            feed_file = session.query(FeedFile).get(file_id)
+        except NoResultFound:
+            click.echo("Could not find file with id: {}".format(file_id))
+            sys.exit(1)
+        name = feed_file.filename
+        click.echo("found feed file: {} ({})".format(name, file_id))
+        session.delete(feed_file)
+        session.commit()
+        session.close()
+        click.echo("sucessfully deleted feed file: {} ({})".format(name, file_id))
 
 @gtfsdb_main.command('add-by-zip')
 @click.argument('directory', nargs=1)
