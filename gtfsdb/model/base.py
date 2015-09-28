@@ -121,11 +121,6 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
-        if 'thread_pool' in kwargs.keys():
-            thread_pool = kwargs.get('thread_pool')
-        else:
-            thread_pool = ThreadPoolExecutor(max_workers=1)
-
         records = []
         futures = []
         file_path = os.path.join(directory, cls.filename)
@@ -142,18 +137,15 @@ class _Base(object):
                 records.append(record)
                 i += 1
                 if i >= batch_size:
-                    futures.append(thread_pool.submit(db.execute, table.insert(), records))
+                    db.session.execute(table.insert(), records)
+                    db.session.flush()
                     records = []
                     i = 0
             if len(records) > 0:
-                futures.append(thread_pool.submit(db.execute, table.insert(), records))
+                db.session.execute(table.insert(), records)
+                db.session.flush()
             f.close()
 
-        if 'thread_pool' not in kwargs.keys():
-            for future in futures:
-                while future.running():
-                    time.sleep(0.1)
-                future.result()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
         return futures

@@ -38,8 +38,8 @@ with testing.postgresql.Postgresql() as postgresql:
     batch_size = config
 
     #batch_sizes = [1000, 5000, 10000]
-    batch_sizes = [5000]
-    db_threads = [1,5,10]
+    batch_sizes = [10000]
+    db_threads = [1]#,5,10]
 
     result_list = []
     for batch_size in batch_sizes:

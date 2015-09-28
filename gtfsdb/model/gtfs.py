@@ -59,7 +59,6 @@ class GTFS(object):
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
             gtfs_directory=gtfs_directory,
             key_lookup=key_lookup,
-            thread_pool=ThreadPoolExecutor(max_workers=kwargs.get('db_threads', config.DB_THREADS)),
             file_id=self.file_id
         )
         futures = []
@@ -68,13 +67,7 @@ class GTFS(object):
         shutil.rmtree(gtfs_directory)
 
         log.debug('GTFS.load: Done parsing, finishing upload')
-        for future in futures:
-            while future.running():
-                time.sleep(0.1)
-            excp = future.exception()
-            if excp:
-                raise excp
-            future.result()
+        db.session.commit()
 
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
