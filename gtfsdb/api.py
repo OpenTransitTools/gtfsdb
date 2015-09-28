@@ -80,11 +80,16 @@ def get_feeds_from_directory(directory):
     file_list = []
     upload_date = datetime.utcnow()
     user = format('censio-{}'.format(getpass.getuser()))
+    def create_feed_obj(f_path):
+        f_path = os.path.abspath(f_path)
+        md5_sum = GTFS.gen_md5(f_path)
+        return FeedFile(md5sum=md5_sum, date_added=upload_date, uploaded_by_user=user,
+                        file_url=f_path, description='Manual Upload')
+
+    if directory.endswith(".zip"):
+        return [create_feed_obj(directory)]
     for root, dirs, files in os.walk(directory):
         for f in files:
             if ".zip" in f:
-                f_path = os.path.join(root, f)
-                md5_sum = GTFS.gen_md5(f_path)
-                file_list.append(FeedFile(md5sum=md5_sum, date_added=upload_date, uploaded_by_user=user,
-                                          file_url=f_path, description='Manual Upload'))
+                file_list.append(create_feed_obj(os.path.join(root, f)))
     return file_list
