@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from gtfsdb.model.db import Database
 from gtfsdb.model.metaTracking import FeedFile
-from gtfsdb.api import create_shapes_geom, get_gtfs_feeds, database_load_versioned
+from gtfsdb.api import create_shapes_geom, get_gtfs_feeds, database_load_versioned, get_feeds_from_directory
 from gtfsdb.config import DEFAULT_CONFIG_FILE
 from gtfsdb.model.shape import ShapeGeom
 
@@ -77,6 +77,17 @@ def delete_feed_file(ctx, file_id):
     session.commit()
     session.close()
     click.echo("sucessfully deleted feed file: {} ({})".format(name, file_id))
+
+@gtfsdb_main.command('add-by-zip')
+@click.argument('directory', nargs=1)
+@click.option('-p', '--parallel', default=1, help='Number of worker processes')
+@click.pass_context
+def add_feed_zip(ctx, parallel, directory):
+    db = ctx.obj['database']
+    db.create()
+    feed_list = get_feeds_from_directory(directory)
+    click.echo("Ready to load {} feeds".format(len(feed_list)))
+    load_feeds(feed_list, db, parallel)
 
 def load_feeds(feeds, database, parallel=0):
     database.drop_indexes()

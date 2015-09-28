@@ -39,7 +39,7 @@ class FeedFile(Base):
             del kwargs['agencies']
         except KeyError:
             pass
-        if 'date_added' in kwargs.keys():
+        if 'date_added' in kwargs.keys() and isinstance(kwargs.get('date_added'), float):
             kwargs['date_added'] = datetime.datetime.utcfromtimestamp(kwargs.get('date_added'))
         for key, value in kwargs.iteritems():
             if isinstance(value, basestring):
