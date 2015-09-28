@@ -44,7 +44,6 @@ class Route(Base):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer)
-    the_geom = deferred(Column(Geometry('MULTILINESTRING', spatial_index=False)))
 
     trips = relationship('Trip', primaryjoin='Trip.route_id==Route.route_id',
                          foreign_keys='(Trip.route_id)', uselist=True, backref='route',
@@ -122,34 +121,6 @@ class Route(Base):
     @property
     def end_date(self):
         return self._get_start_end_dates[1]
-
-    @classmethod
-    def load_geoms(cls, db):
-        '''load derived geometries, currently only written for PostgreSQL'''
-        from gtfsdb.model.shape import ShapeGeom
-        from gtfsdb.model.trip import Trip
-
-        if db.is_geospatial and db.is_postgresql:
-            start_time = time.time()
-            session = db.session
-            routes = session.query(Route).all()
-            for route in routes:
-                s = func.st_collect(ShapeGeom.the_geom)
-                s = func.st_multi(s)
-                s = func.st_astext(s).label('the_geom')
-                q = session.query(s)
-                q = q.filter(ShapeGeom.trips.any((Trip.route == route)))
-                route.the_geom = q.first().the_geom
-                session.merge(route)
-            session.commit()
-            processing_time = time.time() - start_time
-            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(
-                cls.__name__, processing_time))
-
-    @classmethod
-    def add_geometry_column(cls):
-        #TODO Remove
-        pass
 
     @classmethod
     def active_routes(cls, session, date=None):
