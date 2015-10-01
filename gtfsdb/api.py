@@ -15,16 +15,10 @@ import os
 log = logging.getLogger(__name__)
 
 def database_load(filename, db_url, **kwargs):
-    try:
-        db = Database(url=db_url, is_geospatial=True)
-        gtfs = GTFS(filename=filename, file_id=kwargs.get('file_id'))
-        gtfs.load(db)
-        #gtfs.post_process(db)
-        return True
-    except Exception, e:
-        traceback.print_exc(file=sys.stdout)
-        log.error('Error processing: {} Message: {}'.format(filename,e))
-        return False
+    db = Database(url=db_url, is_geospatial=True)
+    gtfs = GTFS(filename=filename, file_id=kwargs.get('file_id'))
+    gtfs.load(db)
+    #gtfs.post_process(db)
 
 
 def load_external_agencies(session, agency_meta):
@@ -48,7 +42,8 @@ def database_load_versioned(feed_file, db_url, **kwargs):
         database_load(filename=feed_file.file_url, db_url=db_url, file_id=feed_file.md5sum, **kwargs)
         feed_file.completed = True
     except Exception, e:
-        log.error("Error processing feed: {} {}".format(feed_file.filename or feed_file.file_url, e))
+        traceback.print_exc(file=sys.stdout)
+        log.error('Error processing: {} Message: {}'.format(feed_file.file_url,e))
     finally:
         feed_file.censio_upload_date = datetime.utcnow()
         session = db.get_session()
@@ -69,8 +64,6 @@ def get_gtfs_feeds(session, dataexchangeid_list=[]):
         if len(dataexchangeid_list) > 0:
             if feed['dataexchange_id'] not in dataexchangeid_list:
                 continue
-        if not feed['country'] == 'United States':
-            continue
         details = gtfs_api.get_gtfs_agency_details(feed)['agency']
         load_external_agencies(session, details)
         feeds.append(FeedFile(**gtfs_api.get_most_recent_file(feed)['file']))
