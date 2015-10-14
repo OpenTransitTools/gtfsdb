@@ -1,0 +1,3 @@
+{
+    "database": "postgresql://censio:insecure@localhost:5432/gtfs_data"
+}
