@@ -29,7 +29,7 @@ def gtfsdb_main(ctx, database):
     ctx.obj.update(dict(database=Database(url=database), db_url=database))
 
 
-@gtfsdb_main.command('create-geometry')
+@gtfsdb_main.command('create-geometry', help='Generate the_geom columns. This operation is indepotent, it finds the list shapes without geoms and parses those')
 @click.option('-p', '--parallel', default=1, help='Number of worker processes')
 @click.pass_context
 def create_geom(ctx, parallel):
@@ -39,13 +39,13 @@ def create_geom(ctx, parallel):
                                                           shape_id=shape_id[0]) for shape_id in shape_list)
 
 
-@gtfsdb_main.command('drop-index')
+@gtfsdb_main.command('drop-index', help='Remove the indexes (useful for loading) This does not remove GiST indexes.')
 @click.pass_context
 def drop_index(ctx):
     ctx.obj['database'].drop_indexes()
 
 
-@gtfsdb_main.command('create-index')
+@gtfsdb_main.command('create-index', help='Creates the indexes (but not the geometry indexes... do those manually')
 @click.pass_context
 def create(ctx):
     ctx.obj['database'].create_indexes()
@@ -61,7 +61,7 @@ def load_gtfs_ex(ctx, feeds, parallel):
     click.echo("Ready to load {} feeds".format(len(feeds)))
     load_feeds(feeds, db, parallel)
 
-@gtfsdb_main.command('delete-feed-file')
+@gtfsdb_main.command('delete-feed-file', help='delete a feed file by MD5 Sum. This is a cascading operation.')
 @click.argument('file_id_list', nargs=-1)
 @click.pass_context
 def delete_feed_file(ctx, file_id_list):
@@ -79,7 +79,7 @@ def delete_feed_file(ctx, file_id_list):
         session.close()
         click.echo("sucessfully deleted feed file: {} ({})".format(name, file_id))
 
-@gtfsdb_main.command('add-by-zip')
+@gtfsdb_main.command('add-by-zip', help='Pass a GTFS zip or a directory tree containing zips, and it will import those')
 @click.argument('directory', nargs=1)
 @click.option('-p', '--parallel', default=1, help='Number of worker processes')
 @click.pass_context
