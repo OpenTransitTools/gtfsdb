@@ -13,7 +13,7 @@ from gtfsdb.config import DEFAULT_CONFIG_FILE
 from gtfsdb.model.shape import ShapeGeom
 
 
-@click.option('--database', help="The database connection string")
+@click.option('--database', help="The database connection string. This is needed if you dont have a config file located in '/etc/censio/gtfsdb.json' See sample config file in repo root")
 @click.group()
 @click.pass_context
 def gtfsdb_main(ctx, database):
