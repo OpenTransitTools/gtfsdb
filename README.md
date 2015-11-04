@@ -13,6 +13,7 @@ after install you should be able to call `gtfsdb --help` for some basic document
 
 General Procedure for creating a database:
 
+0. (This applies to existing databases only) run `gtfsdb drop-indexes`
 1. load the feed either via the zip loader: `gtfsdb add-by-zip <Directory or zip file>`
 2. Create the indexed `gtfsdb create-index`
 3. Create the geometries `gtfsdb create-geometry`
