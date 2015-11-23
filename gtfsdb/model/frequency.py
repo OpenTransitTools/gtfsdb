@@ -14,7 +14,7 @@ class Frequency(Base):
 
     __tablename__ = 'gtfs_frequencies'
 
-    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    id = Column(GUID(), primary_key=True, nullable=True)
     trip_id = Column(GUID(), nullable=False)
     start_time = Column(String(8))
     end_time = Column(String(8))

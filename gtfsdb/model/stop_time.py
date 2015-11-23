@@ -19,7 +19,7 @@ class StopTime(Base):
     filename = 'stop_times.txt'
 
     __tablename__ = 'gtfs_stop_times'
-    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    id = Column(GUID(), primary_key=True, nullable=True)
     stop_id = Column(GUID(), nullable=False)
     trip_id = Column(GUID(), nullable=False)
     arrival_time = Column(String(8))

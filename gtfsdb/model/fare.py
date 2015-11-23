@@ -33,7 +33,7 @@ class FareRule(Base):
 
     __tablename__ = 'gtfs_fare_rules'
 
-    id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    id = Column(GUID(), primary_key=True, nullable=True)
     fare_id = Column(GUID(), nullable=False)
     route_id = Column(GUID(), nullable=False)
     origin_id = Column(GUID())
