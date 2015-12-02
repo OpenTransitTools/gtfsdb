@@ -112,8 +112,9 @@ class StopTime(Base):
         sq = sq.group_by(StopTime.trip_id).subquery()
         q = db.session.query(StopTime)
         q = q.filter_by(trip_id=sq.c.trip_id, stop_sequence=sq.c.end_sequence)
-        for r in q:
-            r.departure_time = None
+        for st in q:
+            if st.pickup_type == 1:
+                st.departure_time = None
 
         # remove the arrival times at the start of a trip
         log.info("QUERY StopTime")
@@ -121,8 +122,9 @@ class StopTime(Base):
         sq = sq.group_by(StopTime.trip_id).subquery()
         q = db.session.query(StopTime)
         q = q.filter_by(trip_id=sq.c.trip_id, stop_sequence=sq.c.start_sequence)
-        for r in q:
-            r.arrival_time = None
+        for st in q:
+            if st.drop_off_type == 1:
+                st.arrival_time = None
 
         db.session.commit()
 
