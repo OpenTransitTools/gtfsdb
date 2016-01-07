@@ -22,7 +22,7 @@ setup(
     name='gtfsdb',
     version='0.1.6dev',
     description='GTFS Database',
-    long_description=open('README').read(),
+    long_description=open('README.rst').read(),
     keywords='GTFS',
     author='Mike Gilligan',
     author_email='gilligam@trimet.org',
