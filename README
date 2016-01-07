@@ -64,3 +64,5 @@ Install Steps (on Windows):
     6. buildout install prod
 
     7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+
+Join the chat at https://gitter.im/OpenTransitTools/gtfsdb
