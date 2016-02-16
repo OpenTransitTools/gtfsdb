@@ -62,7 +62,3 @@ def db_connect_tester():
     for st in stop_times:
         print st.get_direction_name()
         break
-
-def db_connect():
-    ''' get connection to an existing gtfsdb
-    '''
