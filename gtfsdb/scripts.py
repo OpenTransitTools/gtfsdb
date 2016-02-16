@@ -9,30 +9,6 @@ def gtfsdb_load():
     args, kwargs = get_args()
     database_load(args.file, **kwargs)
 
-def route_stop_load():
-    ''' written as a test / debug method for RS table loader '''
-    from gtfsdb import Database, RouteStop
-    kwargs = get_args()[1]
-    db = Database(**kwargs)
-    RouteStop.load(db, **kwargs)
-
-def db_connect_tester():
-    ''' simple routine to connect to an existing database and list a few stops
-        bin/connect-tester --database_url sqlite:///gtfs.db _no_gtfs_zip_needed_
-    '''
-    from gtfsdb import Database, Stop, Route, StopTime
-    args, kwargs = get_args()
-    db = Database(**kwargs)
-    for s in db.session.query(Stop).limit(2):
-        print s.stop_name
-    for r in db.session.query(Route).limit(2):
-        print r.route_name
-    #import pdb; pdb.set_trace()
-    stop_times = StopTime.get_departure_schedule(db.session, stop_id='11411')
-    for st in stop_times:
-        print st.get_direction_name()
-        break
-
 def get_args():
     ''' database load command-line arg parser and help util...
     '''
@@ -62,3 +38,31 @@ def get_args():
         url=args.database_url,
     )
     return args, kwargs
+
+def route_stop_load():
+    ''' written as a test / debug method for RS table loader '''
+    from gtfsdb import Database, RouteStop
+    kwargs = get_args()[1]
+    db = Database(**kwargs)
+    RouteStop.load(db, **kwargs)
+
+def db_connect_tester():
+    ''' simple routine to connect to an existing database and list a few stops
+        bin/connect-tester --database_url sqlite:///gtfs.db _no_gtfs_zip_needed_
+    '''
+    from gtfsdb import Database, Stop, Route, StopTime
+    args, kwargs = get_args()
+    db = Database(**kwargs)
+    for s in db.session.query(Stop).limit(2):
+        print s.stop_name
+    for r in db.session.query(Route).limit(2):
+        print r.route_name
+    #import pdb; pdb.set_trace()
+    stop_times = StopTime.get_departure_schedule(db.session, stop_id='11411')
+    for st in stop_times:
+        print st.get_direction_name()
+        break
+
+def db_connect():
+    ''' get connection to an existing gtfsdb
+    '''
