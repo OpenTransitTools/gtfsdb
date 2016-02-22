@@ -145,7 +145,6 @@ class _Base(object):
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
 
-
     @classmethod
     def post_process(cls, db, **kwargs):
         '''Post-process processing method.  This method is a placeholder

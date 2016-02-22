@@ -1,3 +1,8 @@
+import time
+import logging
+log = logging.getLogger(__name__)
+
+
 from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
@@ -45,13 +50,22 @@ class Block(Base):
 
     @classmethod
     def load(cls, db, **kwargs):
+        log.debug('{0}.load (loaded later in post_process)'.format(cls.__name__))
+
+    @classmethod
+    def post_process(cls, db):
         '''
         '''
+        start_time = time.time()
+
+        #import pdb; pdb.set_trace()
         session = db.session
         trips = session.query(Trip).all()
-        print "XXXX"
 
-        # step 0: for each route...
+        # step 1: for each block...
         for t in trips:
             print t.block_id
-            #break
+            break
+
+        processing_time = time.time() - start_time
+        log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
