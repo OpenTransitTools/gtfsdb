@@ -97,6 +97,12 @@ class StopTime(Base):
 
     @classmethod
     def post_process(cls, db, **kwargs):
+        log.debug('{0}.post_process'.format(cls.__name__))
+        #cls.null_out_last_stop_departures(db, kwargs) commented out due to other processes
+        pass
+
+    @classmethod
+    def null_out_last_stop_departures(cls, db, **kwargs):
         ''' delete all 'depature_time' values that appear for the last stop
             time of a given trip (e.g., the trip ends there, so there isn't a
             further vehicle departure / customer pickup for that stop time / trip pair)...
@@ -104,10 +110,8 @@ class StopTime(Base):
             NOTE: we know this breaks the current GTFS spec, which states that departure &
                   arrival times must both exist for every stop time.  Sadly, GTFS is kinda wrong...
         '''
-        log.debug('{0}.post_process'.format(cls.__name__))
-
-        # remove the departure times at the end of a trip
-        log.info("QUERY StopTime")
+        # step 1: remove the departure times at the end of a trip
+        log.info("QUERY StopTime for all trip end times")
         sq = db.session.query(StopTime.trip_id, func.max(StopTime.stop_sequence).label('end_sequence'))
         sq = sq.group_by(StopTime.trip_id).subquery()
         q = db.session.query(StopTime)
@@ -117,7 +121,7 @@ class StopTime(Base):
                 st.departure_time = None
 
         # remove the arrival times at the start of a trip
-        log.info("QUERY StopTime")
+        log.info("QUERY StopTime for all trip start times")
         sq = db.session.query(StopTime.trip_id, func.min(StopTime.stop_sequence).label('start_sequence'))
         sq = sq.group_by(StopTime.trip_id).subquery()
         q = db.session.query(StopTime)

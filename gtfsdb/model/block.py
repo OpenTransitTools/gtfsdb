@@ -51,11 +51,13 @@ class Block(Base):
     @classmethod
     def load(cls, db, **kwargs):
         log.debug('{0}.load (loaded later in post_process)'.format(cls.__name__))
+        pass
 
     @classmethod
     def post_process(cls, db):
         '''
         '''
+        log.debug('{0}.post_process'.format(cls.__name__))
         start_time = time.time()
 
         #import pdb; pdb.set_trace()
@@ -65,7 +67,7 @@ class Block(Base):
         # step 1: for each block...
         for t in trips:
             print t.block_id
-            break
+            #break
 
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
