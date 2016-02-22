@@ -4,6 +4,7 @@ from sqlalchemy.types import Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from gtfsdb.model.trip import Trip
 
 
 class Block(Base):
@@ -41,3 +42,16 @@ class Block(Base):
         primaryjoin='Block.prev_trip_id==Trip.trip_id',
         foreign_keys='(Block.prev_trip_id)',
         uselist=False, viewonly=True)
+
+    @classmethod
+    def load(cls, db, **kwargs):
+        '''
+        '''
+        session = db.session
+        trips = session.query(Trip).all()
+        print "XXXX"
+
+        # step 0: for each route...
+        for t in trips:
+            print t.block_id
+            #break

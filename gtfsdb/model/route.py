@@ -171,6 +171,7 @@ class Route(Base):
 
         return ret_val
 
+
 class RouteDirection(Base):
     datasource = config.DATASOURCE_GTFS
     filename = 'route_directions.txt'
@@ -306,5 +307,3 @@ class RouteFilter(Base):
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
     description = Column(String)
-
-
