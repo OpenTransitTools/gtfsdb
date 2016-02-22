@@ -12,3 +12,4 @@ from gtfsdb.model.stop_feature import *
 from gtfsdb.model.stop_time import StopTime
 from gtfsdb.model.transfer import Transfer
 from gtfsdb.model.trip import Trip
+from gtfsdb.model.block import Block

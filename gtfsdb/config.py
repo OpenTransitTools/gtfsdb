@@ -32,6 +32,7 @@ SORTED_CLASS_NAMES = [
     'RouteFilter',
     'FeedInfo',
     'Agency',
+    'Block',
     'Calendar',
     'CalendarDate',
     'Route',

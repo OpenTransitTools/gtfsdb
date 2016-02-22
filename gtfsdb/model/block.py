@@ -1,4 +1,4 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
@@ -11,6 +11,7 @@ class Block(Base):
 
     __tablename__ = 'blocks'
 
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     block_id = Column(String(255),   index=True, nullable=False)
     trip_id = Column(String(255),    index=True, nullable=False)
     service_id = Column(String(255), index=True, nullable=False)
