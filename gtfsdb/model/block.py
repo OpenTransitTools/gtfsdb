@@ -88,9 +88,9 @@ class Block(Base):
             # step 3: sort our bucket
             sorted_blocks = sorted(t, key=lambda t : t.start_time)
 
-            for k in sorted_blocks:
+            for j, k in enumerate(sorted_blocks):
                 try:
-                    print k.start_time
+                    print j+1, k.start_time
                 except:
                     print "EMPTY"
 
