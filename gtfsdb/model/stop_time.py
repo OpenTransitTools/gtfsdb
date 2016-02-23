@@ -98,7 +98,7 @@ class StopTime(Base):
     @classmethod
     def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
-        cls.null_out_last_stop_departures(db) ## commented out due to other processes
+        #cls.null_out_last_stop_departures(db) ## commented out due to other processes
         pass
 
     @classmethod
@@ -132,6 +132,7 @@ class StopTime(Base):
 
         db.session.flush()
         db.session.commit()
+        db.session.close()
 
     @classmethod
     def get_departure_schedule(cls, session, stop_id, date=None, route_id=None, limit=None):
