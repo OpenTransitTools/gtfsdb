@@ -67,7 +67,7 @@ class Block(Base):
         # step 1: for each block...
         for t in trips:
             print t.block_id
-            #break
+            break
 
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))

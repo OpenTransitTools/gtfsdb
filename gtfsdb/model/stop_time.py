@@ -98,11 +98,11 @@ class StopTime(Base):
     @classmethod
     def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
-        #cls.null_out_last_stop_departures(db, kwargs) commented out due to other processes
+        cls.null_out_last_stop_departures(db) ## commented out due to other processes
         pass
 
     @classmethod
-    def null_out_last_stop_departures(cls, db, **kwargs):
+    def null_out_last_stop_departures(cls, db):
         ''' delete all 'depature_time' values that appear for the last stop
             time of a given trip (e.g., the trip ends there, so there isn't a
             further vehicle departure / customer pickup for that stop time / trip pair)...
@@ -130,6 +130,7 @@ class StopTime(Base):
             if st.drop_off_type == 1:
                 st.arrival_time = None
 
+        db.session.flush()
         db.session.commit()
 
     @classmethod
