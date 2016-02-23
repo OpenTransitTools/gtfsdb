@@ -62,12 +62,24 @@ class Block(Base):
 
         #import pdb; pdb.set_trace()
         session = db.session
-        trips = session.query(Trip).all()
+        trips = session.query(Trip).order_by(Trip.block_id, Trip.service_id).all()
 
         # step 1: for each block...
-        for t in trips:
-            print t.block_id
-            break
+        i = 0
+        sum = 0
+        while i < len(trips):
+            b = trips[i].block_id
+            s = trips[i].service_id
+            t = []
+            while i < len(trips):
+                if trips[i].block_id != b or \
+                   trips[i].service_id != s:
+                    break
+                t.append(trips[i])
+                i = i + 1
+            sum = sum + len(t)
+
+        print sum, len(trips)
 
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
