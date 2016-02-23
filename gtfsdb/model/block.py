@@ -1,3 +1,4 @@
+import operator
 import time
 import logging
 log = logging.getLogger(__name__)
@@ -19,8 +20,9 @@ class Block(Base):
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     block_id = Column(String(255),   index=True, nullable=False)
-    trip_id = Column(String(255),    index=True, nullable=False)
     service_id = Column(String(255), index=True, nullable=False)
+    trip_id = Column(String(255),    index=True, nullable=False)
+    sequence = Column(Integer)
     prev_trip_id = Column(String(255))
     next_trip_id = Column(String(255))
 
@@ -55,7 +57,11 @@ class Block(Base):
 
     @classmethod
     def post_process(cls, db):
-        '''
+        cls.populate(db)
+
+    @classmethod
+    def populate(cls, db):
+        ''' loop thru a full trip table and break things into buckets based on service key and block id
         '''
         log.debug('{0}.post_process'.format(cls.__name__))
         start_time = time.time()
@@ -64,12 +70,13 @@ class Block(Base):
         session = db.session
         trips = session.query(Trip).order_by(Trip.block_id, Trip.service_id).all()
 
-        # step 1: for each block...
+        # step 1: loop thru all the trips
         i = 0
-        sum = 0
         while i < len(trips):
             b = trips[i].block_id
             s = trips[i].service_id
+
+            # step 2: grab a batch of trips that have the same block and service id
             t = []
             while i < len(trips):
                 if trips[i].block_id != b or \
@@ -77,9 +84,15 @@ class Block(Base):
                     break
                 t.append(trips[i])
                 i = i + 1
-            sum = sum + len(t)
 
-        print sum, len(trips)
+            # step 3: sort our bucket
+            sorted_blocks = sorted(t, key=lambda t : t.start_time)
+
+            for k in sorted_blocks:
+                try:
+                    print k.start_time
+                except:
+                    print "EMPTY"
 
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
