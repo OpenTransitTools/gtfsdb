@@ -107,6 +107,10 @@ class StopTime(Base):
             time of a given trip (e.g., the trip ends there, so there isn't a
             further vehicle departure / customer pickup for that stop time / trip pair)...
 
+            -- query below shows null'd out stop times
+            select * from ott.stop_times
+            where COALESCE(arrival_time,'')='' or COALESCE(departure_time,'')=''
+
             NOTE: we know this breaks the current GTFS spec, which states that departure &
                   arrival times must both exist for every stop time.  Sadly, GTFS is kinda wrong...
         '''
