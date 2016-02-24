@@ -19,10 +19,10 @@ class Block(Base):
     __tablename__ = 'blocks'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
+    sequence = Column(Integer)
     block_id = Column(String(255),   index=True, nullable=False)
     service_id = Column(String(255), index=True, nullable=False)
     trip_id = Column(String(255),    index=True, nullable=False)
-    sequence = Column(Integer)
     prev_trip_id = Column(String(255))
     next_trip_id = Column(String(255))
 
@@ -50,6 +50,14 @@ class Block(Base):
         foreign_keys='(Block.prev_trip_id)',
         uselist=False, viewonly=True)
 
+    def __init__(self, sequence, block_id, service_id, trip_id, prev_trip_id, next_trip_id):
+        self.sequence = sequence
+        self.block_id = block_id
+        self.service_id = service_id
+        self.trip_id = trip_id
+        self.prev_trip_id = prev_trip_id
+        self.next_trip_id = next_trip_id
+
     @classmethod
     def load(cls, db, **kwargs):
         log.debug('{0}.load (loaded later in post_process)'.format(cls.__name__))
@@ -76,6 +84,11 @@ class Block(Base):
             b = trips[i].block_id
             s = trips[i].service_id
 
+            # need block (optional) and service id info
+            if b is None or s is None:
+                i = i + 1
+                continue
+
             # step 2: grab a batch of trips that have the same block and service id
             t = []
             while i < len(trips):
@@ -87,12 +100,24 @@ class Block(Base):
 
             # step 3: sort our bucket
             sorted_blocks = sorted(t, key=lambda t : t.start_time)
+            sb_len = len(sorted_blocks) - 1
 
+            # step 4: create block objects
+            #import pdb; pdb.set_trace()
+            records = []
             for j, k in enumerate(sorted_blocks):
-                try:
-                    print j+1, k.start_time
-                except:
-                    print "EMPTY"
+                prev = None
+                next = None
+                if j > 0: prev = sorted_blocks[j-1].trip_id
+                if j < sb_len: next = sorted_blocks[j+1].trip_id
+                block = Block(sequence=j+1, block_id=b, service_id=s, trip_id=k.trip_id, prev_trip_id=prev, next_trip_id=next)
+                session.add(block)
+
+            # step 5: insert in the db
+            #table = cls.__table__
+            #db.engine.execute(table.insert(), records)
+            db.session.flush()
+            db.session.commit()
 
         processing_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
