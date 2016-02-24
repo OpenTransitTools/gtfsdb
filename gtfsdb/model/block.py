@@ -65,13 +65,13 @@ class Block(Base):
 
     @classmethod
     def post_process(cls, db):
+        log.debug('{0}.post_process'.format(cls.__name__))
         cls.populate(db)
 
     @classmethod
     def populate(cls, db):
         ''' loop thru a full trip table and break things into buckets based on service key and block id
         '''
-        log.debug('{0}.post_process'.format(cls.__name__))
         start_time = time.time()
 
         #import pdb; pdb.set_trace()
@@ -117,4 +117,4 @@ class Block(Base):
             db.session.commit()
 
         processing_time = time.time() - start_time
-        log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
+        log.debug('{0}.populate ({1:.0f} seconds)'.format(cls.__name__, processing_time))
