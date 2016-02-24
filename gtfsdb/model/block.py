@@ -84,7 +84,7 @@ class Block(Base):
             b = trips[i].block_id
             s = trips[i].service_id
 
-            # need block (optional) and service id info
+            # need block (optional) and service id info ... if we don't have that, continue to next trip
             if b is None or s is None:
                 i = i + 1
                 continue
@@ -104,7 +104,6 @@ class Block(Base):
 
             # step 4: create block objects
             #import pdb; pdb.set_trace()
-            records = []
             for j, k in enumerate(sorted_blocks):
                 prev = None
                 next = None
@@ -114,8 +113,6 @@ class Block(Base):
                 session.add(block)
 
             # step 5: insert in the db
-            #table = cls.__table__
-            #db.engine.execute(table.insert(), records)
             db.session.flush()
             db.session.commit()
 
