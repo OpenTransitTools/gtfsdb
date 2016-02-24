@@ -1,4 +1,4 @@
-import operator
+import sys
 import time
 import logging
 log = logging.getLogger(__name__)
@@ -73,12 +73,12 @@ class Block(Base):
         ''' loop thru a full trip table and break things into buckets based on service key and block id
         '''
         start_time = time.time()
+        batch_size = config.DEFAULT_BATCH_SIZE
+        num_recs = 0
 
+        # step 1: loop thru all trips, sorted by block and service key
         #import pdb; pdb.set_trace()
-        session = db.session
-        trips = session.query(Trip).order_by(Trip.block_id, Trip.service_id).all()
-
-        # step 1: loop thru all the trips
+        trips = db.session.query(Trip).order_by(Trip.block_id, Trip.service_id).all()
         i = 0
         while i < len(trips):
             b = trips[i].block_id
@@ -110,11 +110,19 @@ class Block(Base):
                 if j > 0: prev = sorted_blocks[j-1].trip_id
                 if j < sb_len: next = sorted_blocks[j+1].trip_id
                 block = Block(sequence=j+1, block_id=b, service_id=s, trip_id=k.trip_id, prev_trip_id=prev, next_trip_id=next)
-                session.add(block)
+                db.session.add(block)
 
             # step 5: insert in the db
-            db.session.flush()
-            db.session.commit()
+            num_recs = num_recs + sb_len
+            if num_recs >= batch_size:
+                sys.stdout.write('*')
+                db.session.flush()
+                db.session.commit()
+                num_recs = 0
+
+        # step 5b: (final) insert into the db
+        db.session.flush()
+        db.session.commit()
 
         processing_time = time.time() - start_time
         log.debug('{0}.populate ({1:.0f} seconds)'.format(cls.__name__, processing_time))
