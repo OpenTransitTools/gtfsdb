@@ -143,6 +143,7 @@ class StopTime(Base):
         ''' helper routine which returns the stop schedule for a give date
         '''
         from gtfsdb.model.trip import Trip
+        from gtfsdb.model.block import Block
 
         # step 0: make sure we have a valid date
         if date is None:
@@ -168,5 +169,14 @@ class StopTime(Base):
         if limit:
             q = q.limit(limit)
 
-        ret_val = q.all()
+        stop_times = q.all()
+
+        q = session.query(Block)
+        q = q.filter(Block.first_stop == stop_id)
+        blocks = q.all()
+        if blocks:
+            ret_val = stop_times
+        else:
+            ret_val = stop_times
+
         return ret_val

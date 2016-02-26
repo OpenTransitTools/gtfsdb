@@ -25,6 +25,8 @@ class Block(Base):
     trip_id = Column(String(255),    index=True, nullable=False)
     prev_trip_id = Column(String(255))
     next_trip_id = Column(String(255))
+    start_stop_id = Column(String(255), index=True, nullable=False)
+    end_stop_id = Column(String(255), index=True, nullable=False)
 
     universal_calendar = relationship(
         'UniversalCalendar',
@@ -50,13 +52,28 @@ class Block(Base):
         foreign_keys='(Block.prev_trip_id)',
         uselist=False, viewonly=True)
 
-    def __init__(self, sequence, block_id, service_id, trip_id, prev_trip_id, next_trip_id):
+    start_stop = relationship(
+        'Stop',
+        primaryjoin='Stop.stop_id==Block.start_stop_id',
+        foreign_keys='(Block.start_stop_id)',
+        uselist=False, viewonly=True)
+
+    end_stop = relationship(
+        'Stop',
+        primaryjoin='Stop.stop_id==Block.end_stop_id',
+        foreign_keys='(Block.end_stop_id)',
+        uselist=False, viewonly=True)
+
+
+    def __init__(self, sequence, block_id, service_id, trip_id, prev_trip_id, next_trip_id, start_stop_id, end_stop_id):
         self.sequence = sequence
         self.block_id = block_id
         self.service_id = service_id
         self.trip_id = trip_id
         self.prev_trip_id = prev_trip_id
         self.next_trip_id = next_trip_id
+        self.start_stop_id = start_stop_id
+        self.end_stop_id = end_stop_id
 
     @classmethod
     def load(cls, db, **kwargs):
@@ -83,6 +100,8 @@ class Block(Base):
         while i < len(trips):
             b = trips[i].block_id
             s = trips[i].service_id
+            ss = trips[i].start_stop
+            es = trips[i].end_stop
 
             # need block (optional) and service id info ... if we don't have that, continue to next trip
             if b is None or s is None:
@@ -109,7 +128,10 @@ class Block(Base):
                 next = None
                 if j > 0: prev = sorted_blocks[j-1].trip_id
                 if j < sb_len: next = sorted_blocks[j+1].trip_id
-                block = Block(sequence=j+1, block_id=b, service_id=s, trip_id=k.trip_id, prev_trip_id=prev, next_trip_id=next)
+                block = Block(sequence=j+1, block_id=b, service_id=s,
+                              trip_id=k.trip_id, prev_trip_id=prev, next_trip_id=next,
+                              start_stop_id=ss.stop_id, end_stop_id=es.stop_id
+                              )
                 db.session.add(block)
 
             # step 5: insert in the db
