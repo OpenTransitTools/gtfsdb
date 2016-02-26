@@ -100,8 +100,6 @@ class Block(Base):
         while i < len(trips):
             b = trips[i].block_id
             s = trips[i].service_id
-            ss = trips[i].start_stop
-            es = trips[i].end_stop
 
             # need block (optional) and service id info ... if we don't have that, continue to next trip
             if b is None or s is None:
@@ -130,8 +128,8 @@ class Block(Base):
                 if j < sb_len: next = sorted_blocks[j+1].trip_id
                 block = Block(sequence=j+1, block_id=b, service_id=s,
                               trip_id=k.trip_id, prev_trip_id=prev, next_trip_id=next,
-                              start_stop_id=ss.stop_id, end_stop_id=es.stop_id
-                              )
+                              start_stop_id=k.start_stop.stop_id, end_stop_id=k.end_stop.stop_id
+                        )
                 db.session.add(block)
 
             # step 5: insert in the db

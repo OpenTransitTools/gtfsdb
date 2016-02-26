@@ -139,11 +139,20 @@ class StopTime(Base):
         db.session.close()
 
     @classmethod
+    def get_service_keys_from_list(cls, stop_times):
+        ret_val = []
+        for s in stop_times:
+            k = s.trip.service_id
+            if k not in ret_val:
+                ret_val.append(k)
+        return ret_val
+
+
+    @classmethod
     def get_departure_schedule(cls, session, stop_id, date=None, route_id=None, limit=None):
         ''' helper routine which returns the stop schedule for a give date
         '''
         from gtfsdb.model.trip import Trip
-        from gtfsdb.model.block import Block
 
         # step 0: make sure we have a valid date
         if date is None:
@@ -170,13 +179,37 @@ class StopTime(Base):
             q = q.limit(limit)
 
         stop_times = q.all()
+        ret_val = cls.block_filter(session, stop_id, stop_times)
 
-        q = session.query(Block)
-        q = q.filter(Block.first_stop == stop_id)
-        blocks = q.all()
-        if blocks:
-            ret_val = stop_times
-        else:
-            ret_val = stop_times
+        return ret_val
 
+    @classmethod
+    def block_filter(cls, session, stop_id, stop_times):
+        '''
+        '''
+        ret_val = stop_times
+        if stop_times and len(stop_times) > 1:
+            from gtfsdb.model.block import Block
+            keys = cls.get_service_keys_from_list(stop_times)
+            q = session.query(Block)
+            q = q.filter(Block.end_stop_id == stop_id)
+            q = q.filter(Block.service_id.in_(keys))
+            blocks = q.all()
+            if blocks:
+                ret_val = []
+                for s in stop_times:
+                    block = None
+                    for b in blocks:
+                        if s.trip_id == b.trip_id and s.trip.block_id == b.block_id:
+                            #import pdb; pdb.set_trace()
+                            block = b
+                            break
+                    if not block:
+                        ret_val.append(s)
+                    else:
+                        if block.next_trip:
+                            pass # this is an arrival trip (don't return the stop_time as a departure)
+                        else:
+                            ret_val.append(s) # this is the last trip of the day (so return it)
+                            # @todo maybe monkey patch stop_time with block, so we know about last trip
         return ret_val
