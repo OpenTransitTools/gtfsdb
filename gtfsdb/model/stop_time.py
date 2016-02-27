@@ -201,14 +201,15 @@ class StopTime(Base):
                     block = None
                     for b in blocks:
                         if s.trip_id == b.trip_id and s.trip.block_id == b.block_id:
-                            #import pdb; pdb.set_trace()
                             block = b
                             break
                     if not block:
                         ret_val.append(s)
                     else:
-                        if block.next_trip:
-                            pass # this is an arrival trip (don't return the stop_time as a departure)
+                        #import pdb; pdb.set_trace()
+                        if block.next_trip and block.next_trip.start_stop.stop_id == stop_id:
+                            pass # this is an arrival trip, and the next trip
+                                 # (don't return the stop_time as a departure)
                         else:
                             ret_val.append(s) # this is the last trip of the day (so return it)
                             # @todo maybe monkey patch stop_time with block, so we know about last trip
