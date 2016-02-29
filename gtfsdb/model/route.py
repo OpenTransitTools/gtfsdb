@@ -55,20 +55,6 @@ class Route(Base):
         uselist=True, viewonly=True, lazy='joined')
 
     @property
-    def is_active(self, date=None):
-        """ :return False whenever we see that the route start and end date are outside the
-                    input date (where the input date defaults to 'today')
-        """
-        ret_val = True
-        if self.start_date and self.end_date:
-            if date is None:
-                date = datetime.date.today()
-            ret_val = False
-            if self.start_date <= date <= self.end_date:
-                ret_val = True
-        return ret_val
-
-    @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
         ''' build a route name out of long and short names...
         '''
@@ -93,6 +79,23 @@ class Route(Base):
         except:
             pass
         return ret_val
+
+    @property
+    def is_active(self, date=None):
+        """ :return False whenever we see that the route start and end date are outside the
+                    input date (where the input date defaults to 'today')
+        """
+        try:
+            self._is_active
+        except AttributeError:
+            self._is_active = True
+            if self.start_date and self.end_date:
+                self._is_active = False
+                if date is None:
+                    date = datetime.date.today()
+                if self.start_date <= date <= self.end_date:
+                    self._is_active = True
+            return self._is_active
 
     @property
     def _get_start_end_dates(self):
