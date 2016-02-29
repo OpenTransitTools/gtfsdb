@@ -141,12 +141,11 @@ class Stop(Base):
 
     @classmethod
     def active_stop_ids(cls, session):
-        ''' return an array of stop_id / agency_id pairs
-            {stop_id:'2112', agency_id:'C-TRAN'}
+        ''' return an array of stop_id / agencies pairs
+            {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
         '''
         ret_val = []
         stops = cls.active_stops(session)
         for s in stops:
             ret_val.append({"stop_id":s.stop_id, "agencies":s.agencies})
         return ret_val
-

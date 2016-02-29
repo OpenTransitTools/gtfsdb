@@ -174,6 +174,17 @@ class Route(Base):
 
         return ret_val
 
+    @classmethod
+    def active_route_ids(cls, session):
+        ''' return an array of route_id / agency_id pairs
+            {route_id:'2112', agency_id:'C-TRAN'}
+        '''
+        ret_val = []
+        routes = cls.active_routes(session)
+        for r in routes:
+            ret_val.append({"route_id":r.route_id, "agency_id":r.agency_id})
+        return ret_val
+
 
 class RouteDirection(Base):
     datasource = config.DATASOURCE_GTFS
