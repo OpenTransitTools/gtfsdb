@@ -47,26 +47,6 @@ class Stop(Base):
         foreign_keys='(Stop.stop_id)',
         uselist=True, viewonly=True)
 
-    @property
-    def is_active(self, date=None):
-        return True
-
-    @property
-    def is_active(self, date=None):
-        """ :return False whenever we see that the stop has zero stop_times on the given
-                    input date (which defaults to 'today')
-        """
-        ret_val = False
-        if date is None:
-            date = datetime.date.today()
-
-        #import pdb; pdb.set_trace()
-        from gtfsdb.model.stop_time import StopTime
-        st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
-        if st and len(st) > 0:
-            ret_val = True
-        return ret_val
-
     @classmethod
     def add_geometry_column(cls):
         cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
@@ -76,13 +56,30 @@ class Stop(Base):
         args = (config.SRID, row['stop_lon'], row['stop_lat'])
         row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
 
-
-    """ TODO: rewrite the cache to use timeout checking in Base.py """
+    @property
+    def routes(self):
+        ''' return list of routes servicing this stop
+            @todo: rewrite the cache to use timeout checking in Base.py
+        '''
+        try:
+            self._routes
+        except AttributeError:
+            from gtfsdb.model.route import Route
+            from gtfsdb.model.trip import Trip
+            from gtfsdb.model.stop_time import StopTime
+            session = object_session(self)
+            q = session.query(Route)
+            f = ((StopTime.stop_id == self.stop_id) & (StopTime.departure_time != ''))
+            q = q.filter(Route.trips.any(Trip.stop_times.any(f)))
+            q = q.order_by(Route.route_sort_order)
+            self._routes = q.all()
+        return self._routes
 
     @property
     def headsigns(self):
-        '''Returns a dictionary of all unique (route_id, headsign) tuples used
-        at the stop and the number of trips the head sign is used'''
+        ''' Returns a dictionary of all unique (route_id, headsign) tuples used
+            at the stop and the number of trips the head sign is used
+        '''
         if not hasattr(self, '_headsigns'):
             from gtfsdb.model.stop_time import StopTime
             self._headsigns = defaultdict(int)
@@ -94,23 +91,62 @@ class Stop(Base):
             for r in q:
                 headsign = r.stop_headsign or r.trip.trip_headsign
                 self._headsigns[(r.trip.route, headsign)] += 1
-
         return self._headsigns
 
     @property
-    def routes(self):
-        ''''''
-        from gtfsdb.model.route import Route
-        from gtfsdb.model.trip import Trip
-        from gtfsdb.model.stop_time import StopTime
-
+    def is_active(self, date=None):
+        """ :return False whenever we see that the stop has zero stop_times on the given
+                    input date (which defaults to 'today')
+            @TODO: rewrite the cache to use timeout checking in Base.py
+        """
         try:
-            self._routes
+            self._is_active
         except AttributeError:
-            session = object_session(self)
-            q = session.query(Route)
-            f = ((StopTime.stop_id == self.stop_id) & (StopTime.departure_time != ''))
-            q = q.filter(Route.trips.any(Trip.stop_times.any(f)))
-            q = q.order_by(Route.route_sort_order)
-            self._routes = q.all()
-        return self._routes
+            self._is_active = False
+            if date is None:
+                date = datetime.date.today()
+
+            #import pdb; pdb.set_trace()
+            from gtfsdb.model.stop_time import StopTime
+            st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
+            if st and len(st) > 0:
+                self._is_active = True
+        return self._is_active
+
+    @property
+    def agencies(self):
+        ''' return list of agency ids with routes hitting this stop
+            @todo: rewrite the cache to use timeout checking in Base.py
+        '''
+        try:
+            self._agencies
+        except AttributeError:
+            self._agencies = []
+            if self.routes:
+                for r in self.routes:
+                    if r.agency_id not in self._agencies:
+                        self.agencies.append(r.agency_id)
+        return self._agencies
+
+    @classmethod
+    def active_stops(cls, session):
+        ''' check for active stops
+        '''
+        ret_val = []
+        stops = session.query(Stop).all()
+        for s in stops:
+            if s.is_active:
+                ret_val.append(s)
+        return ret_val
+
+    @classmethod
+    def active_stop_ids(cls, session):
+        ''' return an array of stop_id / agency_id pairs
+            {stop_id:'2112', agency_id:'C-TRAN'}
+        '''
+        ret_val = []
+        stops = cls.active_stops(session)
+        for s in stops:
+            ret_val.append({"stop_id":s.stop_id, "agencies":s.agencies})
+        return ret_val
+

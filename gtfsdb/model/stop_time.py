@@ -159,7 +159,7 @@ class StopTime(Base):
             date = datetime.date.today()
 
         # step 1: get stop times based on date
-        log.info("QUERY StopTime")
+        log.debug("QUERY StopTime")
         q = session.query(StopTime)
         q = q.filter_by(stop_id=stop_id)
         q = q.filter(StopTime.departure_time != None)
@@ -202,6 +202,7 @@ class StopTime(Base):
                     for b in blocks:
                         if s.trip_id == b.trip_id and s.trip.block_id == b.block_id:
                             block = b
+                            blocks.remove(b)
                             break
                     if not block:
                         ret_val.append(s)
