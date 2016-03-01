@@ -129,23 +129,26 @@ class Stop(Base):
         return self._agencies
 
     @classmethod
-    def active_stops(cls, session):
+    def active_stops(cls, session, limit=None):
         ''' check for active stops
         '''
         ret_val = []
-        stops = session.query(Stop).all()
+        stops = session.query(Stop)
+        if limit:
+            stops = stops.limit(limit)
+        stops = stops.all()
         for s in stops:
             if s.is_active:
                 ret_val.append(s)
         return ret_val
 
     @classmethod
-    def active_stop_ids(cls, session):
+    def active_stop_ids(cls, session, limit=None):
         ''' return an array of stop_id / agencies pairs
             {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
         '''
         ret_val = []
-        stops = cls.active_stops(session)
+        stops = cls.active_stops(session, limit)
         for s in stops:
             ret_val.append({"stop_id":s.stop_id, "agencies":s.agencies})
         return ret_val
