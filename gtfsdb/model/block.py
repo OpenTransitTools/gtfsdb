@@ -146,3 +146,36 @@ class Block(Base):
 
         processing_time = time.time() - start_time
         log.debug('{0}.populate ({1:.0f} seconds)'.format(cls.__name__, processing_time))
+
+    @classmethod
+    def start_stop_ids(cls, session):
+        ''' return an array of distinct starting stop_ids
+        '''
+        ret_val = []
+        blocks = session.query(Block).all()
+        for b in blocks:
+            if b.start_stop_id not in ret_val:
+                ret_val.append(b.start_stop_id)
+        return ret_val
+
+    @classmethod
+    def end_stop_ids(cls, session):
+        ''' return an array of distinct ending stop_ids
+        '''
+        ret_val = []
+        blocks = session.query(Block).all()
+        for b in blocks:
+            if b.end_stop_id not in ret_val:
+                ret_val.append(b.end_stop_id)
+        return ret_val
+
+    @classmethod
+    def unique_stop_ids(cls, session):
+        ''' return an array of unique starting and ending stop_ids
+        '''
+        ret_val = cls.start_stop_ids(session)
+        ends   = cls.end_stop_ids(session)
+        for s in ends:
+            if s not in ret_val:
+                ret_val.append(s)
+        return ret_val
