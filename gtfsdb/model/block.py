@@ -172,10 +172,13 @@ class Block(Base):
     @classmethod
     def unique_stop_ids(cls, session):
         ''' return an array of unique starting and ending stop_ids
+            use the dict {'stop_id':id} format for return (compatable with Stops.active_stops())
         '''
-        ret_val = cls.start_stop_ids(session)
-        ends   = cls.end_stop_ids(session)
-        for s in ends:
-            if s not in ret_val:
-                ret_val.append(s)
+        stops = cls.start_stop_ids(session)
+        stops.extend(cls.end_stop_ids(session))
+        unique = set(stops)
+
+        ret_val = []
+        for s in unique:
+            ret_val.append({'stop_id':s})
         return ret_val
