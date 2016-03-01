@@ -170,9 +170,9 @@ class Block(Base):
         return ret_val
 
     @classmethod
-    def unique_stop_ids(cls, session):
+    def active_stop_ids(cls, session):
         ''' return an array of unique starting and ending stop_ids
-            use the dict {'stop_id':id} format for return (compatable with Stops.active_stops())
+            use the dict {'stop_id':id} format for return (compatible with Stops.active_stop_ids())
         '''
         stops = cls.start_stop_ids(session)
         stops.extend(cls.end_stop_ids(session))
