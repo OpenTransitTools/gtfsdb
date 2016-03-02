@@ -15,12 +15,13 @@ class Trip(Base):
     route_id = Column(String(255), index=True, nullable=False)
     service_id = Column(String(255), index=True, nullable=False)
     trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    trip_headsign = Column(String(255))
-    trip_short_name = Column(String(255))
-    direction_id = Column(Integer)
-    block_id = Column(String(255))
+    direction_id = Column(Integer, index=True)
+    block_id = Column(String(255), index=True)
     shape_id = Column(String(255), index=True, nullable=True)
     trip_type = Column(String(255))
+
+    trip_headsign = Column(String(255))
+    trip_short_name = Column(String(255))
     bikes_allowed = Column(Integer, default=0)
     wheelchair_accessible = Column(Integer, default=0)
 
