@@ -169,12 +169,14 @@ class StopTime(Base):
         if route_id:
             q = q.filter(StopTime.trip.has(Trip.route_id == route_id))
 
-        # step 3: order the stop times
-        q = q.order_by(StopTime.departure_time)
-
-        # step 4: options to speed up /q
+        # step 3: options to speed up /q
         q = q.options(joinedload_all('trip'))
 
+        # step 4: order the stop times
+        if limit is None or limit > 1:
+            q = q.order_by(StopTime.departure_time)
+
+        # step 5: limit results
         if limit:
             q = q.limit(limit)
 

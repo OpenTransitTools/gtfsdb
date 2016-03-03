@@ -95,9 +95,10 @@ class Stop(Base):
 
     @property
     def is_active(self, date=None):
-        """ :return False whenever we see that the stop has zero stop_times on the given
-                    input date (which defaults to 'today')
-            @TODO: rewrite the cache to use timeout checking in Base.py
+        """ :return False whenever we see that the stop has zero stop_times on the given input date
+                    (which defaults to 'today')
+            @TODO: add pre-calculated stop (and route) calendars that show the range of dates (against the calendar)
+                   when a given stop (or/and route) is active ... |stop_id|first_date|last_date|total_dates|
         """
         try:
             self._is_active
