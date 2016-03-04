@@ -137,8 +137,8 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
-                        rs.start_date = r.start_date or datetime.date.today() - datetime.timedelta(days=180)
-                        rs.end_date =  r.end_date or datetime.date.today() + datetime.timedelta(days=180)
+                        rs.start_date = r.start_date
+                        rs.end_date =  r.end_date
                         session.add(rs)
 
                     # step 8: flush the new records to the db...
