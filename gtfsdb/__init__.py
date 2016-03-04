@@ -6,6 +6,7 @@ from gtfsdb.model.feed_info import FeedInfo
 from gtfsdb.model.frequency import Frequency
 from gtfsdb.model.gtfs import GTFS
 from gtfsdb.model.route import *
+from gtfsdb.model.route_stop import RouteStop
 from gtfsdb.model.shape import *
 from gtfsdb.model.stop import Stop
 from gtfsdb.model.stop_feature import *
