@@ -1,11 +1,12 @@
 import sys
 import time
+import datetime
 import logging
 log = logging.getLogger(__name__)
 
 from sqlalchemy import Column
 from sqlalchemy.orm import deferred, relationship
-from sqlalchemy.types import Integer, String
+from sqlalchemy.types import Integer, String, Date
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -22,6 +23,8 @@ class RouteStop(Base):
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     order = Column(Integer, index=True, nullable=False)
+    start_date = Column(Date, index=True, nullable=False)
+    end_date = Column(Date, index=True, nullable=False)
 
     route = relationship(
         'Route',
@@ -41,6 +44,19 @@ class RouteStop(Base):
         foreign_keys='(RouteStop.route_id, RouteStop.direction_id)',
         uselist=False, viewonly=True, lazy='joined')
 
+    start_calendar = relationship(
+        'UniversalCalendar',
+        primaryjoin='RouteStop.start_date==UniversalCalendar.date',
+        foreign_keys='(RouteStop.start_date)',
+        uselist=True, viewonly=True)
+
+    end_calendar = relationship(
+        'UniversalCalendar',
+        primaryjoin='RouteStop.end_date==UniversalCalendar.date',
+        foreign_keys='(RouteStop.end_date)',
+        uselist=True, viewonly=True)
+
+
     @classmethod
     def load(cls, db, **kwargs):
         ''' for each route/direction, find list of stop_ids for route/direction pairs
@@ -52,7 +68,7 @@ class RouteStop(Base):
 
         start_time = time.time()
         session = db.session
-        routes = session.query(Route).all()
+        routes = Route.active_routes(session)
 
         # step 0: for each route...
         for r in routes:
@@ -112,6 +128,9 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
+                        v = '20070604'
+                        rs.start_date = datetime.datetime.strptime(v, '%Y%m%d').date()
+                        rs.end_date = datetime.datetime.strptime(v, '%Y%m%d').date()
                         session.add(rs)
 
                     # step 8: flush the new records to the db...
