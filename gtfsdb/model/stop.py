@@ -94,30 +94,6 @@ class Stop(Base):
         return self._headsigns
 
     @property
-    def is_active(self, date=None):
-        """ :return False whenever we see that the stop has zero stop_times on the given input date
-                    (which defaults to 'today')
-
-            @NOTE: use caution with this routine.  calling this for multiple stops can really slow things down,
-                   since you're querying large trip and stop_time tables, and asking for a schedule of each stop
-                   I used to call this multiple times via route_stop to make sure each stop was active ... that
-                   was really bad performance wise.
-        """
-        try:
-            self._is_active
-        except AttributeError:
-            self._is_active = False
-            if date is None:
-                date = datetime.date.today()
-
-            #import pdb; pdb.set_trace()
-            from gtfsdb.model.stop_time import StopTime
-            st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
-            if st and len(st) > 0:
-                self._is_active = True
-        return self._is_active
-
-    @property
     def agencies(self):
         ''' return list of agency ids with routes hitting this stop
             @todo: rewrite the cache to use timeout checking in Base.py
@@ -131,6 +107,27 @@ class Stop(Base):
                     if r.agency_id not in self._agencies:
                         self.agencies.append(r.agency_id)
         return self._agencies
+
+    @classmethod
+    def is_active(self, date=None):
+        """ :return False whenever we see that the stop has zero stop_times on the given input date
+                    (which defaults to 'today')
+
+            @NOTE: use caution with this routine.  calling this for multiple stops can really slow things down,
+                   since you're querying large trip and stop_time tables, and asking for a schedule of each stop
+                   I used to call this multiple times via route_stop to make sure each stop was active ... that
+                   was really bad performance wise.
+        """
+        _is_active = False
+        if date is None:
+            date = datetime.date.today()
+
+        #import pdb; pdb.set_trace()
+        from gtfsdb.model.stop_time import StopTime
+        st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
+        if st and len(st) > 0:
+            _is_active = True
+        return _is_active
 
     @classmethod
     def active_stops(cls, session, limit=None, active_filter=True):
@@ -148,7 +145,7 @@ class Stop(Base):
         if active_filter:
             ret_val = []
             for s in stops:
-                if s.is_active:
+                if s.is_active():
                     ret_val.append(s)
         else:
             ret_val = stops

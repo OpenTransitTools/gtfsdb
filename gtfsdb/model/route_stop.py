@@ -56,9 +56,18 @@ class RouteStop(Base):
         foreign_keys='(RouteStop.end_date)',
         uselist=True, viewonly=True)
 
-
     @classmethod
     def load(cls, db, **kwargs):
+        log.debug('{0}.load (loaded later in post_process)'.format(cls.__name__))
+        pass
+
+    @classmethod
+    def post_process(cls, db):
+        log.debug('{0}.post_process'.format(cls.__name__))
+        cls.populate(db.session)
+
+    @classmethod
+    def populate(cls, session):
         ''' for each route/direction, find list of stop_ids for route/direction pairs
 
             the load is a two part process, where part A finds a list of unique stop ids, and
@@ -66,9 +75,9 @@ class RouteStop(Base):
         '''
         from gtfsdb import Route, RouteDirection
 
+        #import pdb; pdb.set_trace()
         start_time = time.time()
-        session = db.session
-        routes = Route.active_routes(session)
+        routes = session.query(Route).all()
 
         # step 0: for each route...
         for r in routes:
@@ -128,9 +137,8 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
-                        v = '20070604'
-                        rs.start_date = datetime.datetime.strptime(v, '%Y%m%d').date()
-                        rs.end_date = datetime.datetime.strptime(v, '%Y%m%d').date()
+                        rs.start_date = r.start_date or datetime.date.today() - datetime.timedelta(days=180)
+                        rs.end_date =  r.end_date or datetime.date.today() + datetime.timedelta(days=180)
                         session.add(rs)
 
                     # step 8: flush the new records to the db...
@@ -143,5 +151,17 @@ class RouteStop(Base):
         session.close()
 
         processing_time = time.time() - start_time
-        log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))
+        log.debug('{0}.post_process ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
+    @classmethod
+    def is_active(self, date=None):
+        """ :return False whenever we see that the route_stop's start and end date are
+                    outside the input date (where the input date defaults to 'today')
+        """
+        _is_active = False
+        if self.start_date and self.end_date:
+            if date is None:
+                date = datetime.date.today()
+            if self.start_date <= date <= self.end_date:
+                _is_active = True
+        return _is_active
