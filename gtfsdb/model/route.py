@@ -79,7 +79,6 @@ class Route(Base):
             pass
         return ret_val
 
-    @classmethod
     def is_active(self, date=None):
         """ :return False whenever we see that the route start and end date are outside the
                     input date (where the input date defaults to 'today')

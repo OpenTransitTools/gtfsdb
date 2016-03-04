@@ -108,7 +108,6 @@ class Stop(Base):
                         self.agencies.append(r.agency_id)
         return self._agencies
 
-    @classmethod
     def is_active(self, date=None):
         """ :return False whenever we see that the stop has zero stop_times on the given input date
                     (which defaults to 'today')

@@ -56,6 +56,18 @@ class RouteStop(Base):
         foreign_keys='(RouteStop.end_date)',
         uselist=True, viewonly=True)
 
+    def is_active(self, date=None):
+        """ :return False whenever we see that the route_stop's start and end date are
+                    outside the input date (where the input date defaults to 'today')
+        """
+        _is_active = False
+        if self.start_date and self.end_date:
+            if date is None:
+                date = datetime.date.today()
+            if self.start_date <= date <= self.end_date:
+                _is_active = True
+        return _is_active
+
     @classmethod
     def load(cls, db, **kwargs):
         log.debug('{0}.load (loaded later in post_process)'.format(cls.__name__))
@@ -137,8 +149,9 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
-                        rs.start_date = r.start_date
-                        rs.end_date =  r.end_date
+                        s, e = cls._calculate_times(r, stop_id)
+                        rs.start_date = s
+                        rs.end_date =  e
                         session.add(rs)
 
                     # step 8: flush the new records to the db...
@@ -154,14 +167,7 @@ class RouteStop(Base):
         log.debug('{0}.post_process ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
     @classmethod
-    def is_active(self, date=None):
-        """ :return False whenever we see that the route_stop's start and end date are
-                    outside the input date (where the input date defaults to 'today')
-        """
-        _is_active = False
-        if self.start_date and self.end_date:
-            if date is None:
-                date = datetime.date.today()
-            if self.start_date <= date <= self.end_date:
-                _is_active = True
-        return _is_active
+    def _calculate_times(cls, r, stop_id):
+        s = r.start_date
+        e = r.end_date
+        return s, e
