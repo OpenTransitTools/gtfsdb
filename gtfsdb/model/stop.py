@@ -97,8 +97,11 @@ class Stop(Base):
     def is_active(self, date=None):
         """ :return False whenever we see that the stop has zero stop_times on the given input date
                     (which defaults to 'today')
-            @TODO: add pre-calculated stop (and route) calendars that show the range of dates (against the calendar)
-                   when a given stop (or/and route) is active ... |stop_id|first_date|last_date|total_dates|
+
+            @NOTE: use caution with this routine.  calling this for multiple stops can really slow things down,
+                   since you're querying large trip and stop_time tables, and asking for a schedule of each stop
+                   I used to call this multiple times via route_stop to make sure each stop was active ... that
+                   was really bad performance wise.
         """
         try:
             self._is_active
