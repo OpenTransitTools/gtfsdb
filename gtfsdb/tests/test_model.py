@@ -71,13 +71,22 @@ class TestRoute(unittest.TestCase, BasicModelTests):
             for r in routes:
                 self.assertFalse("we should not have any routes, but I see route id: {0}".format(r.route_id))
 
+class TestRouteStop(unittest.TestCase, BasicModelTests):
+    model = RouteStop
+
+    def test_active_date(self):
+        m = self.get_first()
+        self.assertTrue(m.is_active(datetime.date(2014, 6, 6)))
+
+    def test_active_today(self):
+        m = self.get_first()
+        self.assertFalse(m.is_active())
+
 class TestRouteDirection(unittest.TestCase, BasicModelTests):
     model = RouteDirection
 
-
 class TestShape(unittest.TestCase, BasicModelTests):
     model = Shape
-
 
 class TestStop(unittest.TestCase, BasicModelTests):
     model = Stop
@@ -91,14 +100,11 @@ class TestStop(unittest.TestCase, BasicModelTests):
         for r in m.routes:
             self.assert_(isinstance(r, Route))
 
-
 class TestStopTimes(unittest.TestCase, BasicModelTests):
     model = StopTime
 
-
 class TestTransfer(unittest.TestCase, BasicModelTests):
     model = Transfer
-
 
 class TestTrip(unittest.TestCase, BasicModelTests):
     model = Trip
