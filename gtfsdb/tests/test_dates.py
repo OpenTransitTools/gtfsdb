@@ -33,7 +33,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         for s in stops:
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))
 
-    def __init__(self): pass # uncomment for debugging via main below
+    #def __init__(self): pass # uncomment for debugging via main below
 
 def main(argv):
     t = TestRouteStop()
