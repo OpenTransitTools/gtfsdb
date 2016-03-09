@@ -36,9 +36,9 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
     #def __init__(self): pass # uncomment for debugging via main below
 
 def main(argv):
+    shutil.copyfile(TestRouteStop.db_file, "gtfs.db")
     t = TestRouteStop()
     t.test_active_list()
-    shutil.copyfile(t.db_file, "gtfs.db")
 
 if __name__ == "__main__":
     main(sys.argv)

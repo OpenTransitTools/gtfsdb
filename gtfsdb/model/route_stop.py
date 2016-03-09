@@ -116,6 +116,7 @@ class RouteStop(Base):
         #import pdb; pdb.set_trace()
         start_time = time.time()
         routes = session.query(Route).all()
+        create_dirs = None
 
         # step 0: for each route...
         for r in routes:
@@ -159,13 +160,18 @@ class RouteStop(Base):
                 # PART B: add records to the database ...
                 if len(unique_stops_ids) > 0:
 
-                    # step 6: if a RouteDirection doesn't exist, let's create it...
-                    if r.directions is None or len(r.directions) == 0:
-                        rd = RouteDirection()
-                        rd.route_id = r.route_id
-                        rd.direction_id = d
-                        rd.direction_name = "Outbound" if d is 0 else "Inbound"
-                        session.add(rd)
+                    # step 6: if an entry for the direction doesn't exist, create a new
+                    #         RouteDirection record and add it to this route
+                    if create_dirs or r.directions is None or len(r.directions) == 0:
+                        if not create_dirs:
+                            create_dirs = []
+                        if d not in create_dirs:
+                            create_dirs.append(d)
+                            rd = RouteDirection()
+                            rd.route_id = r.route_id
+                            rd.direction_id = d
+                            rd.direction_name = "Outbound" if d is 0 else "Inbound"
+                            session.add(rd)
 
                     # step 7: create new RouteStop records
                     for k, stop_id in enumerate(unique_stops_ids):
