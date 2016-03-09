@@ -69,6 +69,32 @@ class RouteStop(Base):
         return _is_active
 
     @classmethod
+    def active_stops(cls, session, route_id, direction_id, agency_id=None, date=None):
+        ''' returns list of routes that are seen as 'active' based on dates and filters
+        '''
+
+        # step 1: default date
+        if date is None or not isinstance(date, datetime.date):
+            date = datetime.date.today()
+
+        # step 2a: query all route stops
+        q = session.query(RouteStop).filter(RouteStop.route_id == route_id).filter(RouteStop.direction_id == direction_id)
+
+        # step 2b: filter based on date
+        q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
+
+        # step 2c: filter by any agency_id
+        if agency_id:
+            q = q.filter(RouteStop.agency_id == agency_id)
+
+        # step 2d: add some stop order
+        q = q.order_by(RouteStop.order)
+
+        #import pdb; pdb.set_trace()
+        route_stops = q.all()
+        return route_stops
+
+    @classmethod
     def load(cls, db, **kwargs):
         log.debug('{0}.load (loaded later in post_process)'.format(cls.__name__))
         pass

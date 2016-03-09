@@ -153,19 +153,15 @@ class Route(Base):
         if date is None or not isinstance(date, datetime.date):
             date = datetime.date.today()
 
-        # step 3: filter by date
-        if date:
-            for r in routes:
-                if r:
-                    # step 3a: filter based on date (if invalid looking date objects, just pass the route on)
-                    if r.start_date and r.end_date:
-                        if r.start_date <= date <= r.end_date:
-                            ret_val.append(r)
-                    else:
+        # step 3: filter routes by active date
+        for r in routes:
+            if r:
+                # step 3a: filter based on date (if invalid looking date objects, just pass the route on)
+                if r.start_date and r.end_date:
+                    if r.start_date <= date <= r.end_date:
                         ret_val.append(r)
-        else:
-            # step 3b: if no good date, just assign routes to ret_val
-            ret_val = routes
+                else:
+                    ret_val.append(r)
 
         return ret_val
 

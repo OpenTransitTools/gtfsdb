@@ -36,26 +36,6 @@ class BasicModelTests(object):
                 self.assert_(isinstance(r, self.model))
 
 
-class TestAgency(unittest.TestCase, BasicModelTests):
-    model = Agency
-
-
-class TestCalendar(unittest.TestCase, BasicModelTests):
-    model = Calendar
-
-
-class TestCalendarDate(unittest.TestCase, BasicModelTests):
-    model = CalendarDate
-
-
-class TestFareAttribute(unittest.TestCase, BasicModelTests):
-    model = FareAttribute
-
-
-class TestFareRule(unittest.TestCase, BasicModelTests):
-    model = FareRule
-
-
 class TestRoute(unittest.TestCase, BasicModelTests):
     model = Route
 
@@ -66,6 +46,7 @@ class TestRoute(unittest.TestCase, BasicModelTests):
 
     def test_active_date(self):
         routes = Route.active_routes(self.db.session, datetime.date(2014, 6, 6))
+        self.assertTrue(len(routes) > 1)
         for r in routes:
             self.assertTrue("good, I see active route id: {0}".format(r.route_id))
 
@@ -76,6 +57,12 @@ class TestRoute(unittest.TestCase, BasicModelTests):
 
 class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop
+
+    def test_active_list(self):
+        stops = RouteStop.active_stops(self.db.session, route_id="194", direction_id="1", date=datetime.date(2014, 6, 6))
+        self.assertTrue(len(stops) > 1)
+        for s in stops:
+            self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))
 
     def test_active_date(self):
         #import pdb; pdb.set_trace()
@@ -89,26 +76,6 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 class TestRouteDirection(unittest.TestCase, BasicModelTests):
     model = RouteDirection
 
-class TestShape(unittest.TestCase, BasicModelTests):
-    model = Shape
-
-class TestStop(unittest.TestCase, BasicModelTests):
-    model = Stop
-
-    def test_headsigns(self):
-        m = self.get_first()
-        self.assert_(isinstance(m.headsigns, dict))
-
-    def test_routes(self):
-        m = self.get_first()
-        for r in m.routes:
-            self.assert_(isinstance(r, Route))
-
-class TestStopTimes(unittest.TestCase, BasicModelTests):
-    model = StopTime
-
-class TestTransfer(unittest.TestCase, BasicModelTests):
-    model = Transfer
 
 class TestTrip(unittest.TestCase, BasicModelTests):
     model = Trip
@@ -130,3 +97,41 @@ class TestTrip(unittest.TestCase, BasicModelTests):
         m = self.get_first()
         self.assert_(m.start_time)
         self.assert_(m.end_time)
+
+
+class TestStop(unittest.TestCase, BasicModelTests):
+    model = Stop
+
+    def test_headsigns(self):
+        m = self.get_first()
+        self.assert_(isinstance(m.headsigns, dict))
+
+    def test_routes(self):
+        m = self.get_first()
+        for r in m.routes:
+            self.assert_(isinstance(r, Route))
+
+class TestStopTimes(unittest.TestCase, BasicModelTests):
+    model = StopTime
+
+
+class TestAgency(unittest.TestCase, BasicModelTests):
+    model = Agency
+
+class TestCalendar(unittest.TestCase, BasicModelTests):
+    model = Calendar
+
+class TestCalendarDate(unittest.TestCase, BasicModelTests):
+    model = CalendarDate
+
+class TestFareAttribute(unittest.TestCase, BasicModelTests):
+    model = FareAttribute
+
+class TestFareRule(unittest.TestCase, BasicModelTests):
+    model = FareRule
+
+class TestShape(unittest.TestCase, BasicModelTests):
+    model = Shape
+
+class TestTransfer(unittest.TestCase, BasicModelTests):
+    model = Transfer
