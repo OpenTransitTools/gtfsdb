@@ -154,6 +154,7 @@ class Route(Base):
             date = datetime.date.today()
 
         # step 3: filter routes by active date
+        #         NOTE: r.start_date and r.end_date are properties, so have to do in code vs. query
         for r in routes:
             if r:
                 # step 3a: filter based on date (if invalid looking date objects, just pass the route on)
@@ -162,7 +163,6 @@ class Route(Base):
                         ret_val.append(r)
                 else:
                     ret_val.append(r)
-
         return ret_val
 
     @classmethod

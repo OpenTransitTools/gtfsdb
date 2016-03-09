@@ -45,6 +45,7 @@ class TestRoute(unittest.TestCase, BasicModelTests):
         self.assert_(isinstance(m.end_date, datetime.date))
 
     def test_active_date(self):
+        #import pdb; pdb.set_trace()
         routes = Route.active_routes(self.db.session, datetime.date(2014, 6, 6))
         self.assertTrue(len(routes) > 1)
         for r in routes:
@@ -65,7 +66,6 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))
 
     def test_active_date(self):
-        #import pdb; pdb.set_trace()
         m = self.get_first()
         self.assertTrue(m.is_active(datetime.date(2014, 6, 6)))
 
