@@ -64,17 +64,21 @@ class TestRoute(unittest.TestCase, BasicModelTests):
         self.assert_(isinstance(m.start_date, datetime.date))
         self.assert_(isinstance(m.end_date, datetime.date))
 
-    def test_active_routes(self):
-        if hasattr(self, 'model'):
-            #import pdb; pdb.set_trace()
-            routes = Route.active_routes(self.db.session)
-            for r in routes:
-                self.assertFalse("we should not have any routes, but I see route id: {0}".format(r.route_id))
+    def test_active_date(self):
+        routes = Route.active_routes(self.db.session, datetime.date(2014, 6, 6))
+        for r in routes:
+            self.assertTrue("good, I see active route id: {0}".format(r.route_id))
+
+    def test_active_today(self):
+        routes = Route.active_routes(self.db.session)
+        for r in routes:
+            self.assertFalse("we should not have any routes, but I see route id: {0}".format(r.route_id))
 
 class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop
 
     def test_active_date(self):
+        #import pdb; pdb.set_trace()
         m = self.get_first()
         self.assertTrue(m.is_active(datetime.date(2014, 6, 6)))
 
