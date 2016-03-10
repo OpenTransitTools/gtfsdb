@@ -27,9 +27,8 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop
 
     def test_active_list(self):
-        #import pdb; pdb.set_trace()
         stops = RouteStop.active_stops(self.db.session, route_id="OCITY", direction_id="1", date=datetime.date(2015, 6, 6))
-        #self.assertTrue(len(stops) > 1)
+        self.assertTrue(len(stops) > 1)
         for s in stops:
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))
 

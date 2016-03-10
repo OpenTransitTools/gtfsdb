@@ -116,26 +116,31 @@ class RouteStop(Base):
         #import pdb; pdb.set_trace()
         start_time = time.time()
         routes = session.query(Route).all()
-        create_dirs = None
 
-        # step 0: for each route...
         for r in routes:
+            # step 0: figure out some info about the route
+            create_dirs = False
+            if r.directions is None or len(r.directions) == 0:
+                create_dirs = True
 
             # step 1: filter the list of trips down to only a trip with a unique pattern
             #   TODO: any way to have the orm do this?  Something probably really simple Mike?
             trips = []
             shape_id_filter = []
             for t in r.trips:
-                if t.shape_id not in shape_id_filter:
-                    shape_id_filter.append(t.shape_id)
-                    trips.append(t)
+                # a bit of a speedup to filter trips that have the same shape
+                if t.shape_id and t.shape_id in shape_id_filter:
+                    continue
+                # store our trips
+                shape_id_filter.append(t.shape_id)
+                trips.append(t)
 
             # step 2: sort our list of trips by length (note: for trips with two directions, ...)
             trips = sorted(trips, key=lambda t: t.trip_len, reverse=True)
 
             # PART A: we're going to just collect a list of unique stop ids for this route / directions 
             for d in [0, 1]:
-                unique_stops_ids = []
+                unique_stops = []
 
                 # step 3: loop through all our trips and their stop times, pulling out a unique set of stops 
                 for t in trips:
@@ -147,34 +152,30 @@ class RouteStop(Base):
                         for i, st in enumerate(t.stop_times):
                             # step 5a: make sure this stop that customers can actually board...
                             if st.is_boarding_stop():
-                                if st.stop_id in unique_stops_ids:
-                                    last_pos = unique_stops_ids.index(st.stop_id)
+                                if st.stop_id in unique_stops:
+                                    last_pos = unique_stops.index(st.stop_id)
                                 else:
                                     # step 5b: add ths stop id to our unique list ... either in position, or appended to the end of the list
                                     if last_pos:
                                         last_pos += 1
-                                        unique_stops_ids.insert(last_pos, st.stop_id)
+                                        unique_stops.insert(last_pos, st.stop_id)
                                     else:
-                                        unique_stops_ids.append(st.stop_id)
+                                        unique_stops.append(st.stop_id)
 
                 # PART B: add records to the database ...
-                if len(unique_stops_ids) > 0:
+                if len(unique_stops) > 0:
 
                     # step 6: if an entry for the direction doesn't exist, create a new
                     #         RouteDirection record and add it to this route
-                    if create_dirs or r.directions is None or len(r.directions) == 0:
-                        if not create_dirs:
-                            create_dirs = []
-                        if d not in create_dirs:
-                            create_dirs.append(d)
-                            rd = RouteDirection()
-                            rd.route_id = r.route_id
-                            rd.direction_id = d
-                            rd.direction_name = "Outbound" if d is 0 else "Inbound"
-                            session.add(rd)
+                    if create_dirs:
+                        rd = RouteDirection()
+                        rd.route_id = r.route_id
+                        rd.direction_id = d
+                        rd.direction_name = "Outbound" if d is 0 else "Inbound"
+                        session.add(rd)
 
                     # step 7: create new RouteStop records
-                    for k, stop_id in enumerate(unique_stops_ids):
+                    for k, stop_id in enumerate(unique_stops):
                         # step 4b: create a RouteStop record
                         rs = RouteStop()
                         rs.route_id = r.route_id
@@ -186,13 +187,13 @@ class RouteStop(Base):
                         rs.end_date =  e
                         session.add(rs)
 
-                    # step 8: flush the new records to the db...
-                    sys.stdout.write('*')
-                    session.commit()
-                    session.flush()
-                    unique_stops_ids = [None]
+            # step 8: commit the new records to the db for this route...
+            sys.stdout.write('*')
+            session.commit()
 
+        # step 9: final commit...
         session.commit()
+        session.flush()
         session.close()
 
         processing_time = time.time() - start_time
