@@ -37,6 +37,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 def main(argv):
     shutil.copyfile(TestRouteStop.db_file, "gtfs.db")
     t = TestRouteStop()
+    #import pdb; pdb.set_trace()
     t.test_active_list()
 
 if __name__ == "__main__":
