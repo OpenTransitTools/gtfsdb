@@ -7,6 +7,7 @@ log = logging.getLogger(__name__)
 from sqlalchemy import Column
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.types import Integer, String, Date
+from sqlalchemy.sql import func
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -182,25 +183,51 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
-                        s, e = cls._calculate_times(r, stop_id)
-                        rs.start_date = s
-                        rs.end_date =  e
+                        rs.start_date = r.start_date
+                        rs.end_date =  r.end_date
                         session.add(rs)
 
             # step 8: commit the new records to the db for this route...
             sys.stdout.write('*')
             session.commit()
 
-        # step 9: final commit...
+        # step 9: commit
         session.commit()
         session.flush()
+
+        # step 10: now let's go thru and
+        cls._fix_dates(session)
         session.close()
 
         processing_time = time.time() - start_time
         log.debug('{0}.post_process ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
     @classmethod
-    def _calculate_times(cls, r, stop_id):
-        s = r.start_date
-        e = r.end_date
-        return s, e
+    def _fix_dates(cls, session):
+        ''' fix up the route stop
+
+            SELECT r.route_id, st.stop_id, min(date), max(date)
+            FROM universal_calendar u, trips t, stop_times st, routes r
+            where u.service_id = t.service_id
+            and t.trip_id = st.trip_id
+            and t.route_id = r.route_id
+            group by r.route_id, st.stop_id
+            order by 2
+
+
+
+        '''
+        return
+
+        from gtfsdb import UniversalCalendar, Route, Stop
+
+        routes = session.query(RouteStop).all()
+        for rs in routes:
+            q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+            q = q.filter(UniversalCalendar.trips.any(route_id=rs.route_id))
+            q = q.filter(UniversalCalendar.trips.stop_times.any(stop_id=rs.stop_id))
+            print q.all()
+
+        #import pdb; pdb.set_trace()
+        #session.query(Route.route_id, Stop.stop_id, func.min(U.date) ).group_by(Table.column1, Table.column2).all()
+        #q = session.query(func.min(UniversalCalendar.date) ).group_by(Table.column1, Table.column2).all()
