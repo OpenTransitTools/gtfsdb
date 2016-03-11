@@ -219,14 +219,15 @@ class RouteStop(Base):
         '''
         return
 
-        from gtfsdb import UniversalCalendar, Route, Stop
+        from gtfsdb import UniversalCalendar, Route, Stop, Trip
 
         routes = session.query(RouteStop).all()
         for rs in routes:
             q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-            q = q.filter(UniversalCalendar.trips.any(route_id=rs.route_id))
-            q = q.filter(UniversalCalendar.trips.stop_times.any(stop_id=rs.stop_id))
+            q = q.filter(Trip.route_id==rs.route_id)
+            q = q.filter(Trip.stop_times.any(stop_id=rs.stop_id))
             print q.all()
+            #break
 
         #import pdb; pdb.set_trace()
         #session.query(Route.route_id, Stop.stop_id, func.min(U.date) ).group_by(Table.column1, Table.column2).all()
