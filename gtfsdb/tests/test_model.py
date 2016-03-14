@@ -65,6 +65,10 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         for s in stops:
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))
 
+    def test_by_stop(self):
+        stops = RouteStop.by_stop(self.db.session, stop_id="12883")
+        self.assertTrue(len(stops) >= 1)
+
     def test_route_stops(self):
         date = datetime.date(2014, 6, 6)
         stops = RouteStop.active_stops(self.db.session, route_id="193", direction_id="1", date=date)
@@ -78,7 +82,6 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 
         stops = RouteStop.active_stops(self.db.session, route_id="194", direction_id="0", date=date)
         self.assertTrue(len(stops) > 5)
-
 
     def test_active_date(self):
         m = self.get_first()

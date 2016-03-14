@@ -70,7 +70,42 @@ class RouteStop(Base):
         return _is_active
 
     @classmethod
-    def active_stops(cls, session, route_id, direction_id, agency_id=None, date=None):
+    def is_stop_active(cls, session, stop_id, agency_id=None, date=None):
+        ''' returns boolean whether given stop id is active for a given date
+        '''
+        ret_val = False
+
+        # step 1: default date
+        if date is None or not isinstance(date, datetime.date):
+            date = datetime.date.today()
+
+        # step 2: get RouteStop object
+        rs = RouteStop.by_stop(session, stop_id, agency_id, date, 1)
+        if rs and len(rs) > 0:
+            ret_val = True
+        return ret_val
+
+    @classmethod
+    def by_stop(cls, session, stop_id, agency_id=None, date=None, count=None):
+        #import pdb; pdb.set_trace()
+        # step 1: query all route stops by stop id (and maybe agency)
+        q = session.query(RouteStop).filter(RouteStop.stop_id == stop_id)
+        if agency_id:
+            q = q.filter(RouteStop.agency_id == agency_id)
+
+        # step 2: filter based on date
+        if date:
+            q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
+
+        # step 3: limit the number of objects returned by query
+        if count:
+            q = q.limit(count)
+
+        ret_val = q.all()
+        return ret_val
+
+    @classmethod
+    def active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
         ''' returns list of routes that are seen as 'active' based on dates and filters
         '''
 
@@ -78,17 +113,17 @@ class RouteStop(Base):
         if date is None or not isinstance(date, datetime.date):
             date = datetime.date.today()
 
-        # step 2a: query all route stops
-        q = session.query(RouteStop).filter(RouteStop.route_id == route_id).filter(RouteStop.direction_id == direction_id)
+        # step 2a: query all route stops by route (and maybe direction and agency
+        q = session.query(RouteStop).filter(RouteStop.route_id == route_id)
+        if direction_id:
+            q = q.filter(RouteStop.direction_id == direction_id)
+        if agency_id:
+            q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2b: filter based on date
         q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
 
-        # step 2c: filter by any agency_id
-        if agency_id:
-            q = q.filter(RouteStop.agency_id == agency_id)
-
-        # step 2d: add some stop order
+        # step 2c: add some stop order
         q = q.order_by(RouteStop.order)
 
         #import pdb; pdb.set_trace()
