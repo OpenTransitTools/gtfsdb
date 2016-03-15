@@ -279,11 +279,13 @@ class RouteStop(Base):
             order by 2
 
 
-
-        '''
-        return
-
-        from gtfsdb import UniversalCalendar, Route, Stop, Trip
+        q = session.query(Route.route_id, StopTime.stop_id, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))\
+            .join(UniversalCalendar)\
+            .join(Trip, UniversalCalendar.service_id == Trip.service_id)
+        q = q.join(Route)
+        q = q.join(StopTime)
+        q = q.group_by(Route.route_id, StopTime.stop_id)
+        recs = q.all()
 
         routes = session.query(RouteStop).all()
         for rs in routes:
@@ -293,6 +295,19 @@ class RouteStop(Base):
             print q.all()
             #break
 
-        #import pdb; pdb.set_trace()
+        '''
+        return
+
+        import pdb; pdb.set_trace()
+        from gtfsdb import UniversalCalendar, Route, StopTime, Trip
+
+        routes = session.query(RouteStop).all()
+        for rs in routes:
+            q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+            q = q.filter(Trip.route_id==rs.route_id)
+            q = q.filter(Trip.stop_times.any(stop_id=rs.stop_id))
+            print q.all()
+
         #session.query(Route.route_id, Stop.stop_id, func.min(U.date) ).group_by(Table.column1, Table.column2).all()
         #q = session.query(func.min(UniversalCalendar.date) ).group_by(Table.column1, Table.column2).all()
+

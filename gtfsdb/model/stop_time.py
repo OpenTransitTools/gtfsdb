@@ -147,7 +147,6 @@ class StopTime(Base):
                 ret_val.append(k)
         return ret_val
 
-
     @classmethod
     def get_departure_schedule(cls, session, stop_id, date=None, route_id=None, limit=None):
         ''' helper routine which returns the stop schedule for a give date

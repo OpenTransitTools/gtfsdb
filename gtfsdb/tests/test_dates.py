@@ -79,8 +79,8 @@ def main(argv):
     shutil.copyfile(TestRouteStop.db_file, "gtfs.db")
     t = TestRouteStop()
     #import pdb; pdb.set_trace()
-    #t.test_active_list()
-    t.test_old_stops()
+    t.test_active_list()
+    #t.test_old_stops()
 
 if __name__ == "__main__":
     main(sys.argv)
