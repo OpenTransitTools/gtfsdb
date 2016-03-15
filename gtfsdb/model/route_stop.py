@@ -80,13 +80,16 @@ class RouteStop(Base):
             date = datetime.date.today()
 
         # step 2: get RouteStop object
-        rs = RouteStop.by_stop(session, stop_id, agency_id, date, 1)
+        rs = RouteStop.query_by_stop(session, stop_id, agency_id, date, 1)
         if rs and len(rs) > 0:
             ret_val = True
         return ret_val
 
     @classmethod
-    def by_stop(cls, session, stop_id, agency_id=None, date=None, count=None):
+    def query_by_stop(cls, session, stop_id, agency_id=None, date=None, count=None, sort=False):
+        ''' get all route stop records by looking for a given stop_id.
+            further filtering can be had by providing an active date and agency id
+        '''
         #import pdb; pdb.set_trace()
         # step 1: query all route stops by stop id (and maybe agency)
         q = session.query(RouteStop).filter(RouteStop.stop_id == stop_id)
@@ -101,7 +104,33 @@ class RouteStop(Base):
         if count:
             q = q.limit(count)
 
+        # step 4: sort the results based on order column
+        if sort:
+            q = q.order_by(RouteStop.order)
+
         ret_val = q.all()
+        return ret_val
+
+    @classmethod
+    def unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
+        ''' get a unique set of route records by looking for a given stop_id.
+            further filtering can be had by providing an active date and agency id, and route name
+        '''
+        ret_val = []
+
+        route_ids = []
+        route_names = []
+
+        route_stops = RouteStop.query_by_stop(session, stop_id, agency_id, date, sort=True)
+        for rs in route_stops:
+            # step 1: filter(s) check
+            if rs.route_id in route_ids: continue
+            if route_name_filter and rs.route.route_name in route_names: continue
+            route_ids.append(rs.route_id)
+            route_names.append(rs.route.route_name)
+
+            # step 2: append route object to results
+            ret_val.append(rs.route)
         return ret_val
 
     @classmethod
