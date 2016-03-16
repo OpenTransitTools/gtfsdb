@@ -188,7 +188,7 @@ class RouteStop(Base):
             if r.directions is None or len(r.directions) == 0:
                 create_dirs = True
 
-            # step 1: filter the list of trips down to only a trip with a unique pattern
+            # step 1a: filter the list of trips down to only a trip with a unique pattern
             #   TODO: any way to have the orm do this?  Something probably really simple Mike?
             trips = []
             shape_id_filter = []
@@ -200,8 +200,11 @@ class RouteStop(Base):
                 shape_id_filter.append(t.shape_id)
                 trips.append(t)
 
-            # step 2: sort our list of trips by length (note: for trips with two directions, ...)
+            # step 1b: sort our list of trips by length (note: for trips with two directions, ...)
             trips = sorted(trips, key=lambda t: t.trip_len, reverse=True)
+
+            # step 2: get a hash table of route stops with effective start and end dates
+            stop_dates = cls._find_route_stop_dates(session, r.route_id)
 
             # PART A: we're going to just collect a list of unique stop ids for this route / directions 
             for d in [0, 1]:
@@ -247,8 +250,8 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
-                        rs.start_date = r.start_date
-                        rs.end_date =  r.end_date
+                        rs.start_date = stop_dates[stop_id][1] #r.start_date
+                        rs.end_date =  stop_dates[stop_id][2] #r.end_date
                         session.add(rs)
 
             # step 8: commit the new records to the db for this route...
@@ -260,15 +263,15 @@ class RouteStop(Base):
         session.flush()
 
         # step 10: now let's go thru and
-        cls._fix_dates(session)
+        #cls._fix_dates(session)
         session.close()
 
         processing_time = time.time() - start_time
         log.debug('{0}.post_process ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
     @classmethod
-    def _fix_dates(cls, session):
-        ''' fix up the route stop start and end dates by looking at the min and max service dates, when
+    def _find_route_stop_dates(cls, session, route_id):
+        ''' find effective start date and end date for all stops of the input route, when
             queried against the trip and stop time tables.  Below are a couple of pure SQL queries that
             perform what I'm doing to get said start and end dates:
 
@@ -278,63 +281,31 @@ class RouteStop(Base):
             WHERE t.service_id = u.service_id
               AND t.trip_id    = st.trip_id
             GROUP BY t.route_id, st.stop_id
-            ORDER BY 2
 
-            # sqlalchemy verstion of the above
-            q = session.query(Trip.route_id, StopTime.stop_id, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-            q = q.filter(UniversalCalendar.service_id == Trip.service_id)
-            q = q.filter(Trip.trip_id == StopTime. trip_id)
-            q = q.group_by(Trip.route_id, StopTime.stop_id)
-            q = q.order_by(StopTime.stop_id)
-            z = q.all()
-
-            # specific route stop start & end date (sqlalchemy version below used in the code)
-            SELECT min(date), max(date)
+            # query all stops start & end dates for a given route (used below in SQLAlchemy)
+            SELECT st.stop_id, min(date), max(date)
             FROM ott.universal_calendar u, ott.trips t, ott.stop_times st
             WHERE t.service_id = u.service_id
               AND t.trip_id    = st.trip_id
-              AND t.route_id   = '46'
-              AND st.stop_id   = '9966'
+              AND st.stop_id   = '1'
+            GROUP BY st.stop_id
 
-            # sqlalchemy specific route stop start & end date
-            route_id = 100
-            stop_id = 13729
-            q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-            q = q.filter(Trip.service_id  == UniversalCalendar.service_id)
-            q = q.filter(Trip.trip_id     == StopTime.trip_id)
-            q = q.filter(Trip.route_id    == route_id)
-            q = q.filter(StopTime.stop_id == stop_id)
-            d = q.one()
-
+            @:return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
         '''
-        return
-
-
-        from gtfsdb import UniversalCalendar, Route, StopTime, Trip
+        ret_val = {}
 
         # step 1: query the route/stop start and end dates, based on stop time table
         #import pdb; pdb.set_trace()
-        #q = session.query(RouteStop, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-        q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+        from gtfsdb import UniversalCalendar, StopTime, Trip
+        q = session.query(StopTime.stop_id, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
         q = q.filter(UniversalCalendar.service_id == Trip.service_id)
-        q = q.filter(Trip.trip_id == StopTime.trip_id)
-        #q = q.filter(RouteStop.route_id == Trip.route_id)
-        #q = q.filter(RouteStop.stop_id  == StopTime.stop_id)
-        rs_list = q.all()
-        for rs in rs_list:
-            print rs
-            continue
-            # step 2: update our route stop dates
-            route_stop = rs[0]
-            start_date = rs[1]
-            end_date = rs[2]
-            route_stop.start_date = start_date
-            route_stop.end_date   = end_date
-            print start_date
-            print  end_date
-            print ""
-            print ""
+        q = q.filter(Trip.trip_id  == StopTime.trip_id)
+        q = q.filter(Trip.route_id == route_id)
+        q = q.group_by(StopTime.stop_id)
+        stop_dates = q.all()
 
-        # step 3: commit the above changes to the RouteStop start/end dates in the database
-        session.commit()
-        session.flush()
+        # step 2: make a hash of these dates with the stop id as the key
+        for d in stop_dates:
+            ret_val[d[0]] = d
+
+        return ret_val
