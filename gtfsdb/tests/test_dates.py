@@ -21,7 +21,7 @@ class BasicModelTests(object):
     db_file = tempfile.mkstemp()[1]
     url = 'sqlite:///{0}'.format(db_file)
     db = database_load(gtfs_file, url=url)
-    log.debug(db_file)
+    log.debug("DATABASE TMP FILE: {0}".format(db_file))
 
 class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop

@@ -18,9 +18,10 @@ class BasicModelTests(object):
 
     path = resource_filename('gtfsdb', 'tests')
     gtfs_file = 'file:///{0}'.format(os.path.join(path, 'large-sample-feed.zip'))
-    url = 'sqlite:///{0}'.format(tempfile.mkstemp()[1])
-    log.debug(url)
+    db_file = tempfile.mkstemp()[1]
+    url = 'sqlite:///{0}'.format(db_file)
     db = database_load(gtfs_file, url=url)
+    log.debug("DATABASE TMP FILE: {0}".format(db_file))
 
     def get_first(self):
         try:

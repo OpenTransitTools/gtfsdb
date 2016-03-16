@@ -268,9 +268,11 @@ class RouteStop(Base):
 
     @classmethod
     def _fix_dates(cls, session):
-        ''' fix up the route stop start and end dates, by looking at
+        ''' fix up the route stop start and end dates by looking at the min and max service dates, when
+            queried against the trip and stop time tables.  Below are a couple of pure SQL queries that
+            perform what I'm doing to get said start and end dates:
 
-            # all route stops with start & end dates
+            # query all route stops with start & end dates
             SELECT t.route_id, st.stop_id, min(date), max(date)
             FROM ott.universal_calendar u, ott.trips t, ott.stop_times st
             WHERE t.service_id = u.service_id
@@ -278,6 +280,7 @@ class RouteStop(Base):
             GROUP BY t.route_id, st.stop_id
             ORDER BY 2
 
+            # sqlalchemy verstion of the above
             q = session.query(Trip.route_id, StopTime.stop_id, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
             q = q.filter(UniversalCalendar.service_id == Trip.service_id)
             q = q.filter(Trip.trip_id == StopTime. trip_id)
@@ -285,7 +288,7 @@ class RouteStop(Base):
             q = q.order_by(StopTime.stop_id)
             z = q.all()
 
-            # specific route stop start & end date
+            # specific route stop start & end date (sqlalchemy version below used in the code)
             SELECT min(date), max(date)
             FROM ott.universal_calendar u, ott.trips t, ott.stop_times st
             WHERE t.service_id = u.service_id
@@ -294,21 +297,25 @@ class RouteStop(Base):
               AND st.stop_id   = '9966'
 
         '''
-        #return
-
         from gtfsdb import UniversalCalendar, Route, StopTime, Trip
 
         #import pdb; pdb.set_trace()
         routes = session.query(RouteStop).all()
         for rs in routes:
+
+            # step 1: query the route/stop start and end dates, based on stop time table
             q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
             q = q.filter(Trip.service_id  == UniversalCalendar.service_id)
             q = q.filter(Trip.trip_id     == StopTime.trip_id)
             q = q.filter(Trip.route_id    == rs.route_id)
             q = q.filter(StopTime.stop_id == rs.stop_id)
             d = q.one()
-            print d
 
-        #session.query(Route.route_id, Stop.stop_id, func.min(U.date) ).group_by(Table.column1, Table.column2).all()
-        #q = session.query(func.min(UniversalCalendar.date) ).group_by(Table.column1, Table.column2).all()
+            # step 2: update our route stop dates
+            rs.start_date = d[0]
+            rs.end_date = d[1]
+
+        # step 3: commit the above changes to the database
+        session.commit()
+        session.flush()
 
