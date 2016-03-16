@@ -48,9 +48,21 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         routes = RouteStop.unique_routes_at_stop(self.db.session, stop_id="OLD")
         self.assertTrue(len(routes) == 1)
 
-    def test_routes_via_stop(self):
-        routes = RouteStop.unique_routes_at_stop(self.db.session, stop_id="STAGECOACH", route_name_filter=True)
-        self.assertTrue(len(routes) == 3)
+    def test_stop_dates(self):
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2015, 1, 5))
+        self.assertTrue(active)
+
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2015, 1, 4))
+        self.assertFalse(active)
+
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2016, 6, 6))
+        self.assertFalse(active)
+
+        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2015, 1, 5))
+        self.assertFalse(active)
+
+        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2016, 6, 6))
+        self.assertTrue(active)
 
     def test_new_routes(self):
         date = datetime.date(2016, 6, 6)
@@ -66,6 +78,10 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="0", date=date)
         self.assertTrue(len(rs) == 0)
 
+    def test_effective_dates(self):
+        date = datetime.date(2016, 6, 6)
+        rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
+        self.assertTrue(len(rs) > 2)
 
     def test_active_list(self):
         rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=datetime.date(2015, 6, 6))

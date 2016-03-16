@@ -257,7 +257,7 @@ class RouteStop(Base):
             sys.stdout.write('*')
             session.commit()
 
-        # step 9: commit
+        # step 9: final commit for any stragglers
         session.commit()
         session.flush()
         session.close()
