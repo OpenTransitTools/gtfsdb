@@ -184,12 +184,11 @@ class RouteStop(Base):
 
         for r in routes:
             # step 0: figure out some info about the route
-            create_dirs = False
+            create_directions = False
             if r.directions is None or len(r.directions) == 0:
-                create_dirs = True
+                create_directions = True
 
             # step 1a: filter the list of trips down to only a trip with a unique pattern
-            #   TODO: any way to have the orm do this?  Something probably really simple Mike?
             trips = []
             shape_id_filter = []
             for t in r.trips:
@@ -204,7 +203,7 @@ class RouteStop(Base):
             trips = sorted(trips, key=lambda t: t.trip_len, reverse=True)
 
             # step 2: get a hash table of route stops with effective start and end dates
-            stop_dates = cls._find_route_stop_dates(session, r.route_id)
+            stop_effective_dates = cls._find_route_stop_effective_dates(session, r.route_id)
 
             # PART A: we're going to just collect a list of unique stop ids for this route / directions 
             for d in [0, 1]:
@@ -235,7 +234,7 @@ class RouteStop(Base):
 
                     # step 6: if an entry for the direction doesn't exist, create a new
                     #         RouteDirection record and add it to this route
-                    if create_dirs:
+                    if create_directions:
                         rd = RouteDirection()
                         rd.route_id = r.route_id
                         rd.direction_id = d
@@ -250,8 +249,8 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
-                        rs.start_date = stop_dates[stop_id][1] #r.start_date
-                        rs.end_date =  stop_dates[stop_id][2] #r.end_date
+                        rs.start_date = stop_effective_dates[stop_id][1]
+                        rs.end_date =  stop_effective_dates[stop_id][2]
                         session.add(rs)
 
             # step 8: commit the new records to the db for this route...
@@ -261,16 +260,13 @@ class RouteStop(Base):
         # step 9: commit
         session.commit()
         session.flush()
-
-        # step 10: now let's go thru and
-        #cls._fix_dates(session)
         session.close()
 
         processing_time = time.time() - start_time
         log.debug('{0}.post_process ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
     @classmethod
-    def _find_route_stop_dates(cls, session, route_id):
+    def _find_route_stop_effective_dates(cls, session, route_id):
         ''' find effective start date and end date for all stops of the input route, when
             queried against the trip and stop time tables.  Below are a couple of pure SQL queries that
             perform what I'm doing to get said start and end dates:
@@ -292,10 +288,10 @@ class RouteStop(Base):
 
             @:return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
         '''
+        #import pdb; pdb.set_trace()
         ret_val = {}
 
         # step 1: query the route/stop start and end dates, based on stop time table
-        #import pdb; pdb.set_trace()
         from gtfsdb import UniversalCalendar, StopTime, Trip
         q = session.query(StopTime.stop_id, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
         q = q.filter(UniversalCalendar.service_id == Trip.service_id)
