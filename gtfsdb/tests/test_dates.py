@@ -48,6 +48,26 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         routes = RouteStop.unique_routes_at_stop(self.db.session, stop_id="OLD")
         self.assertTrue(len(routes) == 1)
 
+    def test_active_stop_list(self):
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 1, 4))
+        self.assertTrue(len(rs) == 0)
+
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 1, 5))
+        see_old_stop = False
+        for r in rs:
+            self.assertTrue(r.stop_id != "NEW")
+            if r.stop_id == "OLD":
+                see_old_stop = True
+        self.assertTrue(see_old_stop)
+
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2016, 1, 5))
+        see_new_stop = False
+        for r in rs:
+            self.assertTrue(r.stop_id != "OLD")
+            if r.stop_id == "NEW":
+                see_new_stop = True
+        self.assertTrue(see_new_stop)
+
     def test_stop_dates(self):
         active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2015, 1, 5))
         self.assertTrue(active)
