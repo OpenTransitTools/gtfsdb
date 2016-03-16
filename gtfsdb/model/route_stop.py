@@ -268,45 +268,46 @@ class RouteStop(Base):
 
     @classmethod
     def _fix_dates(cls, session):
-        ''' fix up the route stop
+        ''' fix up the route stop start and end dates, by looking at
 
-            SELECT r.route_id, st.stop_id, min(date), max(date)
-            FROM universal_calendar u, trips t, stop_times st, routes r
-            where u.service_id = t.service_id
-            and t.trip_id = st.trip_id
-            and t.route_id = r.route_id
-            group by r.route_id, st.stop_id
-            order by 2
+            # all route stops with start & end dates
+            SELECT t.route_id, st.stop_id, min(date), max(date)
+            FROM ott.universal_calendar u, ott.trips t, ott.stop_times st
+            WHERE t.service_id = u.service_id
+              AND t.trip_id    = st.trip_id
+            GROUP BY t.route_id, st.stop_id
+            ORDER BY 2
 
+            q = session.query(Trip.route_id, StopTime.stop_id, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+            q = q.filter(UniversalCalendar.service_id == Trip.service_id)
+            q = q.filter(Trip.trip_id == StopTime. trip_id)
+            q = q.group_by(Trip.route_id, StopTime.stop_id)
+            q = q.order_by(StopTime.stop_id)
+            z = q.all()
 
-        q = session.query(Route.route_id, StopTime.stop_id, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))\
-            .join(UniversalCalendar)\
-            .join(Trip, UniversalCalendar.service_id == Trip.service_id)
-        q = q.join(Route)
-        q = q.join(StopTime)
-        q = q.group_by(Route.route_id, StopTime.stop_id)
-        recs = q.all()
-
-        routes = session.query(RouteStop).all()
-        for rs in routes:
-            q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-            q = q.filter(Trip.route_id==rs.route_id)
-            q = q.filter(Trip.stop_times.any(stop_id=rs.stop_id))
-            print q.all()
-            #break
+            # specific route stop start & end date
+            SELECT min(date), max(date)
+            FROM ott.universal_calendar u, ott.trips t, ott.stop_times st
+            WHERE t.service_id = u.service_id
+              AND t.trip_id    = st.trip_id
+              AND t.route_id   = '46'
+              AND st.stop_id   = '9966'
 
         '''
-        return
+        #return
 
-        import pdb; pdb.set_trace()
         from gtfsdb import UniversalCalendar, Route, StopTime, Trip
 
+        #import pdb; pdb.set_trace()
         routes = session.query(RouteStop).all()
         for rs in routes:
             q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-            q = q.filter(Trip.route_id==rs.route_id)
-            q = q.filter(Trip.stop_times.any(stop_id=rs.stop_id))
-            print q.all()
+            q = q.filter(Trip.service_id  == UniversalCalendar.service_id)
+            q = q.filter(Trip.trip_id     == StopTime.trip_id)
+            q = q.filter(Trip.route_id    == rs.route_id)
+            q = q.filter(StopTime.stop_id == rs.stop_id)
+            d = q.one()
+            print d
 
         #session.query(Route.route_id, Stop.stop_id, func.min(U.date) ).group_by(Table.column1, Table.column2).all()
         #q = session.query(func.min(UniversalCalendar.date) ).group_by(Table.column1, Table.column2).all()
