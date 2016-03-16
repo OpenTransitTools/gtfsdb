@@ -296,26 +296,45 @@ class RouteStop(Base):
               AND t.route_id   = '46'
               AND st.stop_id   = '9966'
 
-        '''
-        from gtfsdb import UniversalCalendar, Route, StopTime, Trip
-
-        #import pdb; pdb.set_trace()
-        routes = session.query(RouteStop).all()
-        for rs in routes:
-
-            # step 1: query the route/stop start and end dates, based on stop time table
+            # sqlalchemy specific route stop start & end date
+            route_id = 100
+            stop_id = 13729
             q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
             q = q.filter(Trip.service_id  == UniversalCalendar.service_id)
             q = q.filter(Trip.trip_id     == StopTime.trip_id)
-            q = q.filter(Trip.route_id    == rs.route_id)
-            q = q.filter(StopTime.stop_id == rs.stop_id)
+            q = q.filter(Trip.route_id    == route_id)
+            q = q.filter(StopTime.stop_id == stop_id)
             d = q.one()
 
-            # step 2: update our route stop dates
-            rs.start_date = d[0]
-            rs.end_date = d[1]
+        '''
+        return
 
-        # step 3: commit the above changes to the database
+
+        from gtfsdb import UniversalCalendar, Route, StopTime, Trip
+
+        # step 1: query the route/stop start and end dates, based on stop time table
+        #import pdb; pdb.set_trace()
+        #q = session.query(RouteStop, func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+        q = session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+        q = q.filter(UniversalCalendar.service_id == Trip.service_id)
+        q = q.filter(Trip.trip_id == StopTime.trip_id)
+        #q = q.filter(RouteStop.route_id == Trip.route_id)
+        #q = q.filter(RouteStop.stop_id  == StopTime.stop_id)
+        rs_list = q.all()
+        for rs in rs_list:
+            print rs
+            continue
+            # step 2: update our route stop dates
+            route_stop = rs[0]
+            start_date = rs[1]
+            end_date = rs[2]
+            route_stop.start_date = start_date
+            route_stop.end_date   = end_date
+            print start_date
+            print  end_date
+            print ""
+            print ""
+
+        # step 3: commit the above changes to the RouteStop start/end dates in the database
         session.commit()
         session.flush()
-

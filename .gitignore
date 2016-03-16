@@ -12,6 +12,7 @@ COMMIT_EDITMSG
 #*
 .idea
 *.iml
+.DS_Store
 
 # C extensions
 *.so
