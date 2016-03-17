@@ -93,7 +93,7 @@ class RouteStop(Base):
         #import pdb; pdb.set_trace()
         # step 1: query all route stops by stop id (and maybe agency)
         q = session.query(RouteStop).filter(RouteStop.stop_id == stop_id)
-        if agency_id:
+        if agency_id is not None:
             q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2: filter based on date
@@ -144,9 +144,9 @@ class RouteStop(Base):
 
         # step 2a: query all route stops by route (and maybe direction and agency
         q = session.query(RouteStop).filter(RouteStop.route_id == route_id)
-        if direction_id:
+        if direction_id is not None:
             q = q.filter(RouteStop.direction_id == direction_id)
-        if agency_id:
+        if agency_id is not None:
             q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2b: filter based on date
@@ -238,7 +238,7 @@ class RouteStop(Base):
                         rd = RouteDirection()
                         rd.route_id = r.route_id
                         rd.direction_id = d
-                        rd.direction_name = "Outbound" if d is 0 else "Inbound"
+                        rd.direction_name = "Outbound" if d == 0 else "Inbound"
                         session.add(rd)
 
                     # step 7: create new RouteStop records

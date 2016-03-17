@@ -129,7 +129,7 @@ class Stop(Base):
         return _is_active
 
     @classmethod
-    def active_stops(cls, session, limit=None, active_filter=True):
+    def active_stops(cls, session, limit=None, active_filter=True, date=None):
         ''' check for active stops
         '''
         ret_val = None
@@ -144,7 +144,7 @@ class Stop(Base):
         if active_filter:
             ret_val = []
             for s in stops:
-                if s.is_active():
+                if s.is_active(date):
                     ret_val.append(s)
         else:
             ret_val = stops
