@@ -34,6 +34,7 @@ class Calendar(Base):
     sunday = Column(Boolean, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
+    service_name = Column(String(255)) # Trillium extension, a human-readable name for the calendar.
 
     def weekday_list(self):
         weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3,

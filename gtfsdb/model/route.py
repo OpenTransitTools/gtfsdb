@@ -21,7 +21,7 @@ class RouteType(Base):
 
     route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
     route_type_name = Column(String(255))
-    route_type_desc = Column(String(255))
+    route_type_desc = Column(String(1023))
 
 
 class Route(Base):
@@ -34,12 +34,13 @@ class Route(Base):
     agency_id = Column(String(255), index=True, nullable=True)
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
-    route_desc = Column(String(255))
+    route_desc = Column(String(1023))
     route_type = Column(Integer, index=True, nullable=False)
     route_url = Column(String(255))
     route_color = Column(String(6))
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer, index=True)
+    min_headway_minutes = Column(Integer) # Trillium extension.
 
     trips = relationship(
         'Trip',
