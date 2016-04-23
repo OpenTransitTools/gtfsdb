@@ -165,7 +165,7 @@ class RouteStop(Base):
         pass
 
     @classmethod
-    def post_process(cls, db):
+    def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
         cls.populate(db.session)
 

@@ -39,7 +39,7 @@ class GTFS(object):
             Route.load_geoms(db)
 
         for cls in db.sorted_classes:
-            cls.post_process(db)
+            cls.post_process(db, **kwargs)
 
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))

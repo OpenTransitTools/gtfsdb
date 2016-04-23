@@ -81,9 +81,12 @@ class Block(Base):
         pass
 
     @classmethod
-    def post_process(cls, db):
-        log.debug('{0}.post_process'.format(cls.__name__))
-        cls.populate(db)
+    def post_process(cls, db, **kwargs):
+        ignore_blocks = kwargs.get('ignore_blocks', None)
+        log.debug('{0} {1}.post_process'.format("skip" if ignore_blocks else "run", cls.__name__))
+        if not ignore_blocks:
+            #import pdb; pdb.set_trace()
+            cls.populate(db)
 
     @classmethod
     def populate(cls, db):
@@ -94,7 +97,6 @@ class Block(Base):
         num_recs = 0
 
         # step 1: loop thru all trips, sorted by block and service key
-        #import pdb; pdb.set_trace()
         trips = db.session.query(Trip).order_by(Trip.block_id, Trip.service_id).all()
         i = 0
         while i < len(trips):

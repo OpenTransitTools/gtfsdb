@@ -28,6 +28,8 @@ def get_args():
                         help='Database SCHEMA name')
     parser.add_argument('--tables', choices=tables, default=None, nargs='*',
                         help='Limited list of TABLES to load, if blank, load all tables')
+    parser.add_argument('--ignore_blocks', '-nb', default=False, action='store_true',
+                        help="don't bother populating the derrived block table")
     args = parser.parse_args()
 
     kwargs = dict(
@@ -36,6 +38,7 @@ def get_args():
         is_geospatial=args.is_geospatial,
         tables=args.tables,
         url=args.database_url,
+        ignore_blocks=args.ignore_blocks,
     )
     return args, kwargs
 
