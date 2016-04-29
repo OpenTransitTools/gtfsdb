@@ -2,6 +2,15 @@
 GTFSDB
 ======
 
+***
+NOTE: May 2016 ... for folks with legacy gtfsdb databases, two new columns were recently added...
+      These two statements will keep you running:
+'''
+ALTER TABLE routes ADD COLUMN min_headway_minutes integer;
+ALTER TABLE ott.calendar ADD COLUMN service_desc character varying(255);
+'''
+***
+
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/OpenTransitTools/gtfsdb
    :target: https://gitter.im/OpenTransitTools/gtfsdb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
