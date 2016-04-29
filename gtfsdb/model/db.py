@@ -73,7 +73,15 @@ class Database(object):
 
     @schema.setter
     def schema(self, val):
+        #import pdb; pdb.set_trace()
         self._schema = val
+        try:
+            if self._schema:
+                from sqlalchemy.schema import CreateSchema
+                self.engine.execute(CreateSchema(self._schema))
+        except Exception, e:
+            log.info("NOTE: couldn't create schema {0} (schema might already exist)\n{1}".format(self._schema, e))
+
         for cls in self.classes:
             cls.__table__.schema = val
 
