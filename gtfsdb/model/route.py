@@ -138,8 +138,9 @@ class Route(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        from geoalchemy2 import Geometry
-        cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+        if not hasattr(cls, 'geom'):
+            from geoalchemy2 import Geometry
+            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
 
     @classmethod
     def active_routes(cls, session, date=None):

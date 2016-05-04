@@ -32,7 +32,8 @@ class Pattern(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        cls.geom = deferred(Column(Geometry(geometry_type='LINESTRING', srid=config.SRID)))
+        if not hasattr(cls, 'geom'):
+            cls.geom = deferred(Column(Geometry(geometry_type='LINESTRING', srid=config.SRID)))
 
     def geom_from_shape(self, points):
         coords = ['{0} {1}'.format(r.shape_pt_lon, r.shape_pt_lat) for r in points]
@@ -78,7 +79,8 @@ class Shape(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+        if not hasattr(cls, 'geom'):
+            cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     @classmethod
     def add_geom_to_dict(cls, row):

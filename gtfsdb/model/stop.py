@@ -49,7 +49,8 @@ class Stop(Base):
 
     @classmethod
     def add_geometry_column(cls):
-        cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+        if not hasattr(cls, 'geom'):
+            cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
 
     @classmethod
     def add_geom_to_dict(cls, row):
