@@ -1,3 +1,6 @@
+import logging
+log = logging.getLogger(__name__)
+
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
@@ -50,22 +53,37 @@ class Trip(Base):
         foreign_keys='(Trip.service_id)',
         uselist=True, viewonly=True)
 
-    @property
-    def end_stop(self):
-        return self.stop_times[-1].stop
-
-    @property
-    def end_time(self):
-        return self.stop_times[-1].arrival_time
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        trips = db.session.query(Trip).all()
+        for t in trips:
+            if not t.is_valid:
+                log.info("invalid trip: {0} only has {1} stop times".format(t.trip_id, t.trip_len))
 
     @property
     def start_stop(self):
         return self.stop_times[0].stop
 
     @property
+    def end_stop(self):
+        return self.stop_times[-1].stop
+
+    @property
     def start_time(self):
         return self.stop_times[0].departure_time
 
     @property
+    def end_time(self):
+        return self.stop_times[-1].arrival_time
+
+    @property
     def trip_len(self):
-        return len(self.stop_times)
+        ret_val = 0
+        if self.stop_times:
+            ret_val = len(self.stop_times)
+        return ret_val
+
+    @property
+    def is_valid(self):
+        ''' trip has to have multiple stop times to be valid, else it's not a trip... '''
+        return self.trip_len >= 2

@@ -1,17 +1,15 @@
 import csv
 import datetime
-import logging
 import os
 from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
 import time
+import logging
+log = logging.getLogger(__name__)
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
 from gtfsdb import config, util
-
-
-log = logging.getLogger(__name__)
 
 
 class _Base(object):

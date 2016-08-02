@@ -100,6 +100,10 @@ class Block(Base):
         trips = db.session.query(Trip).order_by(Trip.block_id, Trip.service_id).all()
         i = 0
         while i < len(trips):
+            # make sure the trip has a couple stops
+            if not trips[i].is_valid:
+                continue
+
             b = trips[i].block_id
             s = trips[i].service_id
 
@@ -111,6 +115,9 @@ class Block(Base):
             # step 2: grab a batch of trips that have the same block and service id
             t = []
             while i < len(trips):
+                if not trips[i].is_valid:
+                    continue
+
                 if trips[i].block_id != b or \
                    trips[i].service_id != s:
                     break
