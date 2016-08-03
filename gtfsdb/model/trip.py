@@ -58,7 +58,9 @@ class Trip(Base):
         trips = db.session.query(Trip).all()
         for t in trips:
             if not t.is_valid:
-                log.info("invalid trip: {0} only has {1} stop times".format(t.trip_id, t.trip_len))
+                log.warn("invalid trip: {0} only has {1} stop_time record (i.e., maybe the stops are coded as "
+                         "non-public, and thus their stop time records didn't make it into the gtfs)"
+                         .format(t.trip_id, t.trip_len))
 
     @property
     def start_stop(self):
