@@ -102,6 +102,7 @@ class Block(Base):
         while i < len(trips):
             # make sure the trip has a couple stops
             if not trips[i].is_valid:
+                i = i + 1
                 continue
 
             b = trips[i].block_id
@@ -116,6 +117,7 @@ class Block(Base):
             t = []
             while i < len(trips):
                 if not trips[i].is_valid:
+                    i = i + 1
                     continue
 
                 if trips[i].block_id != b or \
