@@ -1,12 +1,6 @@
 ======
 GTFSDB
 ======
-|
-NOTE: May 2016 ... for folks with legacy gtfsdb databases, two new columns were recently added. These two statements will keep you running against the new code w/out having to fully recreate your database from scratch:
- - ALTER TABLE routes ADD COLUMN min_headway_minutes integer;
- - ALTER TABLE calendar ADD COLUMN service_desc character varying(255); 
-|
-
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/OpenTransitTools/gtfsdb
@@ -34,7 +28,7 @@ Available on pypi: https://pypi.python.org/pypi/gtfsdb
 Install and use via the gtfsdb source tree:
 ==========================================
 
-0. Install Python 2.7, easy_install and buildout on your system...
+0. Install Python 2.7, easy_install (https://pypi.python.org/pypi/setuptools) and zc.buildout (https://pypi.python.org/pypi/zc.buildout/2.5.2) on your system...
 1. git clone https://github.com/OpenTransitTools/gtfsdb.git
 2. cd gtfsdb
 3. buildout install prod
@@ -76,3 +70,12 @@ Install Steps (on Windows):
     6. buildout install prod
 
     7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+
+NEWS:
+-----
+|
+NOTE: May 2016 ... for folks with legacy gtfsdb databases, two new columns were recently added. These two statements will keep you running against the new code w/out having to fully recreate your database from scratch:
+ - ALTER TABLE routes ADD COLUMN min_headway_minutes integer;
+ - ALTER TABLE calendar ADD COLUMN service_desc character varying(255); 
+|
+
