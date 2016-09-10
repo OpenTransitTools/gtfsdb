@@ -134,6 +134,15 @@ class RouteStop(Base):
         return ret_val
 
     @classmethod
+    def active_unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
+        ''' to filter active routes, just provide a date to the above unique_routes_at_stop method
+        '''
+        # make sure date is not null...
+        if date is None or not isinstance(date, datetime.date):
+            date = datetime.date.today()
+        return cls.unique_routes_at_stop(session, stop_id, agency_id, date, route_name_filter)
+
+    @classmethod
     def active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
         ''' returns list of routes that are seen as 'active' based on dates and filters
         '''
