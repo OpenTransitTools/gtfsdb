@@ -131,7 +131,6 @@ class Block(Base):
             sb_len = len(sorted_blocks) - 1
 
             # step 4: create block objects
-            #import pdb; pdb.set_trace()
             for j, k in enumerate(sorted_blocks):
                 prev = None
                 next = None
