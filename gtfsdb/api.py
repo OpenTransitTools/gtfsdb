@@ -1,7 +1,8 @@
 from gtfsdb import Database, GTFS
 
+
 def database_load(filename, **kwargs):
-    '''Basic API to load a GTFS zip file into a database
+    """ Basic API to load a GTFS zip file into a database
 
     arguments:
         filename: URL or local path to GTFS zip file
@@ -12,7 +13,7 @@ def database_load(filename, **kwargs):
         schema: database schema name
         tables: limited list of tables to load
         url: SQLAlchemy database url
-    '''
+    """
     db = Database(**kwargs)
     db.create()
     gtfs = GTFS(filename)

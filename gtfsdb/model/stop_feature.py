@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Sequence
-from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
 from gtfsdb import config

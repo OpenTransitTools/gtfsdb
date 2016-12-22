@@ -87,5 +87,5 @@ class Trip(Base):
 
     @property
     def is_valid(self):
-        ''' trip has to have multiple stop times to be valid, else it's not a trip... '''
+        # trip has to have multiple stop times to be valid, else it's not a trip...
         return self.trip_len >= 2

@@ -59,9 +59,9 @@ class Stop(Base):
 
     @property
     def routes(self):
-        ''' return list of routes servicing this stop
+        """ return list of routes servicing this stop
             @todo: rewrite the cache to use timeout checking in Base.py
-        '''
+        """
         try:
             self._routes
         except AttributeError:
@@ -78,9 +78,9 @@ class Stop(Base):
 
     @property
     def headsigns(self):
-        ''' Returns a dictionary of all unique (route_id, headsign) tuples used
+        """ Returns a dictionary of all unique (route_id, headsign) tuples used
             at the stop and the number of trips the head sign is used
-        '''
+        """
         if not hasattr(self, '_headsigns'):
             from gtfsdb.model.stop_time import StopTime
             self._headsigns = defaultdict(int)
@@ -96,9 +96,9 @@ class Stop(Base):
 
     @property
     def agencies(self):
-        ''' return list of agency ids with routes hitting this stop
+        """ return list of agency ids with routes hitting this stop
             @todo: rewrite the cache to use timeout checking in Base.py
-        '''
+        """
         try:
             self._agencies
         except AttributeError:
@@ -131,8 +131,8 @@ class Stop(Base):
 
     @classmethod
     def active_stops(cls, session, limit=None, active_filter=True, date=None):
-        ''' check for active stops
-        '''
+        """ check for active stops
+        """
         ret_val = None
 
         # step 1: get stops
@@ -154,9 +154,9 @@ class Stop(Base):
 
     @classmethod
     def active_stop_ids(cls, session, limit=None, active_filter=True):
-        ''' return an array of stop_id / agencies pairs
+        """ return an array of stop_id / agencies pairs
             {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
-        '''
+        """
         ret_val = []
         stops = cls.active_stops(session, limit, active_filter)
         for s in stops:

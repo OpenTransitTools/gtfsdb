@@ -90,8 +90,8 @@ class Block(Base):
 
     @classmethod
     def populate(cls, db):
-        ''' loop thru a full trip table and break things into buckets based on service key and block id
-        '''
+        """ loop thru a full trip table and break things into buckets based on service key and block id
+        """
         start_time = time.time()
         batch_size = config.DEFAULT_BATCH_SIZE
         num_recs = 0
@@ -159,8 +159,8 @@ class Block(Base):
 
     @classmethod
     def start_stop_ids(cls, session):
-        ''' return an array of distinct starting stop_ids
-        '''
+        """ return an array of distinct starting stop_ids
+        """
         ret_val = []
         blocks = session.query(Block).all()
         for b in blocks:
@@ -170,8 +170,8 @@ class Block(Base):
 
     @classmethod
     def end_stop_ids(cls, session):
-        ''' return an array of distinct ending stop_ids
-        '''
+        """ return an array of distinct ending stop_ids
+        """
         ret_val = []
         blocks = session.query(Block).all()
         for b in blocks:
@@ -181,9 +181,9 @@ class Block(Base):
 
     @classmethod
     def active_stop_ids(cls, session, limit=None):
-        ''' return an array of unique starting and ending stop_ids
+        """ return an array of unique starting and ending stop_ids
             use the dict {'stop_id':id} format for return (compatible with Stops.active_stop_ids())
-        '''
+        """
         stops = cls.start_stop_ids(session)
         stops.extend(cls.end_stop_ids(session))
         unique = set(stops)

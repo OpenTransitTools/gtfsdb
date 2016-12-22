@@ -40,35 +40,35 @@ class _Base(object):
 
     @property
     def to_dict(self):
-        '''convert a SQLAlchemy object into a dict that is serializable to JSON
-        '''
+        """convert a SQLAlchemy object into a dict that is serializable to JSON
+        """
         ret_val = self.__dict__.copy()
 
-        ''' not crazy about this hack, but ... the __dict__ on a SQLAlchemy
+        """ not crazy about this hack, but ... the __dict__ on a SQLAlchemy
         object contains hidden crap that we delete from the class dict
-        '''
+        """
         if set(['_sa_instance_state']).issubset(ret_val):
             del ret_val['_sa_instance_state']
 
-        ''' we're using 'created' as the date parameter, so convert values
+        """ we're using 'created' as the date parameter, so convert values
         to strings <TODO>: better would be to detect date & datetime objects,
         and convert those...
-        '''
+        """
         if set(['created']).issubset(ret_val):
             ret_val['created'] = ret_val['created'].__str__()
 
         return ret_val
 
     def get_up_date_name(self, attribute_name):
-        ''' return attribute name of where we'll store an update variable
-        '''
+        """ return attribute name of where we'll store an update variable
+        """
         return "{0}_update_utc".format(attribute_name)
 
     def is_cached_data_valid(self, attribute_name, max_age=2):
-        ''' we have to see both the attribute name exist in our object, as well as
+        """ we have to see both the attribute name exist in our object, as well as
             that object having a last update date (@see update_cached_data below)
             and that update date being less than 2 days ago...
-        '''
+        """
         ret_val = False
         try:
             #import pdb; pdb.set_trace()
@@ -86,8 +86,8 @@ class _Base(object):
         return ret_val
 
     def update_cached_data(self, attribute_name):
-        '''
-        '''
+        """
+        """
         try:
             #import pdb; pdb.set_trace()
             attribute_update = self.get_up_date_name(attribute_name)
@@ -97,7 +97,7 @@ class _Base(object):
 
     @classmethod
     def load(cls, db, **kwargs):
-        '''Load method for ORM
+        """Load method for ORM
 
         arguments:
             db: instance of gtfsdb.Database
@@ -105,7 +105,7 @@ class _Base(object):
         keyword arguments:
             gtfs_directory: path to unzipped GTFS files
             batch_size: batch size for memory management
-        '''
+        """
         log = logging.getLogger(cls.__module__)
         start_time = time.time()
         batch_size = kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE)
@@ -145,10 +145,10 @@ class _Base(object):
 
     @classmethod
     def post_process(cls, db, **kwargs):
-        '''Post-process processing method.  This method is a placeholder
-           that may be overridden in children...
-           @see: stop_time.py
-        '''
+        """ Post-process processing method.  This method is a placeholder
+            that may be overridden in children...
+            @see: stop_time.py
+        """
         pass
 
     @classmethod
@@ -170,7 +170,7 @@ class _Base(object):
             except Exception, e:
                 log.warning(e)
 
-        '''if this is a geospatially enabled database, add a geom'''
+        """if this is a geospatially enabled database, add a geom"""
         if hasattr(cls, 'geom') and hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
         return row

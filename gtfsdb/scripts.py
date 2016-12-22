@@ -10,8 +10,8 @@ def gtfsdb_load():
     database_load(args.file, **kwargs)
 
 def get_args():
-    ''' database load command-line arg parser and help util...
-    '''
+    """ database load command-line arg parser and help util...
+    """
     tables = sorted([t.name for t in Base.metadata.sorted_tables])
     parser = argparse.ArgumentParser(
         prog='gtfsdb-load',
@@ -43,16 +43,16 @@ def get_args():
     return args, kwargs
 
 def route_stop_load():
-    ''' written as a test / debug method for RS table loader '''
+    """ written as a test / debug method for RS table loader """
     from gtfsdb import Database, RouteStop
     kwargs = get_args()[1]
     db = Database(**kwargs)
     RouteStop.load(db, **kwargs)
 
 def db_connect_tester():
-    ''' simple routine to connect to an existing database and list a few stops
+    """ simple routine to connect to an existing database and list a few stops
         bin/connect-tester --database_url sqlite:///gtfs.db _no_gtfs_zip_needed_
-    '''
+    """
     from gtfsdb import Database, Stop, Route, StopTime
     args, kwargs = get_args()
     db = Database(**kwargs)

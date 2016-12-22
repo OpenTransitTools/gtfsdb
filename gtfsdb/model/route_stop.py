@@ -71,8 +71,8 @@ class RouteStop(Base):
 
     @classmethod
     def is_stop_active(cls, session, stop_id, agency_id=None, date=None):
-        ''' returns boolean whether given stop id is active for a given date
-        '''
+        """ returns boolean whether given stop id is active for a given date
+        """
         ret_val = False
 
         # step 1: default date
@@ -87,9 +87,9 @@ class RouteStop(Base):
 
     @classmethod
     def query_by_stop(cls, session, stop_id, agency_id=None, date=None, count=None, sort=False):
-        ''' get all route stop records by looking for a given stop_id.
+        """ get all route stop records by looking for a given stop_id.
             further filtering can be had by providing an active date and agency id
-        '''
+        """
         #import pdb; pdb.set_trace()
         # step 1: query all route stops by stop id (and maybe agency)
         q = session.query(RouteStop).filter(RouteStop.stop_id == stop_id)
@@ -113,9 +113,9 @@ class RouteStop(Base):
 
     @classmethod
     def unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
-        ''' get a unique set of route records by looking for a given stop_id.
+        """ get a unique set of route records by looking for a given stop_id.
             further filtering can be had by providing an active date and agency id, and route name
-        '''
+        """
         ret_val = []
 
         route_ids = []
@@ -135,8 +135,8 @@ class RouteStop(Base):
 
     @classmethod
     def active_unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
-        ''' to filter active routes, just provide a date to the above unique_routes_at_stop method
-        '''
+        """ to filter active routes, just provide a date to the above unique_routes_at_stop method
+        """
         # make sure date is not null...
         if date is None or not isinstance(date, datetime.date):
             date = datetime.date.today()
@@ -144,8 +144,8 @@ class RouteStop(Base):
 
     @classmethod
     def active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
-        ''' returns list of routes that are seen as 'active' based on dates and filters
-        '''
+        """ returns list of routes that are seen as 'active' based on dates and filters
+        """
 
         # step 1: default date
         if date is None or not isinstance(date, datetime.date):
@@ -180,11 +180,11 @@ class RouteStop(Base):
 
     @classmethod
     def populate(cls, session):
-        ''' for each route/direction, find list of stop_ids for route/direction pairs
+        """ for each route/direction, find list of stop_ids for route/direction pairs
 
             the load is a two part process, where part A finds a list of unique stop ids, and
             part B creates the RouteStop (and potentially RouteDirections ... if not in GTFS) records
-        '''
+        """
         from gtfsdb import Route, RouteDirection
 
         #import pdb; pdb.set_trace()
@@ -276,7 +276,7 @@ class RouteStop(Base):
 
     @classmethod
     def _find_route_stop_effective_dates(cls, session, route_id):
-        ''' find effective start date and end date for all stops of the input route, when
+        """ find effective start date and end date for all stops of the input route, when
             queried against the trip and stop time tables.  Below are a couple of pure SQL queries that
             perform what I'm doing to get said start and end dates:
 
@@ -296,7 +296,7 @@ class RouteStop(Base):
             GROUP BY st.stop_id
 
             @:return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
-        '''
+        """
         #import pdb; pdb.set_trace()
         ret_val = {}
 

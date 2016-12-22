@@ -24,7 +24,7 @@ class GTFS(object):
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
-        '''load known GTFS files, derived tables & lookup tables'''
+        # load known GTFS files, derived tables & lookup tables
         gtfs_directory = self.unzip()
         load_kwargs = dict(
             batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
@@ -34,7 +34,7 @@ class GTFS(object):
             cls.load(db, **load_kwargs)
         shutil.rmtree(gtfs_directory)
 
-        '''load route geometries derived from shapes.txt'''
+        # load route geometries derived from shapes.txt
         if Route in db.classes:
             Route.load_geoms(db)
 
@@ -45,7 +45,7 @@ class GTFS(object):
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
 
     def unzip(self, path=None):
-        '''Unzip GTFS files from URL/directory to path.'''
+        """ Unzip GTFS files from URL/directory to path. """
         path = path if path else tempfile.mkdtemp()
         try:
             with closing(zipfile.ZipFile(self.local_file)) as z:

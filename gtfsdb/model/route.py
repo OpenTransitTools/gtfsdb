@@ -56,8 +56,8 @@ class Route(Base):
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
-        ''' build a route name out of long and short names...
-        '''
+        """ build a route name out of long and short names...
+        """
         if not self.is_cached_data_valid('_route_name'):
             log.warn("query route name")
             ret_val = self.route_long_name
@@ -95,7 +95,7 @@ class Route(Base):
 
     @property
     def _get_start_end_dates(self):
-        '''find the min & max date using Trip & UniversalCalendar'''
+        """find the min & max date using Trip & UniversalCalendar"""
         if not self.is_cached_data_valid('_start_date'):
             from gtfsdb.model.calendar import UniversalCalendar
             q = self.session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
@@ -115,7 +115,7 @@ class Route(Base):
 
     @classmethod
     def load_geoms(cls, db):
-        '''load derived geometries, currently only written for PostgreSQL'''
+        """load derived geometries, currently only written for PostgreSQL"""
         from gtfsdb.model.shape import Pattern
         from gtfsdb.model.trip import Trip
 
@@ -144,8 +144,8 @@ class Route(Base):
 
     @classmethod
     def active_routes(cls, session, date=None):
-        ''' returns list of routes that are seen as 'active' based on dates and filters
-        '''
+        """ returns list of routes that are seen as 'active' based on dates and filters
+        """
         ret_val = []
 
         # step 1: grab all stops
@@ -169,9 +169,9 @@ class Route(Base):
 
     @classmethod
     def active_route_ids(cls, session):
-        ''' return an array of route_id / agency_id pairs
+        """ return an array of route_id / agency_id pairs
             {route_id:'2112', agency_id:'C-TRAN'}
-        '''
+        """
         ret_val = []
         routes = cls.active_routes(session)
         for r in routes:
@@ -191,10 +191,10 @@ class RouteDirection(Base):
 
 
 class RouteFilter(Base):
-    ''' list of filters to be used to cull routes from certain lists
+    """ list of filters to be used to cull routes from certain lists
         e.g., there might be Shuttles that you never want to be shown...you can load that data here, and
         use it in your queries
-    '''
+    """
     datasource = config.DATASOURCE_LOOKUP
     filename = 'route_filter.txt'
     __tablename__ = 'route_filters'

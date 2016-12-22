@@ -10,13 +10,13 @@ from gtfsdb import config
 class Database(object):
 
     def __init__(self, **kwargs):
-        '''
+        """
         keyword arguments:
             is_geospatial: if database supports geo functions
             schema: database schema name
             tables: limited list of tables to load into database
             url: SQLAlchemy database url
-        '''
+        """
         self.tables = kwargs.get('tables', None)
         self.url = kwargs.get('url', config.DEFAULT_DATABASE_URL)
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
@@ -30,7 +30,7 @@ class Database(object):
         return Base.__subclasses__()
 
     def create(self):
-        '''Drop/create GTFS database'''
+        """Drop/create GTFS database"""
         for cls in self.sorted_classes:
             log.debug("create table: {0}".format(cls.__table__))
             try:
