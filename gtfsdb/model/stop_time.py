@@ -186,7 +186,8 @@ class StopTime(Base):
 
     @classmethod
     def block_filter(cls, session, stop_id, stop_times):
-        '''
+        ''' we don't want to show stop times that are arrivals, so we look at the blocks and figure out whether
+            the input stop is the ending stop, and that there's a next trip starting at this same stop.
         '''
         ret_val = stop_times
         if stop_times and len(stop_times) > 1:
@@ -205,10 +206,9 @@ class StopTime(Base):
                             block = b
                             blocks.remove(b)
                             break
-                    if not block:
+                    if block is None:
                         ret_val.append(s)
                     else:
-                        #import pdb; pdb.set_trace()
                         if block.next_trip and block.next_trip.start_stop.stop_id == stop_id:
                             pass # this is an arrival trip, and the next trip
                                  # (don't return the stop_time as a departure)
