@@ -81,9 +81,9 @@ class Block(Base):
         self.start_stop_id = start_stop_id
         self.end_stop_id = end_stop_id
 
-    def is_arrival_trip(self, stop_id):
+    def is_arrival(self, stop_id):
         """ check whether two sequential trips running on this block first arrive and then depart at this stop...
-            if this is an 'arrival' stop
+            if this is an 'arrival' stop, then we probably don't want to show it, etc...
         """
         ret_val = False
         if self.next_trip and self.next_trip.start_stop.stop_id == stop_id:
