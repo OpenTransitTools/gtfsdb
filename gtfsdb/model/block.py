@@ -14,6 +14,12 @@ from gtfsdb.model.trip import Trip
 
 
 class Block(Base):
+    """ This is really a BlockTripService table, in that we have entries for each Block / Trip pair, so that we can see
+        the order of trips served by a given vehicle (block) for a particular service.
+
+        One purpose is to know which trips might begin and end at a given stop .. we often don't want to show
+        'arrival stops' in either our list of RouteStops or Stop Schedule listings...
+    """
     datasource = config.DATASOURCE_DERIVED
 
     __tablename__ = 'blocks'
@@ -74,6 +80,15 @@ class Block(Base):
         self.next_trip_id = next_trip_id
         self.start_stop_id = start_stop_id
         self.end_stop_id = end_stop_id
+
+    def is_arrival_trip(self, stop_id):
+        """ check whether two sequential trips running on this block first arrive and then depart at this stop...
+            if this is an 'arrival' stop
+        """
+        ret_val = False
+        if self.next_trip and self.next_trip.start_stop.stop_id == stop_id:
+            ret_val = True
+        return ret_val
 
     @classmethod
     def load(cls, db, **kwargs):

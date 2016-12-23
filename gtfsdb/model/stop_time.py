@@ -205,13 +205,14 @@ class StopTime(Base):
                             block = b
                             blocks.remove(b)
                             break
+
                     if block is None:
                         ret_val.append(s)
-                    else:
-                        if block.next_trip and block.next_trip.start_stop.stop_id == stop_id:
-                            pass  # this is an arrival trip, and the next trip
-                                  # (don't return the stop_time as a departure)
-                        else:
-                            ret_val.append(s)  # this is the last trip of the day (so return it)
+                    elif not block.is_arrival(stop_id):
+                            ret_val.append(s)
                             # @todo maybe monkey patch stop_time with block, so we know about last trip
+
+                            # this is an arrival trip, and the next trip
+                            # (don't return the stop_time as a departure)
+                            # this is the last trip of the day (so return it)
         return ret_val
