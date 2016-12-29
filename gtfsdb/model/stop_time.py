@@ -192,10 +192,7 @@ class StopTime(Base):
         if stop_times and len(stop_times) > 1:
             from gtfsdb.model.block import Block
             keys = cls.get_service_keys_from_list(stop_times)
-            q = session.query(Block)
-            q = q.filter(Block.end_stop_id == stop_id)
-            q = q.filter(Block.service_id.in_(keys))
-            blocks = q.all()
+            blocks = Block.blocks_by_end_stop_id(session, stop_id, service_keys=keys)
             if blocks:
                 ret_val = []
                 for s in stop_times:

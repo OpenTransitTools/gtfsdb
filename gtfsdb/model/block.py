@@ -72,6 +72,7 @@ class Block(Base):
 
 
     def __init__(self, sequence, block_id, service_id, trip_id, prev_trip_id, next_trip_id, start_stop_id, end_stop_id):
+        # import pdb; pdb.set_trace()
         self.sequence = sequence
         self.block_id = block_id
         self.service_id = service_id
@@ -100,7 +101,6 @@ class Block(Base):
         ignore_blocks = kwargs.get('ignore_blocks', None)
         log.debug('{0} {1}.post_process'.format("skip" if ignore_blocks else "run", cls.__name__))
         if not ignore_blocks:
-            #import pdb; pdb.set_trace()
             cls.populate(db)
 
     @classmethod
@@ -209,3 +209,24 @@ class Block(Base):
                 break
             ret_val.append({'stop_id':s})
         return ret_val
+
+    @classmethod
+    def blocks_by_stop_id(cls, session, stop_id, service_keys=None, by_end_stop=True):
+        q = session.query(Block)
+        if by_end_stop:
+            q = q.filter(Block.end_stop_id == stop_id)
+        else:
+            q = q.filter(Block.start_stop_id == stop_id)
+        if service_keys:
+            q = q.filter(Block.service_id.in_(service_keys))
+        blocks = q.all()
+        return blocks
+
+    @classmethod
+    def blocks_by_start_stop_id(cls, session, stop_id, service_keys=None):
+        return cls.blocks_by_stop_id(session, stop_id, service_keys, by_end_stop=False)
+
+    @classmethod
+    def blocks_by_end_stop_id(cls, session, stop_id, service_keys=None):
+        return cls.blocks_by_stop_id(session, stop_id, service_keys, by_end_stop=True)
+
