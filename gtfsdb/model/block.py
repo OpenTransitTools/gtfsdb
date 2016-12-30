@@ -211,12 +211,14 @@ class Block(Base):
         return ret_val
 
     @classmethod
-    def blocks_by_stop_id(cls, session, stop_id, service_keys=None, by_end_stop=True):
+    def blocks_by_stop_id(cls, session, stop_id, service_keys=None, by_start_stop=False, by_end_stop=False):
+        """ query blocks by stop id and service keys ...
+        """
         q = session.query(Block)
+        if by_start_stop:
+            q = q.filter(Block.start_stop_id == stop_id)
         if by_end_stop:
             q = q.filter(Block.end_stop_id == stop_id)
-        else:
-            q = q.filter(Block.start_stop_id == stop_id)
         if service_keys:
             q = q.filter(Block.service_id.in_(service_keys))
         blocks = q.all()
@@ -224,9 +226,13 @@ class Block(Base):
 
     @classmethod
     def blocks_by_start_stop_id(cls, session, stop_id, service_keys=None):
-        return cls.blocks_by_stop_id(session, stop_id, service_keys, by_end_stop=False)
+        """ query blocks by the start stop
+        """
+        return cls.blocks_by_stop_id(session, stop_id, service_keys, by_start_stop=True)
 
     @classmethod
     def blocks_by_end_stop_id(cls, session, stop_id, service_keys=None):
+        """ query blocks by the end stop
+        """
         return cls.blocks_by_stop_id(session, stop_id, service_keys, by_end_stop=True)
 
