@@ -1,8 +1,5 @@
 import sys
 import time
-import logging
-log = logging.getLogger(__name__)
-
 
 from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
@@ -11,6 +8,9 @@ from sqlalchemy.types import Integer, String
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.trip import Trip
+
+import logging
+log = logging.getLogger(__name__)
 
 
 class Block(Base):
