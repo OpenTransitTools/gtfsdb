@@ -35,6 +35,7 @@ Install and use via the gtfsdb source tree:
    NOTE: if you're using postgres, do a 'buildout install prod postgresql'
 4. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
    examples:
+   - bin/gtfsdb-load --database_url sqlite:///gtfs.db gtfsdb/tests/large-sample-feed.zip
    - bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
    - bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432 --is_geospatial http://developer.trimet.org/schedule/gtfs.zip  
    NOTE: using the `is_geospatial` arg will take much longer to load...

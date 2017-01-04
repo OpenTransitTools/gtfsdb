@@ -181,15 +181,16 @@ class RouteStop(Base):
     def is_arrival(cls, session, trip_id, stop_id):
         """ :return True if it looks like this Trip / Stop pair is an arrival only
             NOTE: this routine might be EXPENSIVE since it is
+            Further, this routine isn't well thought out...not sure block.is_arrival() works
         """
         _is_arrival = False
 
-        #import pdb; pdb.set_trace()
         from gtfsdb import Block
         blocks = Block.blocks_by_trip_stop(session, trip_id, stop_id)
         if blocks:
             for b in blocks:
                 if b.is_arrival():
+                    #import pdb; pdb.set_trace()
                     _is_arrival = True
                     break
         return _is_arrival
@@ -245,8 +246,6 @@ class RouteStop(Base):
                             if st.is_boarding_stop():
 
                                 # step 5b: don't want arrival trips to influence route stop list
-                                if cls.is_arrival(session, t.trip_id, st.stop_id):
-                                    continue
                                 if st.stop_id in unique_stops:
                                     last_pos = unique_stops.index(st.stop_id)
                                 else:
@@ -256,6 +255,8 @@ class RouteStop(Base):
                                         unique_stops.insert(last_pos, st.stop_id)
                                     else:
                                         unique_stops.append(st.stop_id)
+
+                print unique_stops
 
                 # PART B: add records to the database ...
                 if len(unique_stops) > 0:

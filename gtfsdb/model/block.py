@@ -71,7 +71,6 @@ class Block(Base):
         uselist=False, viewonly=True)
 
     def __init__(self, sequence, block_id, service_id, trip_id, prev_trip_id, next_trip_id, start_stop_id, end_stop_id):
-        # import pdb; pdb.set_trace()
         self.sequence = sequence
         self.block_id = block_id
         self.service_id = service_id
@@ -92,6 +91,7 @@ class Block(Base):
             stop_id = self.end_stop_id
 
         if self.next_trip and self.next_trip.start_stop.stop_id == stop_id:
+            #import pdb; pdb.set_trace()
             ret_val = True
         return ret_val
 
