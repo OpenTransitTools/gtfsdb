@@ -164,7 +164,6 @@ class RouteStop(Base):
         # step 2c: add some stop order
         q = q.order_by(RouteStop.order)
 
-        #import pdb; pdb.set_trace()
         route_stops = q.all()
         return route_stops
 
@@ -179,6 +178,23 @@ class RouteStop(Base):
         cls.populate(db.session)
 
     @classmethod
+    def is_arrival(cls, session, trip_id, stop_id):
+        """ :return True if it looks like this Trip / Stop pair is an arrival only
+            NOTE: this routine might be EXPENSIVE since it is
+        """
+        _is_arrival = False
+
+        #import pdb; pdb.set_trace()
+        from gtfsdb import Block
+        blocks = Block.blocks_by_trip_stop(session, trip_id, stop_id)
+        if blocks:
+            for b in blocks:
+                if b.is_arrival():
+                    _is_arrival = True
+                    break
+        return _is_arrival
+
+    @classmethod
     def populate(cls, session):
         """ for each route/direction, find list of stop_ids for route/direction pairs
 
@@ -187,7 +203,6 @@ class RouteStop(Base):
         """
         from gtfsdb import Route, RouteDirection
 
-        #import pdb; pdb.set_trace()
         start_time = time.time()
         routes = session.query(Route).all()
 
@@ -228,6 +243,10 @@ class RouteStop(Base):
                         for i, st in enumerate(t.stop_times):
                             # step 5a: make sure this stop that customers can actually board...
                             if st.is_boarding_stop():
+
+                                # step 5b: don't want arrival trips to influence route stop list
+                                if cls.is_arrival(session, t.trip_id, st.stop_id):
+                                    continue
                                 if st.stop_id in unique_stops:
                                     last_pos = unique_stops.index(st.stop_id)
                                 else:
@@ -252,14 +271,14 @@ class RouteStop(Base):
 
                     # step 7: create new RouteStop records
                     for k, stop_id in enumerate(unique_stops):
-                        # step 4b: create a RouteStop record
+                        # step 7: create a RouteStop record
                         rs = RouteStop()
                         rs.route_id = r.route_id
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
                         rs.start_date = stop_effective_dates[stop_id][1]
-                        rs.end_date =  stop_effective_dates[stop_id][2]
+                        rs.end_date = stop_effective_dates[stop_id][2]
                         session.add(rs)
 
             # step 8: commit the new records to the db for this route...

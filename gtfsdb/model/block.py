@@ -70,7 +70,6 @@ class Block(Base):
         foreign_keys='(Block.end_stop_id)',
         uselist=False, viewonly=True)
 
-
     def __init__(self, sequence, block_id, service_id, trip_id, prev_trip_id, next_trip_id, start_stop_id, end_stop_id):
         # import pdb; pdb.set_trace()
         self.sequence = sequence
@@ -82,11 +81,16 @@ class Block(Base):
         self.start_stop_id = start_stop_id
         self.end_stop_id = end_stop_id
 
-    def is_arrival(self, stop_id):
+    def is_arrival(self, stop_id=None):
         """ check whether two sequential trips running on this block first arrive and then depart at this stop...
             if this is an 'arrival' stop, then we probably don't want to show it, etc...
         """
         ret_val = False
+
+        # default is end_stop_id
+        if stop_id is None:
+            stop_id = self.end_stop_id
+
         if self.next_trip and self.next_trip.start_stop.stop_id == stop_id:
             ret_val = True
         return ret_val
@@ -211,10 +215,12 @@ class Block(Base):
         return ret_val
 
     @classmethod
-    def blocks_by_stop_id(cls, session, stop_id, service_keys=None, by_start_stop=False, by_end_stop=False):
+    def blocks_by_stop_id(cls, session, stop_id, trip_id=None, service_keys=None, by_start_stop=False, by_end_stop=False):
         """ query blocks by stop id and service keys ...
         """
         q = session.query(Block)
+        if trip_id:
+            q = q.filter(Block.trip_id == trip_id)
         if by_start_stop:
             q = q.filter(Block.start_stop_id == stop_id)
         if by_end_stop:
@@ -225,14 +231,24 @@ class Block(Base):
         return blocks
 
     @classmethod
-    def blocks_by_start_stop_id(cls, session, stop_id, service_keys=None):
+    def blocks_by_start_stop_id(cls, session, stop_id, trip_id=None, service_keys=None):
         """ query blocks by the start stop
         """
-        return cls.blocks_by_stop_id(session, stop_id, service_keys, by_start_stop=True)
+        return cls.blocks_by_stop_id(session, stop_id, trip_id=trip_id, service_keys=service_keys, by_start_stop=True)
 
     @classmethod
-    def blocks_by_end_stop_id(cls, session, stop_id, service_keys=None):
+    def blocks_by_end_stop_id(cls, session, stop_id, trip_id=None, service_keys=None):
         """ query blocks by the end stop
         """
-        return cls.blocks_by_stop_id(session, stop_id, service_keys, by_end_stop=True)
+        return cls.blocks_by_stop_id(session, stop_id, trip_id=trip_id, service_keys=service_keys, by_end_stop=True)
 
+    @classmethod
+    def blocks_by_trip_stop(cls, session, trip_id, stop_id, by_end_stop=True):
+        """ query blocks by the end stop
+        """
+        if by_end_stop:
+            blocks = cls.blocks_by_end_stop_id(session, stop_id, trip_id=trip_id)
+        else:
+            blocks = cls.blocks_by_start_stop_id(session, stop_id, trip_id=trip_id)
+
+        return blocks
