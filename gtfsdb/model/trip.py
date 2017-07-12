@@ -1,12 +1,12 @@
 import logging
-log = logging.getLogger(__name__)
 
+from gtfsdb import config
+from gtfsdb.model.base import Base
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Integer, String
 
-from gtfsdb import config
-from gtfsdb.model.base import Base
+log = logging.getLogger(__name__)
 
 
 class Trip(Base):

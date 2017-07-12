@@ -3,7 +3,10 @@ import logging
 import shutil
 import tempfile
 import time
-from urllib import urlretrieve
+try:
+    from urllib import urlretrieve  # Python 2
+except ImportError:
+    from urllib.request import urlretrieve  # Python 3
 import zipfile
 
 from gtfsdb import config
@@ -20,7 +23,9 @@ class GTFS(object):
         self.local_file = urlretrieve(filename)[0]
 
     def load(self, db, **kwargs):
-        '''Load GTFS into database'''
+        """
+        Load GTFS into database
+        """
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
@@ -45,11 +50,13 @@ class GTFS(object):
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
 
     def unzip(self, path=None):
-        """ Unzip GTFS files from URL/directory to path. """
+        """
+        Unzip GTFS files from URL/directory to path.
+        """
         path = path if path else tempfile.mkdtemp()
         try:
             with closing(zipfile.ZipFile(self.local_file)) as z:
                 z.extractall(path)
-        except Exception, e:
+        except Exception as e:
             log.warning(e)
         return path

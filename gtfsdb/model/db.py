@@ -1,10 +1,10 @@
 import logging
-log = logging.getLogger(__file__)
 
+from gtfsdb import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from gtfsdb import config
+log = logging.getLogger(__file__)
 
 
 class Database(object):
@@ -73,13 +73,13 @@ class Database(object):
 
     @schema.setter
     def schema(self, val):
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         self._schema = val
         try:
             if self._schema:
                 from sqlalchemy.schema import CreateSchema
                 self.engine.execute(CreateSchema(self._schema))
-        except Exception, e:
+        except Exception as e:
             log.info("NOTE: couldn't create schema {0} (schema might already exist)\n{1}".format(self._schema, e))
 
         for cls in self.classes:

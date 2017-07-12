@@ -1,18 +1,21 @@
-import logging
-log = logging.getLogger(__name__)
-
 import datetime
+import logging
 import os
 import tempfile
+
 from pkg_resources import resource_filename  # @UnresolvedImport
+
+from gtfsdb import *  # noqa
+from gtfsdb.api import database_load
+
+log = logging.getLogger(__name__)
+
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
-from gtfsdb import *
-from gtfsdb.api import database_load
 
 class BasicModelTests(object):
 
@@ -46,7 +49,7 @@ class TestRoute(unittest.TestCase, BasicModelTests):
         self.assert_(isinstance(m.end_date, datetime.date))
 
     def test_active_date(self):
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         routes = Route.active_routes(self.db.session, datetime.date(2014, 6, 6))
         self.assertTrue(len(routes) > 1)
         for r in routes:
@@ -56,6 +59,7 @@ class TestRoute(unittest.TestCase, BasicModelTests):
         routes = Route.active_routes(self.db.session)
         for r in routes:
             self.assertFalse("we should not have any routes, but I see route id: {0}".format(r.route_id))
+
 
 class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop
@@ -96,6 +100,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         m = self.get_first()
         self.assertFalse(m.is_active())
 
+
 class TestRouteDirection(unittest.TestCase, BasicModelTests):
     model = RouteDirection
 
@@ -134,6 +139,7 @@ class TestStop(unittest.TestCase, BasicModelTests):
         for r in m.routes:
             self.assert_(isinstance(r, Route))
 
+
 class TestStopTimes(unittest.TestCase, BasicModelTests):
     model = StopTime
 
@@ -141,20 +147,26 @@ class TestStopTimes(unittest.TestCase, BasicModelTests):
 class TestAgency(unittest.TestCase, BasicModelTests):
     model = Agency
 
+
 class TestCalendar(unittest.TestCase, BasicModelTests):
     model = Calendar
+
 
 class TestCalendarDate(unittest.TestCase, BasicModelTests):
     model = CalendarDate
 
+
 class TestFareAttribute(unittest.TestCase, BasicModelTests):
     model = FareAttribute
+
 
 class TestFareRule(unittest.TestCase, BasicModelTests):
     model = FareRule
 
+
 class TestShape(unittest.TestCase, BasicModelTests):
     model = Shape
+
 
 class TestTransfer(unittest.TestCase, BasicModelTests):
     model = Transfer

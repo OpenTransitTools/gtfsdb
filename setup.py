@@ -4,7 +4,7 @@ import sys
 
 oracle_extras = ['cx_oracle>=5.1']
 postgresql_extras = ['psycopg2>=2.4.2']
-#dev_extras = oracle_extras + postgresql_extras
+# dev_extras = oracle_extras + postgresql_extras
 dev_extras = []
 
 extras_require = dict(
@@ -45,5 +45,6 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
     ),
 )
