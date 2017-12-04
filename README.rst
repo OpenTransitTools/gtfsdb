@@ -57,7 +57,7 @@ Install Steps (on Windows):
        http://postgis.refractions.net/download/windows/
 
     1. Python2.7 - http://www.python.org/download/releases/2.7.6/ (python-2.7.6.msi)
-       NOTE: see this for setting env variables correctly: http://blog.sadphaeton.com/2009/01/20/python-development-windows-part-1installing-python.html
+       NOTE: see this for setting env variables correctly: https://docs.python.org/3/using/windows.html#excursus-setting-environment-variables
 
     2a. Install Setup Tools (easy_install) https://pypi.python.org/pypi/setuptools#windows-8-powershell
     2b. easy_install zc.buildout

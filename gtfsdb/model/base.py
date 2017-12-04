@@ -117,7 +117,8 @@ class _Base(object):
 
     @classmethod
     def load(cls, db, **kwargs):
-        """Load method for ORM
+        """
+        Load method for ORM
 
         arguments:
             db: instance of gtfsdb.Database
