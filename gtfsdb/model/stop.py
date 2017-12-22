@@ -59,8 +59,9 @@ class Stop(Base):
 
     @property
     def routes(self):
-        """ return list of routes servicing this stop
-            @todo: rewrite the cache to use timeout checking in Base.py
+        """
+        return list of routes servicing this stop
+        @todo: rewrite the cache to use timeout checking in Base.py
         """
         try:
             self._routes
@@ -78,8 +79,9 @@ class Stop(Base):
 
     @property
     def headsigns(self):
-        """ Returns a dictionary of all unique (route_id, headsign) tuples used
-            at the stop and the number of trips the head sign is used
+        """
+        Returns a dictionary of all unique (route_id, headsign) tuples used
+        at the stop and the number of trips the head sign is used
         """
         if not hasattr(self, '_headsigns'):
             from gtfsdb.model.stop_time import StopTime
@@ -96,8 +98,9 @@ class Stop(Base):
 
     @property
     def agencies(self):
-        """ return list of agency ids with routes hitting this stop
-            @todo: rewrite the cache to use timeout checking in Base.py
+        """
+        return list of agency ids with routes hitting this stop
+        @todo: rewrite the cache to use timeout checking in Base.py
         """
         try:
             self._agencies
@@ -110,19 +113,20 @@ class Stop(Base):
         return self._agencies
 
     def is_active(self, date=None):
-        """ :return False whenever we see that the stop has zero stop_times on the given input date
-                    (which defaults to 'today')
+        """
+        :return False whenever we see that the stop has zero stop_times on the given input date
+                (which defaults to 'today')
 
-            @NOTE: use caution with this routine.  calling this for multiple stops can really slow things down,
-                   since you're querying large trip and stop_time tables, and asking for a schedule of each stop
-                   I used to call this multiple times via route_stop to make sure each stop was active ... that
-                   was really bad performance wise.
+        @NOTE: use caution with this routine.  calling this for multiple stops can really slow things down,
+               since you're querying large trip and stop_time tables, and asking for a schedule of each stop
+               I used to call this multiple times via route_stop to make sure each stop was active ... that
+               was really bad performance wise.
         """
         _is_active = False
         if date is None:
             date = datetime.date.today()
 
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         from gtfsdb.model.stop_time import StopTime
         st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
         if st and len(st) > 0:
@@ -131,7 +135,8 @@ class Stop(Base):
 
     @classmethod
     def active_stops(cls, session, limit=None, active_filter=True, date=None):
-        """ check for active stops
+        """
+        check for active stops
         """
         ret_val = None
 
@@ -154,11 +159,12 @@ class Stop(Base):
 
     @classmethod
     def active_stop_ids(cls, session, limit=None, active_filter=True):
-        """ return an array of stop_id / agencies pairs
-            {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
+        """
+        return an array of stop_id / agencies pairs
+        {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
         """
         ret_val = []
         stops = cls.active_stops(session, limit, active_filter)
         for s in stops:
-            ret_val.append({"stop_id":s.stop_id, "agencies":s.agencies})
+            ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val

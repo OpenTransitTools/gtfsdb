@@ -1,15 +1,16 @@
 import datetime
-import time
 import logging
-log = logging.getLogger(__name__)
-
-from sqlalchemy import Column
-from sqlalchemy.orm import deferred, relationship
-from sqlalchemy.types import Integer, String
-from sqlalchemy.sql import func
+import time
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from sqlalchemy import Column
+from sqlalchemy.orm import deferred, relationship
+from sqlalchemy.sql import func
+from sqlalchemy.types import Integer, String
+
+log = logging.getLogger(__name__)
+
 
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteFilter']
 
@@ -40,7 +41,7 @@ class Route(Base):
     route_color = Column(String(6))
     route_text_color = Column(String(6))
     route_sort_order = Column(Integer, index=True)
-    min_headway_minutes = Column(Integer) # Trillium extension.
+    min_headway_minutes = Column(Integer)  # Trillium extension.
 
     trips = relationship(
         'Trip',
@@ -56,7 +57,8 @@ class Route(Base):
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
-        """ build a route name out of long and short names...
+        """
+        build a route name out of long and short names...
         """
         if not self.is_cached_data_valid('_route_name'):
             log.warn("query route name")
@@ -73,7 +75,7 @@ class Route(Base):
     def direction_name(self, direction_id, def_val=''):
         ret_val = def_val
         try:
-            dir = self.directions.filter(RouteDirection.direction_id==direction_id)
+            dir = self.directions.filter(RouteDirection.direction_id == direction_id)
             if dir and dir.direction_name:
                 ret_val = dir.direction_name
         except:
@@ -81,8 +83,9 @@ class Route(Base):
         return ret_val
 
     def is_active(self, date=None):
-        """ :return False whenever we see that the route start and end date are outside the
-                    input date (where the input date defaults to 'today')
+        """
+        :return False whenever we see that the route start and end date are outside the
+                input date (where the input date defaults to 'today')
         """
         _is_active = True
         if self.start_date and self.end_date:
@@ -144,7 +147,8 @@ class Route(Base):
 
     @classmethod
     def active_routes(cls, session, date=None):
-        """ returns list of routes that are seen as 'active' based on dates and filters
+        """
+        returns list of routes that are seen as 'active' based on dates and filters
         """
         ret_val = []
 
@@ -169,13 +173,14 @@ class Route(Base):
 
     @classmethod
     def active_route_ids(cls, session):
-        """ return an array of route_id / agency_id pairs
-            {route_id:'2112', agency_id:'C-TRAN'}
+        """
+        return an array of route_id / agency_id pairs
+        {route_id:'2112', agency_id:'C-TRAN'}
         """
         ret_val = []
         routes = cls.active_routes(session)
         for r in routes:
-            ret_val.append({"route_id":r.route_id, "agency_id":r.agency_id})
+            ret_val.append({"route_id": r.route_id, "agency_id": r.agency_id})
         return ret_val
 
 
@@ -191,9 +196,10 @@ class RouteDirection(Base):
 
 
 class RouteFilter(Base):
-    """ list of filters to be used to cull routes from certain lists
-        e.g., there might be Shuttles that you never want to be shown...you can load that data here, and
-        use it in your queries
+    """
+    list of filters to be used to cull routes from certain lists
+    e.g., there might be Shuttles that you never want to be shown...you can load that data here, and
+    use it in your queries
     """
     datasource = config.DATASOURCE_LOOKUP
     filename = 'route_filter.txt'

@@ -1,15 +1,32 @@
 import csv
 import datetime
+import logging
 import os
-from pkg_resources import resource_filename  # @UnresolvedImport
 import sys
 import time
-import logging
-log = logging.getLogger(__name__)
 
+from pkg_resources import resource_filename  # @UnresolvedImport
+
+from gtfsdb import config, util
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
-from gtfsdb import config, util
+
+log = logging.getLogger(__name__)
+
+try:
+    unicode = unicode
+except NameError:
+    # 'unicode' is undefined, must be Python 3
+    str = str
+    unicode = str
+    bytes = bytes
+    basestring = (str, bytes)
+else:
+    # 'unicode' exists, must be Python 2
+    str = str
+    unicode = unicode
+    bytes = str
+    basestring = basestring
 
 
 class _Base(object):
@@ -27,10 +44,10 @@ class _Base(object):
 
     @classmethod
     def make_geom_lazy(cls):
-        from sqlalchemy.orm import deferred 
+        from sqlalchemy.orm import deferred
         try:
             cls.__mapper__.add_property('geom', deferred(cls.__table__.c.geom))
-        except Exception, e:
+        except Exception as e:
             log.warn(e)
 
     @classmethod
@@ -40,7 +57,8 @@ class _Base(object):
 
     @property
     def to_dict(self):
-        """convert a SQLAlchemy object into a dict that is serializable to JSON
+        """
+        convert a SQLAlchemy object into a dict that is serializable to JSON
         """
         ret_val = self.__dict__.copy()
 
@@ -60,18 +78,20 @@ class _Base(object):
         return ret_val
 
     def get_up_date_name(self, attribute_name):
-        """ return attribute name of where we'll store an update variable
+        """
+        return attribute name of where we'll store an update variable
         """
         return "{0}_update_utc".format(attribute_name)
 
     def is_cached_data_valid(self, attribute_name, max_age=2):
-        """ we have to see both the attribute name exist in our object, as well as
-            that object having a last update date (@see update_cached_data below)
-            and that update date being less than 2 days ago...
+        """
+        we have to see both the attribute name exist in our object, as well as
+        that object having a last update date (@see update_cached_data below)
+        and that update date being less than 2 days ago...
         """
         ret_val = False
         try:
-            #import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             if hasattr(self, attribute_name):
                 attribute_update = self.get_up_date_name(attribute_name)
                 if hasattr(self, attribute_update):
@@ -89,7 +109,7 @@ class _Base(object):
         """
         """
         try:
-            #import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             attribute_update = self.get_up_date_name(attribute_name)
             setattr(self, attribute_update, datetime.datetime.now())
         except:
@@ -97,7 +117,8 @@ class _Base(object):
 
     @classmethod
     def load(cls, db, **kwargs):
-        """Load method for ORM
+        """
+        Load method for ORM
 
         arguments:
             db: instance of gtfsdb.Database
@@ -118,7 +139,10 @@ class _Base(object):
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
-            f = open(file_path, 'r')
+            if sys.version_info >= (3, 0):
+                f = open(file_path, 'rb')
+            else:
+                f = open(file_path, 'r')
             utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
             reader = csv.DictReader(utf8_file)
             reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
@@ -145,15 +169,16 @@ class _Base(object):
 
     @classmethod
     def post_process(cls, db, **kwargs):
-        """ Post-process processing method.  This method is a placeholder
-            that may be overridden in children...
-            @see: stop_time.py
+        """
+        Post-process processing method.  This method is a placeholder
+        that may be overridden in children...
+        @see: stop_time.py
         """
         pass
 
     @classmethod
     def make_record(cls, row):
-        for k, v in row.items():
+        for k, v in row.copy().items():
             if isinstance(v, basestring):
                 row[k] = v.strip()
 
@@ -167,7 +192,7 @@ class _Base(object):
                         row[k] = datetime.datetime.strptime(v, '%Y%m%d').date()
                 else:
                     log.info("I've got issues with your GTFS {0} data.  I'll continue, but expect more errors...".format(cls.__name__))
-            except Exception, e:
+            except Exception as e:
                 log.warning(e)
 
         """if this is a geospatially enabled database, add a geom"""

@@ -34,12 +34,13 @@ class Calendar(Base):
     sunday = Column(Boolean, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
-    service_name = Column(String(255)) # Trillium extension, a human-readable name for the calendar.
+    service_name = Column(String(255))  # Trillium extension, a human-readable name for the calendar.
 
     def weekday_list(self):
         weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3,
                             friday=4, saturday=5, sunday=6)
-        return [v for k, v in weekday_dict.iteritems() if getattr(self, k)]
+        item_func = weekday_dict.iteritems if hasattr(weekday_dict, 'iteritems') else weekday_dict.items
+        return [v for k, v in item_func() if getattr(self, k)]
 
     def to_date_list(self):
         date_list = []

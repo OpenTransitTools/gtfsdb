@@ -1,14 +1,14 @@
 import datetime
 import logging
-log = logging.getLogger(__name__)
-
-from sqlalchemy import Column
-from sqlalchemy.orm import relationship, joinedload_all
-from sqlalchemy.sql.expression import func
-from sqlalchemy.types import Boolean, Integer, Numeric, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from sqlalchemy import Column
+from sqlalchemy.orm import joinedload_all, relationship
+from sqlalchemy.sql.expression import func
+from sqlalchemy.types import Boolean, Integer, Numeric, String
+
+log = logging.getLogger(__name__)
 
 
 class StopTime(Base):
@@ -46,15 +46,18 @@ class StopTime(Base):
             self.timepoint = 'arrival_time' in kwargs
 
     def get_headsign(self):
-        """ get the headsign at this stop ... rule is that if stop is empty, use trip headsign """
+        """
+        get the headsign at this stop ... rule is that if stop is empty, use trip headsign
+        """
         ret_val = self.stop_headsign
         if not ret_val:
             ret_val = self.trip.trip_headsign
         return ret_val
 
     def get_direction_name(self, def_val="", banned=['Shuttle', 'MAX Shuttle', 'Garage', 'Center Garage', 'Merlo Garage', 'Powell Garage']):
-        """ returns either the headsign (priority) or the route direction name (when banned)
-            (as long as one of these names are not banned and not the same name as the route name)
+        """
+        returns either the headsign (priority) or the route direction name (when banned)
+        (as long as one of these names are not banned and not the same name as the route name)
         """
         ret_val = def_val
         try:
@@ -71,23 +74,24 @@ class StopTime(Base):
                 d = self.trip.route.directions[self.trip.direction_id]
                 if d.direction_name and not any([d.direction_name in s for s in banned]):
                     ret_val = d.direction_name.lstrip('to ').lstrip('To ')
-        except Exception, e:
+        except Exception as e:
             log.debug(e)
             pass
         return ret_val
 
     def is_boarding_stop(self):
-        """ return whether the vehicle that is stopping at this stop, and at this time, is an
-            in-revenue vehicle that a customer can actually board...
+        """
+        return whether the vehicle that is stopping at this stop, and at this time, is an
+        in-revenue vehicle that a customer can actually board...
 
-            pickup_type = 1 - No pickup available
+        pickup_type = 1 - No pickup available
 
-            departure_time = None
+        departure_time = None
 
-            NOTE: in gtfsdb, we NULL out the departure times when the vehicle doesn't
-                  pick up anyone (e.g., at route end points, there are no departures...)
+        NOTE: in gtfsdb, we NULL out the departure times when the vehicle doesn't
+              pick up anyone (e.g., at route end points, there are no departures...)
 
-            @see: https://developers.google.com/transit/gtfs/reference#stop_times_fields
+        @see: https://developers.google.com/transit/gtfs/reference#stop_times_fields
         """
         ret_val = True
         if self.pickup_type == 1 or self.departure_time is None:
@@ -97,21 +101,22 @@ class StopTime(Base):
     @classmethod
     def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
-        #cls.null_out_last_stop_departures(db) ## commented out due to other processes
+        # cls.null_out_last_stop_departures(db) ## commented out due to other processes
         pass
 
     @classmethod
     def null_out_last_stop_departures(cls, db):
-        """ delete all 'depature_time' values that appear for the last stop
-            time of a given trip (e.g., the trip ends there, so there isn't a
-            further vehicle departure / customer pickup for that stop time / trip pair)...
+        """
+        delete all 'depature_time' values that appear for the last stop
+        time of a given trip (e.g., the trip ends there, so there isn't a
+        further vehicle departure / customer pickup for that stop time / trip pair)...
 
-            -- query below shows null'd out stop times
-            select * from ott.stop_times
-            where COALESCE(arrival_time,'')='' or COALESCE(departure_time,'')=''
+        -- query below shows null'd out stop times
+        select * from ott.stop_times
+        where COALESCE(arrival_time,'')='' or COALESCE(departure_time,'')=''
 
-            NOTE: we know this breaks the current GTFS spec, which states that departure &
-                  arrival times must both exist for every stop time.  Sadly, GTFS is kinda wrong...
+        NOTE: we know this breaks the current GTFS spec, which states that departure &
+              arrival times must both exist for every stop time.  Sadly, GTFS is kinda wrong...
         """
         # step 1: remove the departure times at the end of a trip
         log.info("QUERY StopTime for all trip end times")
@@ -148,7 +153,8 @@ class StopTime(Base):
 
     @classmethod
     def get_departure_schedule(cls, session, stop_id, date=None, route_id=None, limit=None):
-        """ helper routine which returns the stop schedule for a give date
+        """
+        helper routine which returns the stop schedule for a give date
         """
         from gtfsdb.model.trip import Trip
 
@@ -185,8 +191,9 @@ class StopTime(Base):
 
     @classmethod
     def block_filter(cls, session, stop_id, stop_times):
-        """ we don't want to show stop times that are arrivals, so we look at the blocks and figure out whether
-            the input stop is the ending stop, and that there's a next trip starting at this same stop.
+        """
+        we don't want to show stop times that are arrivals, so we look at the blocks and figure out whether
+        the input stop is the ending stop, and that there's a next trip starting at this same stop.
         """
         ret_val = stop_times
         if stop_times and len(stop_times) > 1:
