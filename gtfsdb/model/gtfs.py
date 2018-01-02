@@ -26,6 +26,8 @@ class GTFS(object):
         """
         Load GTFS into database
         """
+        # import pdb; pdb.set_trace()
+
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
@@ -44,7 +46,7 @@ class GTFS(object):
             Route.load_geoms(db)
 
         # call post process routines...
-        do_postprocess = kwargs.get('do_postprocess')
+        do_postprocess = kwargs.get('do_postprocess', True)
         if do_postprocess:
             for cls in db.sorted_classes:
                 cls.post_process(db, **kwargs)
