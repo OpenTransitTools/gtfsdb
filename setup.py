@@ -13,14 +13,18 @@ extras_require = dict(
     postgresql=postgresql_extras,
 )
 
-install_requires = ['geoalchemy2>=0.2.4', 'sqlalchemy>=0.9']
+install_requires = [
+    'geoalchemy2>=0.2.4',
+    'sqlalchemy<1.2'      # v1.2 doesn't allow Boolean values of '0' and '1', so this the simple workaround
+]
+
 if sys.version_info[:2] <= (2, 6):
     install_requires.append('argparse>=1.2.1')
     extras_require['dev'].append('unittest2')
 
 setup(
     name='gtfsdb',
-    version='0.1.7',
+    version='0.5.0',
     description='GTFS Database',
     long_description=open('README.rst').read(),
     keywords='GTFS',

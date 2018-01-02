@@ -43,8 +43,11 @@ class GTFS(object):
         if Route in db.classes:
             Route.load_geoms(db)
 
-        for cls in db.sorted_classes:
-            cls.post_process(db, **kwargs)
+        # call post process routines...
+        ignore_postprocess = kwargs.get('ignore_postprocess', False)
+        if not ignore_postprocess:
+            for cls in db.sorted_classes:
+                cls.post_process(db, **kwargs)
 
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
