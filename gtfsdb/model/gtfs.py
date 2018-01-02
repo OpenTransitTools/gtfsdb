@@ -44,8 +44,8 @@ class GTFS(object):
             Route.load_geoms(db)
 
         # call post process routines...
-        ignore_postprocess = kwargs.get('ignore_postprocess', False)
-        if not ignore_postprocess:
+        do_postprocess = kwargs.get('do_postprocess')
+        if do_postprocess:
             for cls in db.sorted_classes:
                 cls.post_process(db, **kwargs)
 
