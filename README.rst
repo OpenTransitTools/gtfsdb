@@ -80,3 +80,13 @@ NOTE: May 2016 ... for folks with legacy gtfsdb databases, two new columns were 
  - ALTER TABLE calendar ADD COLUMN service_desc character varying(255); 
 |
 
+
+Example Query:
+--------------
+
+select *
+from trips t, stop_times st
+where t.route_id = '1'
+and t.trip_id = st.trip_id
+and st.stop_sequence = 1
+
