@@ -84,9 +84,17 @@ NOTE: May 2016 ... for folks with legacy gtfsdb databases, two new columns were 
 Example Query:
 --------------
 
+-- get first stop time of each trip for route_id 1
 select *
 from trips t, stop_times st
 where t.route_id = '1'
 and t.trip_id = st.trip_id
 and st.stop_sequence = 1
 
+
+-- get agency name and number of routes 
+select a.agency_name, a.agency_id, count(r.route_id)
+from routes r, agency a
+where r.agency_id = a.agency_id
+group by a.agency_id, a.agency_name
+order by 3 desc
