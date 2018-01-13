@@ -72,6 +72,16 @@ class RouteStop(Base):
                 _is_active = True
         return _is_active
 
+    def is_valid(self):
+        ret_val = True
+        if self.start_date is None or self.end_date is None:
+            ret_val = False
+        return ret_val
+
+    def get_id(self):
+        ret_val = "r:{} d:{} s:{}".format(self.route_id, self.direction_id, self.stop_id)
+        return ret_val
+
     @classmethod
     def is_stop_active(cls, session, stop_id, agency_id=None, date=None):
         """
@@ -290,9 +300,13 @@ class RouteStop(Base):
                         rs.direction_id = d
                         rs.stop_id = stop_id
                         rs.order = k + 1
-                        rs.start_date = stop_effective_dates[stop_id][1]
-                        rs.end_date = stop_effective_dates[stop_id][2]
-                        session.add(rs)
+                        s, e = cls._get_stop_effective_dates(stop_effective_dates, stop_id)
+                        rs.start_date = s
+                        rs.end_date = e
+                        if rs.is_valid():
+                            session.add(rs)
+                        else:
+                            log.info("{} is not valid ... not adding to the database".format(rs.get_id()))
 
             # step 8: commit the new records to the db for this route...
             sys.stdout.write('*')
@@ -347,3 +361,18 @@ class RouteStop(Base):
             ret_val[d[0]] = d
 
         return ret_val
+
+    @classmethod
+    def _get_stop_effective_dates(cls, effective_dates_list, stop_id):
+        """
+        :return: start & end date from the route stop dates returned by method above
+        :see: _find_route_stop_effective_dates
+        """
+        start = None
+        end = None
+        try:
+            start = effective_dates_list[stop_id][1]
+            end = effective_dates_list[stop_id][2]
+        except Exception, e:
+            log.info(e)
+        return start, end
