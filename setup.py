@@ -15,7 +15,8 @@ extras_require = dict(
 
 install_requires = [
     'geoalchemy2>=0.2.4',
-    'sqlalchemy<1.2'      # v1.2 doesn't allow Boolean values of '0' and '1', so this the simple workaround
+    'sqlalchemy<1.2',     # v1.2 doesn't allow Boolean values of '0' and '1', so this the simple workaround
+    'zope.sqlalchemy',    # not used here...but required for pyaramid apps (and pinning sqlalchemy above means this needs to be here)
 ]
 
 if sys.version_info[:2] <= (2, 6):
