@@ -1,3 +1,4 @@
+from gtfsdb.model.ada import Ada  # noqa
 from gtfsdb.model.agency import Agency  # noqa
 from gtfsdb.model.calendar import *  # noqa
 from gtfsdb.model.db import Database  # noqa
