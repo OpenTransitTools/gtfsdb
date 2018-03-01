@@ -44,9 +44,11 @@ class District(Base):
         if hasattr(cls, 'geom'):
             log.debug('{0}.post_process'.format(cls.__name__))
             ada = cls(name='Garde')
-            #ada.geom_from_shape("37.9615819622 23.7216281890869,37.9617173039801 23.7193965911865,37.9633413851658 23.717679977417,37.964559422483 23.7147617340087,37.9644240860015 23.7116718292236, 37.9615819622 23.72162818, 37.9615819622 23.7216281890869")
+            # ada.geom_from_shape("37.9615819622 23.7216281890869,37.9617173039801 23.7193965911865,37.9633413851658 23.717679977417,37.964559422483 23.7147617340087,37.9644240860015 23.7116718292236, 37.9615819622 23.72162818, 37.9615819622 23.7216281890869")
             r = db.session.query(Route).first()
-            ada.geom = r.geom.ST_Buffer(1.1)
+            # 3960 is the number of feet in 3/4 of a mile this is the size of the buffer around routes that
+            # is be generated for the ada boundary
+            ada.geom = r.geom.ST_Buffer(3960, 'quad_segs=50')
             db.session.add(ada)
             db.session.commit()
             db.session.close()
