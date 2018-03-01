@@ -48,6 +48,7 @@ SORTED_CLASS_NAMES = [
     'Trip',
     'StopTime',
     'RouteStop',
+    'Ada',
     'Frequency',
     'FareAttribute',
     'FareRule',

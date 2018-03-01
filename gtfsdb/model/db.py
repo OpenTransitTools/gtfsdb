@@ -1,9 +1,8 @@
-import logging
-
 from gtfsdb import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+import logging
 log = logging.getLogger(__file__)
 
 
