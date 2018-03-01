@@ -3,6 +3,7 @@ import datetime
 from sqlalchemy import Column, Sequence
 from sqlalchemy.types import Date, Integer, String
 from sqlalchemy.orm import deferred, relationship
+from sqlalchemy.sql.functions import func
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -13,6 +14,13 @@ log = logging.getLogger(__file__)
 
 
 class Ada(Base):
+    """
+    The Americans with Disabilities Act (https://www.ada.gov) requires transit agencies to provide
+    complementary paratransit service to destinations within 3/4 mile of all fixed routes.
+    :see: https://en.wikipedia.org/wiki/Paratransit#Americans_with_Disabilities_Act_of_1990
+
+    This class will calculate and represent a Paratransit (or ADA) boundary against all active routes.
+    """
     datasource = config.DATASOURCE_DERIVED
 
     __tablename__ = 'ada'
@@ -26,10 +34,6 @@ class Ada(Base):
         self.name = name
         self.start_date = self.end_date = datetime.datetime.now()
 
-    def geom_from_shape(self, coords):
-        #self.geom = 'SRID={0};POLYGON({1})'.format(config.SRID, ','.join(coords))
-        self.geom = 'POLYGON(({1}))'.format(config.SRID, coords)
-
     @classmethod
     def load(cls, db, **kwargs):
         if hasattr(cls, 'geom'):
@@ -39,16 +43,18 @@ class Ada(Base):
     def post_process(cls, db, **kwargs):
         if hasattr(cls, 'geom'):
             log.debug('{0}.post_process'.format(cls.__name__))
-            ada = cls(name='Garde')
-            #ada.geom_from_shape("37.9615819622 23.7216281890869,37.9617173039801 23.7193965911865,37.9633413851658 23.717679977417,37.964559422483 23.7147617340087,37.9644240860015 23.7116718292236, 37.9615819622 23.72162818, 37.9615819622 23.7216281890869")
-            r = db.session.query(Route).first()
+            ada = cls(name='ADA Boundary')
 
             # 3960 is the number of feet in 3/4 of a mile this is the size of the buffer around routes that
             # is be generated for the ada boundary
-            # todo: make this value configurable ... and maybe metric
-            g = Route.geom.ST_Union()
-            geom = g.ST_Buffer(3960, 'quad_segs=50')
+            # todo: make this value configurable ... and maybe metric ...
+            # todo: the following doesn't work ... too big of a buffer ... so
+            # geom = db.session.query(func.ST_Union(Route.geom.ST_Buffer(3960, 'quad_segs=50')))
+
+            # the buffer values here are just guesses at this point ...
+            geom = db.session.query(func.ST_Union(Route.geom.ST_Buffer(0.0035)))
             ada.geom = geom
+
             db.session.add(ada)
             db.session.commit()
             db.session.close()

@@ -2,6 +2,7 @@ from gtfsdb.model.ada import Ada  # noqa
 from gtfsdb.model.agency import Agency  # noqa
 from gtfsdb.model.calendar import *  # noqa
 from gtfsdb.model.db import Database  # noqa
+from gtfsdb.model.district import District  # noqa
 from gtfsdb.model.fare import *  # noqa
 from gtfsdb.model.feed_info import FeedInfo  # noqa
 from gtfsdb.model.frequency import Frequency  # noqa

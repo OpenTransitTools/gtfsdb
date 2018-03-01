@@ -118,7 +118,11 @@ class Route(Base):
 
     @classmethod
     def load_geoms(cls, db):
-        """load derived geometries, currently only written for PostgreSQL"""
+        """
+        load derived geometries, currently only written for PostgreSQL
+
+        TODO: look if ST_LineMerge would make a nice simple route line ... or some other processing...
+        """
         from gtfsdb.model.shape import Pattern
         from gtfsdb.model.trip import Trip
 

@@ -49,6 +49,7 @@ SORTED_CLASS_NAMES = [
     'StopTime',
     'RouteStop',
     'Ada',
+    'District',
     'Frequency',
     'FareAttribute',
     'FareRule',

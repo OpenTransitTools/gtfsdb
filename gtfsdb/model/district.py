@@ -3,6 +3,9 @@ import datetime
 from sqlalchemy import Column, Sequence
 from sqlalchemy.types import Date, Integer, String
 from sqlalchemy.orm import deferred, relationship
+from sqlalchemy.sql.functions import func
+from geoalchemy2 import Geometry
+from geoalchemy2.functions import GenericFunction
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -10,6 +13,21 @@ from gtfsdb.model.route import Route
 
 import logging
 log = logging.getLogger(__file__)
+
+
+class ST_ExteriorRing(GenericFunction):
+    name = 'ST_ExteriorRing'
+    type = Geometry
+
+
+class ST_MakePolygon(GenericFunction):
+    name = 'ST_MakePolygon'
+    type = Geometry
+
+
+class ST_Collect(GenericFunction):
+    name = 'ST_Collect'
+    type = Geometry
 
 
 class District(Base):
@@ -23,16 +41,13 @@ class District(Base):
     __tablename__ = 'district'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True, nullable=True)
+    name = Column(String(255), nullable=False)
     start_date = Column(Date, index=True, nullable=False)
     end_date = Column(Date, index=True, nullable=False)
 
     def __init__(self, name):
         self.name = name
         self.start_date = self.end_date = datetime.datetime.now()
-
-    def geom_from_shape(self, coords):
-        #self.geom = 'SRID={0};POLYGON({1})'.format(config.SRID, ','.join(coords))
-        self.geom = 'POLYGON(({1}))'.format(config.SRID, coords)
 
     @classmethod
     def load(cls, db, **kwargs):
@@ -43,13 +58,20 @@ class District(Base):
     def post_process(cls, db, **kwargs):
         if hasattr(cls, 'geom'):
             log.debug('{0}.post_process'.format(cls.__name__))
-            ada = cls(name='Garde')
-            # ada.geom_from_shape("37.9615819622 23.7216281890869,37.9617173039801 23.7193965911865,37.9633413851658 23.717679977417,37.964559422483 23.7147617340087,37.9644240860015 23.7116718292236, 37.9615819622 23.72162818, 37.9615819622 23.7216281890869")
-            r = db.session.query(Route).first()
-            # 3960 is the number of feet in 3/4 of a mile this is the size of the buffer around routes that
-            # is be generated for the ada boundary
-            ada.geom = r.geom.ST_Buffer(3960, 'quad_segs=50')
-            db.session.add(ada)
+            district = cls(name='District Boundary')
+
+            # Fill Holes in
+            # https://geospatial.commons.gc.cuny.edu/2013/11/04/filling-in-holes-with-postgis/
+            # https://postgis.net/docs/ST_ExteriorRing.html
+            # NOTE ST_ExteriorRing won't work with MULTIPOLYGONS
+            # https://postgis.net/docs/ST_Buffer.html
+            geom = db.session.query(
+                func.ST_ExteriorRing(
+                    func.ST_Union(
+                        Route.geom.ST_Buffer(0.0085, 'quad_segs=4 endcap=square join=mitre mitre_limit=1.0'))))
+            district.geom = func.ST_MakePolygon(geom)
+
+            db.session.add(district)
             db.session.commit()
             db.session.close()
 
