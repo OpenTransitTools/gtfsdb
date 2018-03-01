@@ -20,6 +20,8 @@ class Ada(Base):
     :see: https://en.wikipedia.org/wiki/Paratransit#Americans_with_Disabilities_Act_of_1990
 
     This class will calculate and represent a Paratransit (or ADA) boundary against all active routes.
+
+    NOTE: to load this table, you need both a geospaitial db (postgis) and the --create_boundaries cmd-line parameter
     """
     datasource = config.DATASOURCE_DERIVED
 
@@ -41,7 +43,7 @@ class Ada(Base):
 
     @classmethod
     def post_process(cls, db, **kwargs):
-        if hasattr(cls, 'geom'):
+        if hasattr(cls, 'geom') and kwargs.get('create_boundaries'):
             log.debug('{0}.post_process'.format(cls.__name__))
             ada = cls(name='ADA Boundary')
 
@@ -53,6 +55,7 @@ class Ada(Base):
 
             # the buffer values here are just guesses at this point ...
             geom = db.session.query(func.ST_Union(Route.geom.ST_Buffer(0.0035)))
+            # TODO: clip the ADA geom against the District geom ... no ADA outside legal transit district
             ada.geom = geom
 
             db.session.add(ada)

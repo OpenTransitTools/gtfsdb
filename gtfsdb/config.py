@@ -1,10 +1,10 @@
+import os
+import logging.config
+from pkg_resources import resource_filename  # @UnresolvedImport
 try:
     from ConfigParser import ConfigParser
 except ImportError:
     from configparser import ConfigParser
-import logging.config
-import os
-from pkg_resources import resource_filename  # @UnresolvedImport
 
 
 '''Parse configuration file and setup logging'''
@@ -48,10 +48,10 @@ SORTED_CLASS_NAMES = [
     'Trip',
     'StopTime',
     'RouteStop',
-    'Ada',
-    'District',
     'Frequency',
     'FareAttribute',
     'FareRule',
     'UniversalCalendar',
+    'District',
+    'Ada',
 ]

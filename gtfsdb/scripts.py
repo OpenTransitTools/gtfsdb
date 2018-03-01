@@ -33,9 +33,11 @@ def get_args():
     parser.add_argument('--tables', choices=tables, default=None, nargs='*',
                         help='Limited list of TABLES to load, if blank, load all tables')
     parser.add_argument('--ignore_postprocess', '-np', default=False, action='store_true',
-                        help="don't run any postprocess model routines (will leave some tables empty ... but will load raw gtfs data)")
+                        help="don't run any post-process model routines (will leave some tables empty ... but will load raw gtfs data)")
     parser.add_argument('--ignore_blocks', '-nb', default=False, action='store_true',
-                        help="don't bother populating the derrived block table")
+                        help="don't bother populating the derived block table")
+    parser.add_argument('--create_boundaries', '-cb', default=False, action='store_true',
+                        help="create and populate both the Ada or District boundary geometries (requires geospatial talbes)")
     args = parser.parse_args()
 
     kwargs = dict(
@@ -46,6 +48,7 @@ def get_args():
         url=args.database_url,
         do_postprocess=not args.ignore_postprocess,
         ignore_blocks=args.ignore_blocks,
+        create_boundaries=args.create_boundaries,
     )
     return args, kwargs
 

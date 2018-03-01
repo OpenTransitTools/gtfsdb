@@ -24,9 +24,12 @@ class Database(object):
     @property
     def classes(self):
         from gtfsdb.model.base import Base
+        ret_val = None
         if self.tables:
-            return [c for c in Base.__subclasses__() if c.__tablename__ in self.tables]
-        return Base.__subclasses__()
+            ret_val = [c for c in Base.__subclasses__() if c.__tablename__ in self.tables]
+        else:
+            ret_val =  Base.__subclasses__()
+        return ret_val
 
     def create(self):
         """Drop/create GTFS database"""
