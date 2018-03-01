@@ -46,7 +46,9 @@ class Ada(Base):
             # 3960 is the number of feet in 3/4 of a mile this is the size of the buffer around routes that
             # is be generated for the ada boundary
             # todo: make this value configurable ... and maybe metric
-            ada.geom = r.geom.ST_Buffer(3960, 'quad_segs=50')
+            g = Route.geom.ST_Union()
+            geom = g.ST_Buffer(3960, 'quad_segs=50')
+            ada.geom = geom
             db.session.add(ada)
             db.session.commit()
             db.session.close()
