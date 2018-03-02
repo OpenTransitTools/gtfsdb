@@ -22,17 +22,19 @@ class ST_Collect(GenericFunction):
     type = Geometry
 
 
-def point_intersects_geom(point, geom, buffer=0.0):
+def does_point_intersect_geom(point, geom, buffer=0.0):
     """
     return true or false whether point is in / out of the geom
     """
+    log.debug('does point intersect this geom')
     ret_val = False
     return ret_val
 
 
-def point_distance_to_geom(point, geom):
+def point_to_geom_distance(point, geom):
     """
     return true or false whether point is in / out of the geom
     """
+    log.debug("distance between point and a geom (assuming they don't intersect")
     ret_val = False
     return ret_val

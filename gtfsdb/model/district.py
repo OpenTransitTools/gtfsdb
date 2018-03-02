@@ -34,6 +34,14 @@ class District(Base):
         self.name = name
         self.start_date = self.end_date = datetime.datetime.now()
 
+    def intersect(self, point):
+        from gtfsdb.util_geo import does_point_intersect_geom
+        return does_point_intersect_geom(point, self.geom)
+
+    def distance(self, point):
+        from gtfsdb.util_geo import point_to_geom_distance
+        return point_to_geom_distance(point, self.geom)
+
     @classmethod
     def load(cls, db, **kwargs):
         if hasattr(cls, 'geom'):
