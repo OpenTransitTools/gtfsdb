@@ -373,6 +373,6 @@ class RouteStop(Base):
         try:
             start = effective_dates_list[stop_id][1]
             end = effective_dates_list[stop_id][2]
-        except Exception, e:
+        except Exception as e:
             log.info(e)
         return start, end
