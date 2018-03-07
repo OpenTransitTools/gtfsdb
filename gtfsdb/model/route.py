@@ -212,4 +212,4 @@ class RouteFilter(Base):
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
-    description = Column(String)
+    description = Column(String(1023))
