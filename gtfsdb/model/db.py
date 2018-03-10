@@ -24,10 +24,33 @@ class Database(object):
 
     @property
     def classes(self):
-        from gtfsdb.model.base import Base
+        subclasses = self.get_base_subclasses()
         if self.tables:
-            return [c for c in Base.__subclasses__() if c.__tablename__ in self.tables]
+            ret_val = [c for c in subclasses if c.__tablename__ in self.tables]
+        else:
+            ret_val = subclasses
+        return ret_val
+
+    @classmethod
+    def get_base_subclasses(cls):
+        from gtfsdb.model.base import Base
         return Base.__subclasses__()
+
+    @property
+    def metadata(self):
+        from gtfsdb.model.base import Base
+        return Base.metadata
+
+    @classmethod
+    def factory_from_cmdline(cls, args):
+        kwargs = dict(
+            tables=args.tables,
+            url=args.database_url,
+            schema=args.schema,
+            is_geospatial=args.is_geospatial
+        )
+        ret_val = Database(kwargs)
+        return ret_val
 
     def create(self):
         """Drop/create GTFS database"""
@@ -42,11 +65,6 @@ class Database(object):
     @property
     def dialect_name(self):
         return self.engine.url.get_dialect().name
-
-    @property
-    def metadata(self):
-        from gtfsdb.model.base import Base
-        return Base.metadata
 
     @property
     def is_geospatial(self):
@@ -75,6 +93,8 @@ class Database(object):
     def schema(self, val):
         # import pdb; pdb.set_trace()
         self._schema = val
+
+        # TODO ... move to create() method
         try:
             if self._schema:
                 from sqlalchemy.schema import CreateSchema
