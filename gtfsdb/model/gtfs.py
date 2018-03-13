@@ -33,12 +33,8 @@ class GTFS(object):
 
         # load known GTFS files, derived tables & lookup tables
         gtfs_directory = self.unzip()
-        load_kwargs = dict(
-            batch_size=kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE),
-            gtfs_directory=gtfs_directory,
-        )
-        for cls in db.sorted_classes:
-            cls.load(db, **load_kwargs)
+        kwargs['gtfs_directory'] = gtfs_directory
+        db.load_tables(**kwargs)
         shutil.rmtree(gtfs_directory)
 
         # load route geometries derived from shapes.txt
@@ -46,10 +42,7 @@ class GTFS(object):
             Route.load_geoms(db)
 
         # call post process routines...
-        do_postprocess = kwargs.get('do_postprocess', True)
-        if do_postprocess:
-            for cls in db.sorted_classes:
-                cls.post_process(db, **kwargs)
+        db.postprocess_tables(**kwargs)
 
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))

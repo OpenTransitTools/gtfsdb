@@ -70,6 +70,15 @@ class Database(object):
             log.info("load {}".format(cls.__name__))
             cls.load(self, **kwargs)
 
+    def postprocess_tables(self, **kwargs):
+        """ call the post-process routines on the sorted classes """
+        # import pdb; pdb.set_trace()
+        do_postprocess = kwargs.get('do_postprocess', True)
+        if do_postprocess:
+            for cls in self.sorted_classes:
+                log.info("post process {}".format(cls.__name__))
+                cls.post_process(self, **kwargs)
+
     def create(self):
         """Drop/create GTFS database"""
         for cls in self.sorted_classes:

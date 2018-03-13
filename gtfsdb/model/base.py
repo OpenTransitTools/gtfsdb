@@ -127,15 +127,28 @@ class _Base(object):
             gtfs_directory: path to unzipped GTFS files
             batch_size: batch size for memory management
         """
-        log = logging.getLogger(cls.__module__)
+
+        # step 0: set up some vars, including setting the log output to show the child of base that we're processing
         start_time = time.time()
         batch_size = kwargs.get('batch_size', config.DEFAULT_BATCH_SIZE)
+        log = logging.getLogger(cls.__module__)
+
+        # step 1: check that we have elements of a file path (a file name and a directory) for the data we'll load
+        if cls.filename is None:
+            log.info("{} lacks a 'filename' attribute ... not loading a null file (exit load).".format(cls.__name__))
+            return  # note early exit
+        if cls.datasource is not config.DATASOURCE_GTFS and cls.datasource is not config.DATASOURCE_LOOKUP:
+            log.info("{}.datasource != DATASOURCE_GTFS or DATASOURCE_LOOKUP (exit load).".format(cls.__name__))
+            return  # note early exit
+
+        # step 2: load either a GTFS file from the unzipped file or a resource file (from a dir specified in config)
         directory = None
         if cls.datasource == config.DATASOURCE_GTFS:
             directory = kwargs.get('gtfs_directory')
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = resource_filename('gtfsdb', 'data')
 
+        # step 3: load the file
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
@@ -164,6 +177,8 @@ class _Base(object):
             if len(records) > 0:
                 db.engine.execute(table.insert(), records)
             f.close()
+
+        # step 4: done...
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))
 
