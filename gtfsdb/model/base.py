@@ -135,10 +135,10 @@ class _Base(object):
 
         # step 1: check that we have elements of a file path (a file name and a directory) for the data we'll load
         if cls.filename is None:
-            log.info("{} lacks a 'filename' attribute ... not loading a null file (exit load).".format(cls.__name__))
+            log.info("{0} lacks a 'filename' attribute ... not loading a null file (exit load).".format(cls.__name__))
             return  # note early exit
         if cls.datasource is not config.DATASOURCE_GTFS and cls.datasource is not config.DATASOURCE_LOOKUP:
-            log.info("{}.datasource != DATASOURCE_GTFS or DATASOURCE_LOOKUP (exit load).".format(cls.__name__))
+            log.info("{0}.datasource != DATASOURCE_GTFS or DATASOURCE_LOOKUP (exit load).".format(cls.__name__))
             return  # note early exit
 
         # step 2: load either a GTFS file from the unzipped file or a resource file (from a dir specified in config)
@@ -149,7 +149,7 @@ class _Base(object):
             directory = resource_filename('gtfsdb', 'data')
 
         # step 3: load the file
-        log.info("load {}".format(cls.__name__))
+        log.info("load {0}".format(cls.__name__))
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):

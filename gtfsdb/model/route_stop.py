@@ -79,7 +79,7 @@ class RouteStop(Base):
         return ret_val
 
     def get_id(self):
-        ret_val = "r:{} d:{} s:{}".format(self.route_id, self.direction_id, self.stop_id)
+        ret_val = "r:{0} d:{1} s:{2}".format(self.route_id, self.direction_id, self.stop_id)
         return ret_val
 
     @classmethod
@@ -306,7 +306,7 @@ class RouteStop(Base):
                         if rs.is_valid():
                             session.add(rs)
                         else:
-                            log.info("{} is not valid ... not adding to the database".format(rs.get_id()))
+                            log.info("{0} is not valid ... not adding to the database".format(rs.get_id()))
 
             # step 8: commit the new records to the db for this route...
             sys.stdout.write('*')

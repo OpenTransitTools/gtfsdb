@@ -19,7 +19,10 @@ class Database(object):
         """
         # import pdb; pdb.set_trace()
         self.tables = kwargs.get('tables', None)
-        self.url = kwargs.get('url', config.DEFAULT_DATABASE_URL)
+        url = kwargs.get('url')
+        if not url:
+            url = kwargs.get('database_url', config.DEFAULT_DATABASE_URL)
+        self.url = url
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
         self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
         self.sorted_class_names = config.SORTED_CLASS_NAMES
@@ -83,8 +86,11 @@ class Database(object):
             try:
                 cls.__table__.drop(self.engine, checkfirst=True)
             except:
-                log.info("NOTE: couldn't drop table")
-            cls.__table__.create(self.engine)
+                log.info("NOTE: couldn't *drop* table {0} (might not be a big deal)".format(cls.__table__))
+            try:
+                cls.__table__.create(self.engine)
+            except Exception as e:
+                log.info("NOTE: couldn't *create* table {0} (could be a big deal)\n{1}".format(cls.__table__, e))
 
     @property
     def dialect_name(self):
