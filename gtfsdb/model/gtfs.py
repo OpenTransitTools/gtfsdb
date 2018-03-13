@@ -29,19 +29,16 @@ class GTFS(object):
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
-        # load .txt files from GTFS.zip, as well as derived tables & lookup tables from gtfsdb/data
+        # step 1: load .txt files from GTFS.zip, as well as derived tables & lookup tables from gtfsdb/data
         gtfs_directory = self.unzip()
         kwargs['gtfs_directory'] = gtfs_directory
         db.load_tables(**kwargs)
         shutil.rmtree(gtfs_directory)
 
-        # load route geometries derived from shapes.txt
-        if Route in db.classes:
-            Route.load_geoms(db)
-
-        # call post process routines...
+        # step 2: call post process routines...
         db.postprocess_tables(**kwargs)
 
+        # step 3: finish
         process_time = time.time() - start_time
         log.debug('GTFS.load ({0:.0f} seconds)'.format(process_time))
 

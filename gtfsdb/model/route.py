@@ -11,7 +11,6 @@ from sqlalchemy.types import Integer, String
 
 log = logging.getLogger(__name__)
 
-
 __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteFilter']
 
 
@@ -118,7 +117,7 @@ class Route(Base):
 
     @classmethod
     def load_geoms(cls, db):
-        """load derived geometries, currently only written for PostgreSQL"""
+        """ load derived geometries, currently only written for PostgreSQL """
         from gtfsdb.model.shape import Pattern
         from gtfsdb.model.trip import Trip
 
@@ -136,8 +135,12 @@ class Route(Base):
                 session.merge(route)
             session.commit()
             processing_time = time.time() - start_time
-            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(
-                cls.__name__, processing_time))
+            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        log.debug('{0}.post_process'.format(cls.__name__))
+        cls.load_geoms(db)
 
     @classmethod
     def add_geometry_column(cls):
@@ -153,7 +156,10 @@ class Route(Base):
         ret_val = []
 
         # step 1: grab all stops
-        routes = session.query(Route).filter(~Route.route_id.in_(session.query(RouteFilter.route_id))).order_by(Route.route_sort_order).all()
+        routes = session.query(Route)\
+            .filter(~Route.route_id.in_(session.query(RouteFilter.route_id)))\
+            .order_by(Route.route_sort_order)\
+            .all()
 
         # step 2: default date
         if date is None or not isinstance(date, datetime.date):

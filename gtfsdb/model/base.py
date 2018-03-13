@@ -149,6 +149,7 @@ class _Base(object):
             directory = resource_filename('gtfsdb', 'data')
 
         # step 3: load the file
+        log.info("load {}".format(cls.__name__))
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
@@ -187,7 +188,7 @@ class _Base(object):
         """
         Post-process processing method.  This method is a placeholder
         that may be overridden in children...
-        @see: stop_time.py
+        @see: stop_time.py or route.py
         """
         pass
 
