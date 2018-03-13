@@ -78,7 +78,8 @@ class Route(Base):
             dir = self.directions.filter(RouteDirection.direction_id == direction_id)
             if dir and dir.direction_name:
                 ret_val = dir.direction_name
-        except:
+        except Exception as e:
+            log.debug(e)
             pass
         return ret_val
 
@@ -207,4 +208,4 @@ class RouteFilter(Base):
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
-    description = Column(String)
+    description = Column(String(1023))
