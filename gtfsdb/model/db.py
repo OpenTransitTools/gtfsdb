@@ -60,18 +60,14 @@ class Database(object):
 
     @classmethod
     def factory_from_cmdline(cls, args):
-        kwargs = dict(
-            tables=args.tables,
-            is_geospatial=args.is_geospatial,
-            schema=args.schema,
-            url=args.database_url,
-            create=args.create
-        )
+        kwargs = vars(args)
         return cls.factory(**kwargs)
 
     def load_tables(self, **kwargs):
         """ load the sorted classes """
+        # import pdb; pdb.set_trace()
         for cls in self.sorted_classes:
+            log.info("load {}".format(cls.__name__))
             cls.load(self, **kwargs)
 
     def create(self):
@@ -113,7 +109,6 @@ class Database(object):
 
     @schema.setter
     def schema(self, val):
-        # import pdb; pdb.set_trace()
         self._schema = val
 
         # TODO ... move to create() method
