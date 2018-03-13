@@ -12,7 +12,6 @@ import zipfile
 from gtfsdb import config
 from .route import Route
 
-
 log = logging.getLogger(__name__)
 
 
@@ -27,11 +26,10 @@ class GTFS(object):
         Load GTFS into database
         """
         # import pdb; pdb.set_trace()
-
         start_time = time.time()
         log.debug('GTFS.load: {0}'.format(self.file))
 
-        # load known GTFS files, derived tables & lookup tables
+        # load .txt files from GTFS.zip, as well as derived tables & lookup tables from gtfsdb/data
         gtfs_directory = self.unzip()
         kwargs['gtfs_directory'] = gtfs_directory
         db.load_tables(**kwargs)
