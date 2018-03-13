@@ -21,6 +21,7 @@ class Database(object):
         self.url = kwargs.get('url', config.DEFAULT_DATABASE_URL)
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
         self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
+        self.sorted_class_names = config.SORTED_CLASS_NAMES
 
     @property
     def classes(self):
@@ -30,6 +31,15 @@ class Database(object):
         else:
             ret_val = subclasses
         return ret_val
+
+    @property
+    def sorted_classes(self):
+        classes = []
+        for class_name in self.sorted_class_names:
+            cls = next((c for c in self.classes if c.__name__ == class_name), None)
+            if cls:
+                classes.append(cls)
+        return classes
 
     @classmethod
     def get_base_subclasses(cls):
@@ -45,12 +55,14 @@ class Database(object):
     def factory_from_cmdline(cls, args):
         kwargs = dict(
             tables=args.tables,
-            url=args.database_url,
+            is_geospatial=args.is_geospatial,
             schema=args.schema,
-            is_geospatial=args.is_geospatial
+            url=args.database_url,
         )
-        ret_val = Database(kwargs)
-        return ret_val
+        db = cls(**kwargs)
+        if args.create:
+            db.create()
+        return db
 
     def create(self):
         """Drop/create GTFS database"""
@@ -104,15 +116,6 @@ class Database(object):
 
         for cls in self.classes:
             cls.__table__.schema = val
-
-    @property
-    def sorted_classes(self):
-        classes = []
-        for class_name in config.SORTED_CLASS_NAMES:
-            cls = next((c for c in self.classes if c.__name__ == class_name), None)
-            if cls:
-                classes.append(cls)
-        return classes
 
     @property
     def url(self):
