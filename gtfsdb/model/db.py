@@ -52,17 +52,27 @@ class Database(object):
         return Base.metadata
 
     @classmethod
+    def factory(cls, **kwargs):
+        db = cls(**kwargs)
+        if kwargs.get('create'):
+            db.create()
+        return db
+
+    @classmethod
     def factory_from_cmdline(cls, args):
         kwargs = dict(
             tables=args.tables,
             is_geospatial=args.is_geospatial,
             schema=args.schema,
             url=args.database_url,
+            create=args.create
         )
-        db = cls(**kwargs)
-        if args.create:
-            db.create()
-        return db
+        return cls.factory(**kwargs)
+
+    def load_tables(self, **kwargs):
+        """ load the sorted classes """
+        for cls in self.sorted_classes:
+            cls.load(self, **kwargs)
 
     def create(self):
         """Drop/create GTFS database"""
