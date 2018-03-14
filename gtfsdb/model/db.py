@@ -17,7 +17,7 @@ class Database(object):
             tables: limited list of tables to load into database
             url: SQLAlchemy database url
         """
-        # import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         self.tables = kwargs.get('tables', None)
         url = kwargs.get('url')
         if not url:
@@ -54,18 +54,6 @@ class Database(object):
     def metadata(self):
         from gtfsdb.model.base import Base
         return Base.metadata
-
-    @classmethod
-    def factory(cls, **kwargs):
-        db = cls(**kwargs)
-        if kwargs.get('create'):
-            db.create()
-        return db
-
-    @classmethod
-    def factory_from_cmdline(cls, args):
-        kwargs = vars(args)
-        return cls.factory(**kwargs)
 
     def load_tables(self, **kwargs):
         """ load the sorted classes """
@@ -108,14 +96,6 @@ class Database(object):
                 cls.add_geometry_column()
 
     @property
-    def is_postgresql(self):
-        return 'postgres' in self.dialect_name
-
-    @property
-    def is_sqlite(self):
-        return 'sqlite' in self.dialect_name
-
-    @property
     def schema(self):
         return self._schema
 
@@ -132,7 +112,7 @@ class Database(object):
             log.info("NOTE: couldn't create schema {0} (schema might already exist)\n{1}".format(self._schema, e))
 
         for cls in self.classes:
-            cls.__table__.schema = val
+            cls.set_schema(self._schema)
 
     @property
     def url(self):
@@ -146,3 +126,37 @@ class Database(object):
             self.engine.connect().connection.connection.text_factory = str
         session_factory = sessionmaker(self.engine)
         self.session = scoped_session(session_factory)
+
+    @property
+    def is_postgresql(self):
+        return 'postgres' in self.dialect_name
+
+    @property
+    def is_sqlite(self):
+        return 'sqlite' in self.dialect_name
+
+    @classmethod
+    def factory(cls, **kwargs):
+        """ helper method to open a Database object (and optionally create the tables in that Database) """
+        db = cls(**kwargs)
+        if kwargs.get('create'):
+            db.create()
+        return db
+
+    @classmethod
+    def factory_from_cmdline(cls, args):
+        """ helper method to open a Database via a set of cmdline args object """
+        kwargs = vars(args)
+        return cls.factory(**kwargs)
+
+    def prep_an_orm_class(self, orm_cls):
+        """
+        helper method to ready an ORM class (see Base and it's children) according to this Database's settings
+        :why?: sometimes you might have classes you want as part of a query, but you don't want those classes
+        available in the Database.classes() or Database.sorted_classes(), since these tables are not being loaded, etc..
+        """
+        if self.is_geospatial and hasattr(orm_cls, 'add_geometry_column'):
+            orm_cls.add_geometry_column()
+
+        if self.schema:
+            orm_cls.set_schema(self.schema)

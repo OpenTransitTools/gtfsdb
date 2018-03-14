@@ -43,6 +43,10 @@ class _Base(object):
         return ret_val
 
     @classmethod
+    def set_schema(cls, schema):
+        cls.__table__.schema = schema
+
+    @classmethod
     def make_geom_lazy(cls):
         from sqlalchemy.orm import deferred
         try:
