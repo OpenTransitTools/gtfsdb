@@ -19,3 +19,4 @@ class Agency(Base):
     agency_lang = Column(String(10))
     agency_phone = Column(String(50))
     agency_fare_url = Column(String(255))
+    agency_email = Column(String(50))
