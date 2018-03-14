@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import datetime
 import logging
 import sys
@@ -277,8 +275,6 @@ class RouteStop(Base):
                                         unique_stops.insert(last_pos, st.stop_id)
                                     else:
                                         unique_stops.append(st.stop_id)
-
-                print(unique_stops)
 
                 # PART B: add records to the database ...
                 if len(unique_stops) > 0:
