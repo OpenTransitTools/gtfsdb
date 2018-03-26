@@ -6,7 +6,7 @@ from gtfsdb.model.base import Base
 from sqlalchemy import Column
 from sqlalchemy.orm import joinedload_all, relationship
 from sqlalchemy.sql.expression import func
-from sqlalchemy.types import Boolean, Integer, Numeric, String
+from sqlalchemy.types import Integer, Numeric, String
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class StopTime(Base):
     pickup_type = Column(Integer, default=0)
     drop_off_type = Column(Integer, default=0)
     shape_dist_traveled = Column(Numeric(20, 10))
-    timepoint = Column(Boolean, index=True, default=False)
+    timepoint = Column(Integer)
 
     stop = relationship(
         'Stop',

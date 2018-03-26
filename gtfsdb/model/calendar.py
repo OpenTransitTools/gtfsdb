@@ -5,7 +5,7 @@ import time
 from sqlalchemy import Column, Index
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy.types import Boolean, Date, Integer, String
+from sqlalchemy.types import Date, Integer, String
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -25,13 +25,13 @@ class Calendar(Base):
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
     service_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    monday = Column(Boolean, nullable=False)
-    tuesday = Column(Boolean, nullable=False)
-    wednesday = Column(Boolean, nullable=False)
-    thursday = Column(Boolean, nullable=False)
-    friday = Column(Boolean, nullable=False)
-    saturday = Column(Boolean, nullable=False)
-    sunday = Column(Boolean, nullable=False)
+    monday = Column(Integer, nullable=False)
+    tuesday = Column(Integer, nullable=False)
+    wednesday = Column(Integer, nullable=False)
+    thursday = Column(Integer, nullable=False)
+    friday = Column(Integer, nullable=False)
+    saturday = Column(Integer, nullable=False)
+    sunday = Column(Integer, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     service_name = Column(String(255))  # Trillium extension, a human-readable name for the calendar.
