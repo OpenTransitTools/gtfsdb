@@ -150,13 +150,22 @@ class Database(object):
         return cls.factory(**kwargs)
 
     def prep_an_orm_class(self, orm_cls):
+        self.prep_orm_class(orm_cls, self.schema, self.is_geospatial)
+
+    @classmethod
+    def prep_orm_class(cls, orm_cls, schema=None, is_geospatial=False):
         """
         helper method to ready an ORM class (see Base and it's children) according to this Database's settings
         :why?: sometimes you might have classes you want as part of a query, but you don't want those classes
         available in the Database.classes() or Database.sorted_classes(), since these tables are not being loaded, etc..
         """
-        if self.is_geospatial and hasattr(orm_cls, 'add_geometry_column'):
+        if is_geospatial and hasattr(orm_cls, 'add_geometry_column'):
             orm_cls.add_geometry_column()
 
-        if self.schema:
-            orm_cls.set_schema(self.schema)
+        if schema:
+            orm_cls.set_schema(schema)
+
+    @classmethod
+    def prep_gtfsdb_model_classes(cls, schema=None, is_geo=False):
+        for c in cls.get_base_subclasses():
+            cls.prep_orm_class(c, schema, is_geo)
