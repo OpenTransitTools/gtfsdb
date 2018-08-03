@@ -48,6 +48,12 @@ class Route(Base):
     route_sort_order = Column(Integer, index=True)
     min_headway_minutes = Column(Integer)  # Trillium extension.
 
+    agency = relationship(
+        'Agency',
+        primaryjoin='Route.agency_id==Agency.agency_id',
+        foreign_keys='(Route.agency_id)',
+        uselist=False, viewonly=True)
+
     type = relationship(
         'RouteType',
         primaryjoin='Route.route_type==RouteType.route_type',
