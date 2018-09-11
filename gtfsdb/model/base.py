@@ -1,17 +1,18 @@
-import csv
-import datetime
-import logging
-import os
-import sys
-import time
-
 from pkg_resources import resource_filename  # @UnresolvedImport
 
 from gtfsdb import config, util
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
 
+import csv
+import datetime
+import os
+import sys
+import time
+
+import logging
 log = logging.getLogger(__name__)
+
 
 try:
     unicode = unicode
@@ -35,6 +36,7 @@ class _Base(object):
 
     @property
     def session(self):
+        #import pdb; pdb.set_trace()
         ret_val = None
         try:
             ret_val = object_session(self)
