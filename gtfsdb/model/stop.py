@@ -112,6 +112,23 @@ class Stop(Base):
                         self.agencies.append(r.agency_id)
         return self._agencies
 
+    @property
+    def amenities(self):
+        """
+        return list of strings for the stop amenity (feature) names
+        """
+        try:
+            self._amenities
+        except AttributeError:
+            self._amenities = []
+            if self.stop_features and len(self.stop_features) > 0:
+                for f in self.stop_features:
+                    n = f.feature_name
+                    if n and len(n) > 0:
+                        self._amenities.append(n)
+                self._amenities = sorted(self._amenities)
+        return self._amenities
+
     def is_active(self, date=None):
         """
         :return False whenever we see that the stop has zero stop_times on the given input date
