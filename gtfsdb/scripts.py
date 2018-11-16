@@ -21,7 +21,7 @@ def get_args():
         prog='gtfsdb-load',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('file', help='URL or local path to GTFS zip FILE')
-    parser.add_argument('--batch_size', '-b', default=config.DEFAULT_BATCH_SIZE,
+    parser.add_argument('--batch_size', '-b', type=int, default=config.DEFAULT_BATCH_SIZE,
                         help='BATCH SIZE to use for memory management')
     parser.add_argument('--database_url', '-d', default=config.DEFAULT_DATABASE_URL,
                         help='DATABASE URL with appropriate privileges')
