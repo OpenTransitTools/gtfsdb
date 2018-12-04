@@ -15,11 +15,17 @@ __all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteFilter']
 
 
 class RouteType(Base):
+    """
+    OTP TYPES (come via service calls)
+    0:TRAM, 1:SUBWAY, 2:RAIL, 3:BUS, 4:FERRY, 5:CABLE_CAR, 6:GONDOLA, 7:FUNICULAR
+    :see https://github.com/opentripplanner/OpenTripPlanner/blob/master/src/main/java/org/opentripplanner/routing/core/TraverseMode.java :
+    """
     datasource = config.DATASOURCE_LOOKUP
     filename = 'route_type.txt'
     __tablename__ = 'route_type'
 
     route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    otp_type = Column(String(255))
     route_type_name = Column(String(255))
     route_type_desc = Column(String(1023))
 
@@ -42,6 +48,18 @@ class Route(Base):
     route_sort_order = Column(Integer, index=True)
     min_headway_minutes = Column(Integer)  # Trillium extension.
 
+    agency = relationship(
+        'Agency',
+        primaryjoin='Route.agency_id==Agency.agency_id',
+        foreign_keys='(Route.agency_id)',
+        uselist=False, viewonly=True)
+
+    type = relationship(
+        'RouteType',
+        primaryjoin='Route.route_type==RouteType.route_type',
+        foreign_keys='(Route.route_type)',
+        uselist=False, viewonly=True)
+
     trips = relationship(
         'Trip',
         primaryjoin='Route.route_id==Trip.route_id',
@@ -52,7 +70,7 @@ class Route(Base):
         'RouteDirection',
         primaryjoin='Route.route_id==RouteDirection.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True, lazy='joined')
+        uselist=True, viewonly=True)
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):

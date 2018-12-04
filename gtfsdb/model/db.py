@@ -1,9 +1,9 @@
 import logging
 import sqlite3
-
 from gtfsdb import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from contextlib import contextmanager
 
 log = logging.getLogger(__file__)
 
@@ -171,3 +171,18 @@ class Database(object):
     def prep_gtfsdb_model_classes(cls, schema=None, is_geo=False):
         for c in cls.get_base_subclasses():
             cls.prep_orm_class(c, schema, is_geo)
+
+    @contextmanager
+    def managed_session(self, *args, **kwds):
+        """
+        will return a session that you can use w/in a 'with' statement
+        :see https://docs.python.org/3/library/contextlib.html#utilities :
+        """
+        log.debug("get managed session")
+        session = self.session()
+        try:
+            yield session
+        finally:
+            log.debug("close managed session")
+            session.close()
+
