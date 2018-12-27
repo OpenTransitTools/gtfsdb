@@ -1,9 +1,10 @@
+import logging
+import sqlite3
 from gtfsdb import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-
 from contextlib import contextmanager
-import logging
+
 log = logging.getLogger(__file__)
 
 
@@ -123,6 +124,7 @@ class Database(object):
         self._url = val
         self.engine = create_engine(val)
         if self.is_sqlite:
+            sqlite3.register_adapter(str, lambda s: s.decode('utf8'))
             self.engine.connect().connection.connection.text_factory = str
         session_factory = sessionmaker(self.engine)
         self.session = scoped_session(session_factory)
