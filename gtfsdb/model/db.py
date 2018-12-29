@@ -1,4 +1,5 @@
 from gtfsdb import config
+from gtfsdb import util
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from contextlib import contextmanager
@@ -25,7 +26,10 @@ class Database(object):
         self.url = url
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
         self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
-        self.sorted_class_names = config.SORTED_CLASS_NAMES
+
+        """Order list of class names, used for creating & populating tables"""
+        from gtfsdb import SORTED_CLASS_NAMES
+        self.sorted_class_names = SORTED_CLASS_NAMES
 
     @property
     def classes(self):
@@ -48,7 +52,7 @@ class Database(object):
     @classmethod
     def get_base_subclasses(cls):
         from gtfsdb.model.base import Base
-        return Base.__subclasses__()
+        return util.get_all_subclasses(Base)
 
     @property
     def metadata(self):

@@ -1,17 +1,20 @@
 import datetime
-import logging
 import time
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+
 from sqlalchemy import Column
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Integer, String
+from sqlalchemy.schema import ForeignKey
 
+import logging
 log = logging.getLogger(__name__)
 
-__all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteFilter']
+
+__all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteFilter', 'CurrentRoutes']
 
 
 class RouteType(Base):
@@ -233,3 +236,34 @@ class RouteFilter(Base):
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
     description = Column(String(1023))
+
+
+class CurrentRoutes(Route):
+    """
+    this table is an inherited table of Routes
+    it is (optionally) used as a view into the currently active routes
+    :see: https://docs.sqlalchemy.org/en/latest/orm/inheritance.html
+    """
+    datasource = config.DATASOURCE_DERIVED
+    __tablename__ = 'current_routes'
+    __mapper_args__ = {'polymorphic_identity': __tablename__}
+    id = Column(String, ForeignKey('routes.route_id'), primary_key=True, index=True, nullable=False)
+
+    @classmethod
+    def update_current_data(cls, db):
+        """
+        will update the current 'view' of this data
+
+        steps:
+          1. open transaction
+          2. drop all data in this 'current' table
+          3. select current routes as a list
+          4. add those id's to this table
+          5. other processing (cached results)
+          6. commit
+          7. close transaction
+        """
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        cls.update_current_data(db)
