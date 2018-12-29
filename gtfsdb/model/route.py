@@ -263,6 +263,10 @@ class CurrentRoutes(Route):
           6. commit
           7. close transaction
         """
+        import pdb; pdb.set_trace()
+        for r in Route.active_routes(db.session):
+            print r.route_id
+
 
     @classmethod
     def post_process(cls, db, **kwargs):

@@ -37,8 +37,7 @@ class TestCurrent(unittest.TestCase):
         url = "postgresql://ott@localhost/test"
         schema = "current_test"
 
-        e = db.create_engine(url, echo=True)
-        #Base.metadata.drop_all(e, checkfirst=True)
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
         self.db = database_load(filename, url=url, schema=schema, populate_current=True)
+        CurrentRoutes.update_current_data(self.db)
