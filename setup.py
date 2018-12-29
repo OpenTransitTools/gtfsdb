@@ -15,7 +15,8 @@ extras_require = dict(
 
 install_requires = [
     'geoalchemy2',
-    'sqlalchemy'
+    'sqlalchemy',
+    'psycopg2',
 ]
 
 setup(
