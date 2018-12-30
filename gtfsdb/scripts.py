@@ -63,6 +63,17 @@ def route_stop_load():
     RouteStop.load(db, **kwargs)
 
 
+def current_tables_load():
+    """
+    written as a test / debug method for RS table loader
+    """
+    from gtfsdb import Database, CurrentRoutes
+    kwargs = get_args()[1]
+    db = Database(**kwargs)
+    for cls in [CurrentRoutes]:
+        cls.load(db, **kwargs)
+
+
 def db_connect_tester():
     """
     simple routine to connect to an existing database and list a few stops

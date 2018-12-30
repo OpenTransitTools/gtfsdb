@@ -8,20 +8,9 @@ except ImportError:
 import logging
 log = logging.getLogger(__name__)
 
-SKIP_TESTS = False
-#SKIP_TESTS = True
 
-
-""" To run this test, do the following:
- a) emacs setup.py - uncomment install_requires='psycopg2'
- b) comment out "#SKIP_TESTS = True" above 
- c) psql -d postgres -c "CREATE DATABASE test WITH OWNER ott;"
- d) buildout # need psychopg2 in bin/test script
- e) bin/test gtfsdb.tests.test_materalized_view
-"""
-import sqlalchemy as db
+from gtfsdb import *
 from gtfsdb.api import database_load
-from gtfsdb.model.route import CurrentRoutes
 
 
 class TestCurrent(unittest.TestCase):
@@ -29,9 +18,18 @@ class TestCurrent(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_database_load(self):
+    def test_postgres_load(self):
+        """ To run this test, do the following:
+         a) emacs setup.py - uncomment install_requires='psycopg2'
+         b) buildout  # need psychopg2 in bin/test script
+         c) comment out "#SKIP_TESTS = True" below
+         d) psql -d postgres -c "CREATE DATABASE test WITH OWNER ott;"
+         e) bin/test gtfsdb.tests.test_current
+        """
+        SKIP_TESTS = False
+        SKIP_TESTS = True
         if SKIP_TESTS:
-            log.warning("NOTE: skipping this Postgres-only test of Materalized Views ... manually set SKIP_TESTS=False above")
+            log.warning("NOTE: skipping this postgres test of CurrentRoutes ... manually set SKIP_TESTS=False above")
             return True
 
         url = "postgresql://ott@localhost/test"
@@ -40,4 +38,8 @@ class TestCurrent(unittest.TestCase):
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
         self.db = database_load(filename, url=url, schema=schema, populate_current=True)
-        CurrentRoutes.update_current_data(self.db)
+
+    def test_sqlite_load(self):
+        path = resource_filename('gtfsdb', 'tests')
+        filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
+        self.db = database_load(filename, populate_current=True)

@@ -238,7 +238,7 @@ class RouteFilter(Base):
     description = Column(String(1023))
 
 
-class CurrentRoutes(Route):
+class CurrentRoutes(Base):
     """
     this table is an inherited table of Routes
     it is (optionally) used as a view into the currently active routes
@@ -246,11 +246,10 @@ class CurrentRoutes(Route):
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_routes'
-    __mapper_args__ = {'polymorphic_identity': __tablename__}
     id = Column(String, ForeignKey('routes.route_id'), primary_key=True, index=True, nullable=False)
 
     @classmethod
-    def update_current_data(cls, db):
+    def post_process(cls, db, **kwargs):
         """
         will update the current 'view' of this data
 
@@ -263,11 +262,15 @@ class CurrentRoutes(Route):
           6. commit
           7. close transaction
         """
-        import pdb; pdb.set_trace()
+        session = db.session()
+
+        # import pdb; pdb.set_trace()
         for r in Route.active_routes(db.session):
             print r.route_id
+            c = CurrentRoutes()
+            c.id = r.route_id
+            session.add(c)
 
-
-    @classmethod
-    def post_process(cls, db, **kwargs):
-        cls.update_current_data(db)
+        session.commit()
+        session.flush()
+        session.close()
