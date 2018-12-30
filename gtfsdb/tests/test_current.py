@@ -18,6 +18,12 @@ class TestCurrent(unittest.TestCase):
     def setUp(self):
         pass
 
+    def check_query_counts(self, clz1, clz2):
+        # import pdb; pdb.set_trace()
+        n1 = self.db.session.query(clz1).all()
+        n2 = self.db.session.query(clz2).all()
+        return len(n1) != len(n2)
+
     def test_postgres_load(self):
         """ To run this test, do the following:
          a) emacs setup.py - uncomment install_requires='psycopg2'
@@ -43,3 +49,4 @@ class TestCurrent(unittest.TestCase):
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
         self.db = database_load(filename, populate_current=True)
+        self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
