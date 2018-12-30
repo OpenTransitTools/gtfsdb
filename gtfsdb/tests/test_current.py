@@ -44,6 +44,7 @@ class TestCurrent(unittest.TestCase):
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
         self.db = database_load(filename, url=url, schema=schema, populate_current=True)
+        self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
 
     def test_sqlite_load(self):
         path = resource_filename('gtfsdb', 'tests')
