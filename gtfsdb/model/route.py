@@ -243,7 +243,14 @@ class CurrentRoutes(Base):
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_routes'
-    id = Column(String, ForeignKey('routes.route_id'), primary_key=True, index=True, nullable=False)
+
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route = relationship(
+        Route.__name__,
+        primaryjoin='CurrentRoutes.route_id==Route.route_id',
+        foreign_keys='(CurrentRoutes.route_id)',
+        uselist=False, viewonly=True,
+    )
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -265,9 +272,8 @@ class CurrentRoutes(Base):
 
             # import pdb; pdb.set_trace()
             for r in Route.active_routes(session):
-                print r.route_id
                 c = CurrentRoutes()
-                c.id = r.route_id
+                c.route_id = r.route_id
                 session.add(c)
 
             session.commit()

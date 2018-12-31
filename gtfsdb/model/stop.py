@@ -196,7 +196,14 @@ class CurrentStops(Base):
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
-    id = Column(String, ForeignKey('stops.stop_id'), primary_key=True, index=True, nullable=False)
+
+    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    stop = relationship(
+        Stop.__name__,
+        primaryjoin='CurrentStops.stop_id==Stop.stop_id',
+        foreign_keys='(CurrentStops.stop_id)',
+        uselist=False, viewonly=True,
+    )
 
     @classmethod
     def post_process(cls, db, **kwargs):
