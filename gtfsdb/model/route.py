@@ -260,17 +260,24 @@ class CurrentRoutes(Base):
           7. close transaction
         """
         session = db.session()
+        try:
+            session.query(CurrentRoutes).delete()
 
-        # import pdb; pdb.set_trace()
-        for r in Route.active_routes(db.session):
-            print r.route_id
-            c = CurrentRoutes()
-            c.id = r.route_id
-            session.add(c)
+            # import pdb; pdb.set_trace()
+            for r in Route.active_routes(session):
+                print r.route_id
+                c = CurrentRoutes()
+                c.id = r.route_id
+                session.add(c)
 
-        session.commit()
-        session.flush()
-        session.close()
+            session.commit()
+            session.flush()
+        except Exception as e:
+            log.warning(e)
+            session.rollback()
+        finally:
+            session.flush()
+            session.close()
 
 
 __all__ = [RouteType.__name__, Route.__name__, RouteDirection.__name__, RouteFilter.__name__, CurrentRoutes.__name__]

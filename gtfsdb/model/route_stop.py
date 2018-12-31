@@ -381,7 +381,7 @@ class CurrentRouteStops(Base):
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_route_stops'
-    id = Column(String, ForeignKey('stops.stop_id'), primary_key=True, index=True, nullable=False)
+    id = Column(String, ForeignKey('route_stops.stop_id'), primary_key=True, index=True, nullable=False)
 
     @classmethod
     def post_process(cls, db, **kwargs):
