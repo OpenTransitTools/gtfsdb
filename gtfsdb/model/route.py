@@ -14,9 +14,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-__all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteFilter', 'CurrentRoutes']
-
-
 class RouteType(Base):
     """
     OTP TYPES (come via service calls)
@@ -240,9 +237,9 @@ class RouteFilter(Base):
 
 class CurrentRoutes(Base):
     """
-    this table is an inherited table of Routes
-    it is (optionally) used as a view into the currently active routes
-    :see: https://docs.sqlalchemy.org/en/latest/orm/inheritance.html
+    this table is (optionally) used as a view into the currently active routes
+    it is pre-calculated to list routes that are currently running service
+    (GTFS can have multiple instances of the same route, with different aspects like name and direction)
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_routes'
@@ -274,3 +271,6 @@ class CurrentRoutes(Base):
         session.commit()
         session.flush()
         session.close()
+
+
+__all__ = [RouteType.__name__, Route.__name__, RouteDirection.__name__, RouteFilter.__name__, CurrentRoutes.__name__]

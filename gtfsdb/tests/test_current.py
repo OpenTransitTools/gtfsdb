@@ -33,7 +33,7 @@ class TestCurrent(unittest.TestCase):
          e) bin/test gtfsdb.tests.test_current
         """
         SKIP_TESTS = False
-        SKIP_TESTS = True
+        #SKIP_TESTS = True
         if SKIP_TESTS:
             log.warning("NOTE: skipping this postgres test of CurrentRoutes ... manually set SKIP_TESTS=False above")
             return True
@@ -43,11 +43,16 @@ class TestCurrent(unittest.TestCase):
 
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
-        self.db = database_load(filename, url=url, schema=schema, populate_current=True)
+        self.db = database_load(filename, url=url, schema=schema, current_tables=True)
+        self.assertTrue(self.check_query_counts(Stop, CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
+        self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
+
 
     def test_sqlite_load(self):
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
-        self.db = database_load(filename, populate_current=True)
+        self.db = database_load(filename, current_tables=True)
+        #self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
+        #self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))

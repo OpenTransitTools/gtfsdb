@@ -1,23 +1,22 @@
 import datetime
-import logging
 import sys
 import time
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+
 from sqlalchemy import Column
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Date, Integer, String
+from sqlalchemy.schema import ForeignKey
 
+import logging
 log = logging.getLogger(__name__)
-
-__all__ = ['RouteStop']
 
 
 class RouteStop(Base):
     datasource = config.DATASOURCE_DERIVED
-
     __tablename__ = 'route_stops'
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
@@ -372,3 +371,24 @@ class RouteStop(Base):
         except Exception as e:
             log.info(e)
         return start, end
+
+
+class CurrentRouteStops(Base):
+    """
+    this table is (optionally) used as a view into the currently active routes
+    it is pre-calculated to list routes that are currently running service
+    (GTFS can have multiple instances of the same route, with different aspects like name and direction)
+    """
+    datasource = config.DATASOURCE_DERIVED
+    __tablename__ = 'current_route_stops'
+    id = Column(String, ForeignKey('stops.stop_id'), primary_key=True, index=True, nullable=False)
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        """
+        will update the current 'view' of this data
+        """
+
+
+
+__all__ = [RouteStop.__name__, CurrentRouteStops.__name__]

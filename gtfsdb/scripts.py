@@ -32,7 +32,7 @@ def get_args():
                         help='Database SCHEMA name')
     parser.add_argument('--tables', choices=tables, default=None, nargs='*',
                         help='Limited list of TABLES to load, if blank, load all tables')
-    parser.add_argument('--current_tables', '-nb', default=False, action='store_true',
+    parser.add_argument('--current_tables', '-ct', default=False, action='store_true',
                         help="create tables that represent 'current' service (e.g., views)")
     parser.add_argument('--ignore_postprocess', '-np', default=False, action='store_true',
                         help="don't run any postprocess model routines (will leave some tables empty ... but will load raw gtfs data)")

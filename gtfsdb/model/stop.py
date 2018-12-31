@@ -1,16 +1,17 @@
-import logging
 import datetime
 from collections import defaultdict
 
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import joinedload_all, object_session, relationship
+from sqlalchemy.schema import ForeignKey
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
 
-
+import logging
 log = logging.getLogger(__name__)
+
 
 
 class Stop(Base):
@@ -185,3 +186,23 @@ class Stop(Base):
         for s in stops:
             ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val
+
+
+class CurrentStops(Base):
+    """
+    this table is (optionally) used as a view into the currently active routes
+    it is pre-calculated to list routes that are currently running service
+    (GTFS can have multiple instances of the same route, with different aspects like name and direction)
+    """
+    datasource = config.DATASOURCE_DERIVED
+    __tablename__ = 'current_stops'
+    id = Column(String, ForeignKey('stops.stop_id'), primary_key=True, index=True, nullable=False)
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        """
+        will update the current 'view' of this data
+        """
+
+
+__all__ = [Stop.__name__, CurrentStops.__name__]

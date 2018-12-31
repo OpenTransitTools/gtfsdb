@@ -18,7 +18,6 @@ class Database(object):
             tables: limited list of tables to load into database
             url: SQLAlchemy database url
         """
-        # import pdb; pdb.set_trace()
         self.tables = kwargs.get('tables', None)
         url = kwargs.get('url')
         if not url:
@@ -28,8 +27,11 @@ class Database(object):
         self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
 
         """Order list of class names, used for creating & populating tables"""
-        from gtfsdb import SORTED_CLASS_NAMES
+        from gtfsdb import SORTED_CLASS_NAMES, CURRENT_CLASS_NAMES
         self.sorted_class_names = SORTED_CLASS_NAMES
+        if kwargs.get('current_tables'):
+            self.sorted_class_names.extend(CURRENT_CLASS_NAMES)
+        # import pdb; pdb.set_trace()
 
     @property
     def classes(self):
