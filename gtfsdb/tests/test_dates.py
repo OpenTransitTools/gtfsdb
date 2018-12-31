@@ -31,7 +31,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop
 
     def test_old_routes(self):
-        date = datetime.date(2015, 6, 6)
+        date = datetime.date(2018, 12, 25)
         rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
@@ -53,10 +53,10 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         self.assertTrue(len(routes) == 1)
 
     def test_active_stop_list(self):
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 1, 3))
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 12, 25))
         self.assertTrue(len(rs) == 0)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 1, 5))
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2018, 12, 25))
         see_old_stop = False
         for r in rs:
             self.assertTrue(r.stop_id != "NEW")
@@ -64,7 +64,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
                 see_old_stop = True
         self.assertTrue(see_old_stop)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2016, 1, 5))
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2019, 1, 5))
         see_new_stop = False
         for r in rs:
             self.assertTrue(r.stop_id != "OLD")
@@ -73,23 +73,23 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         self.assertTrue(see_new_stop)
 
     def test_stop_dates(self):
-        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2015, 1, 5))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2018, 12, 25))
         self.assertTrue(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2015, 1, 3))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2019, 1, 3))
         self.assertFalse(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2016, 6, 6))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2019, 6, 6))
         self.assertFalse(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2015, 1, 5))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2018, 12, 25))
         self.assertFalse(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2016, 6, 6))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2019, 6, 6))
         self.assertTrue(active)
 
     def test_new_routes(self):
-        date = datetime.date(2016, 6, 6)
+        date = datetime.date(2019, 1, 1)
         rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
@@ -103,12 +103,12 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         self.assertTrue(len(rs) == 0)
 
     def test_effective_dates(self):
-        date = datetime.date(2016, 6, 6)
+        date = datetime.date(2019, 1, 1)
         rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
     def test_active_list(self):
-        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=datetime.date(2015, 6, 6))
+        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=datetime.date(2018, 12, 25))
         self.assertTrue(len(rs) > 1)
         for s in rs:
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))

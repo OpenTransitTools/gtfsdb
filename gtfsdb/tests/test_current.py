@@ -47,7 +47,7 @@ class TestCurrent(unittest.TestCase):
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         cr_list = self.db.session.query(CurrentRoutes).all()
         for cr in cr_list:
             self.assertTrue(cr.route is not None)
