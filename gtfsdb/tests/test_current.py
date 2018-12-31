@@ -19,7 +19,6 @@ class TestCurrent(unittest.TestCase):
         pass
 
     def check_query_counts(self, clz1, clz2):
-        # import pdb; pdb.set_trace()
         n1 = self.db.session.query(clz1).all()
         n2 = self.db.session.query(clz2).all()
         return len(n1) != len(n2)
@@ -47,6 +46,11 @@ class TestCurrent(unittest.TestCase):
         self.assertTrue(self.check_query_counts(Stop, CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
+
+        import pdb; pdb.set_trace()
+        cr_list = self.db.session.query(CurrentRoutes).all()
+        for cr in cr_list:
+            self.assertTrue(cr.route is not None)
 
 
     def test_sqlite_load(self):
