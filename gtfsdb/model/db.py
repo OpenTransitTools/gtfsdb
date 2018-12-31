@@ -113,7 +113,7 @@ class Database(object):
         try:
             if self._schema:
                 from sqlalchemy.schema import CreateSchema
-                self.engine.execute(CreateSchema(self._schema))
+                self.engine.execute(CreateSchema(self._schema), checkfirst=True)
         except Exception as e:
             log.info("NOTE: couldn't create schema {0} (schema might already exist)\n{1}".format(self._schema, e))
 
