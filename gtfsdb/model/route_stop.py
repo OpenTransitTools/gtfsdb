@@ -19,6 +19,7 @@ class RouteStop(Base):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'route_stops'
 
+    id = Column(String(255), primary_key=True, index=True, nullable=False)
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
@@ -294,6 +295,7 @@ class RouteStop(Base):
                         rs.route_id = r.route_id
                         rs.direction_id = d
                         rs.stop_id = stop_id
+                        rs.id = rs.get_id()
                         rs.order = k + 1
                         s, e = cls._get_stop_effective_dates(stop_effective_dates, stop_id)
                         rs.start_date = s
@@ -381,7 +383,14 @@ class CurrentRouteStops(Base):
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_route_stops'
-    id = Column(String, ForeignKey('route_stops.stop_id'), primary_key=True, index=True, nullable=False)
+
+    id = Column(String(255), primary_key=True, index=True, nullable=False)
+    rs = relationship(
+        'RouteStop',
+        primaryjoin='CurrentRouteStops.id==RouteStop.id',
+        foreign_keys='(RouteStop.id)',
+        uselist=False, viewonly=True, lazy='joined'
+    )
 
     @classmethod
     def post_process(cls, db, **kwargs):
