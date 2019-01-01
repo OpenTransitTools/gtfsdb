@@ -57,6 +57,6 @@ class TestCurrent(unittest.TestCase):
         path = resource_filename('gtfsdb', 'tests')
         filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
         self.db = database_load(filename, current_tables=True)
-        #self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
+        self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
-        #self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
+        self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
