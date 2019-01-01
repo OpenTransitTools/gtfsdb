@@ -400,9 +400,11 @@ class CurrentRouteStops(Base):
         try:
             session.query(CurrentRouteStops).delete()
 
-            for rs in RouteStop.query(session).all():
-                #import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
+            rs_list = session.query(RouteStop).all()
+            for rs in rs_list:
                 if rs.is_active():
+                    # import pdb; pdb.set_trace()
                     c = CurrentRouteStops()
                     c.id = rs.id
                     session.add(c)

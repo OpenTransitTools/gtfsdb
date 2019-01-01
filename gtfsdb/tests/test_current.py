@@ -32,7 +32,7 @@ class TestCurrent(unittest.TestCase):
          e) bin/test gtfsdb.tests.test_current
         """
         SKIP_TESTS = False
-        #SKIP_TESTS = True
+        SKIP_TESTS = True
         if SKIP_TESTS:
             log.warning("NOTE: skipping this postgres test of CurrentRoutes ... manually set SKIP_TESTS=False above")
             return True
