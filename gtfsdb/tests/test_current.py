@@ -21,7 +21,7 @@ class TestCurrent(unittest.TestCase):
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
         n2 = self.db.session.query(clz2).all()
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         return len(n1) != len(n2)
 
     def test_postgres_load(self):
@@ -33,7 +33,7 @@ class TestCurrent(unittest.TestCase):
          e) bin/test gtfsdb.tests.test_current
         """
         SKIP_TESTS = False
-        #SKIP_TESTS = True
+        SKIP_TESTS = True
         if SKIP_TESTS:
             log.warning("NOTE: skipping this postgres test of CurrentRoutes ... manually set SKIP_TESTS=False above")
             return True
