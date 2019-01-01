@@ -5,7 +5,7 @@ import time
 from gtfsdb import config
 from gtfsdb.model.base import Base
 
-from sqlalchemy import Column
+from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Date, Integer, String
@@ -19,10 +19,10 @@ class RouteStop(Base):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'route_stops'
 
-    id = Column(String(255), primary_key=True, index=True, nullable=False)
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True)
+    route_id = Column(String(255), index=True, nullable=False)
+    direction_id = Column(Integer, index=True, nullable=False)
+    stop_id = Column(String(255), index=True, nullable=False)
     order = Column(Integer, index=True, nullable=False)
     start_date = Column(Date, index=True, nullable=False)
     end_date = Column(Date, index=True, nullable=False)
@@ -295,7 +295,6 @@ class RouteStop(Base):
                         rs.route_id = r.route_id
                         rs.direction_id = d
                         rs.stop_id = stop_id
-                        rs.id = rs.get_id()
                         rs.order = k + 1
                         s, e = cls._get_stop_effective_dates(stop_effective_dates, stop_id)
                         rs.start_date = s
@@ -384,7 +383,7 @@ class CurrentRouteStops(Base):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_route_stops'
 
-    id = Column(String(255), primary_key=True, index=True, nullable=False)
+    id = Column(Integer, primary_key=True, index=True, nullable=False)
     rs = relationship(
         'RouteStop',
         primaryjoin='CurrentRouteStops.id==RouteStop.id',
@@ -397,7 +396,25 @@ class CurrentRouteStops(Base):
         """
         will update the current 'view' of this data
         """
+        session = db.session()
+        try:
+            session.query(CurrentRouteStops).delete()
 
+            for rs in RouteStop.query(session).all():
+                #import pdb; pdb.set_trace()
+                if rs.is_active():
+                    c = CurrentRouteStops()
+                    c.id = rs.id
+                    session.add(c)
+
+            session.commit()
+            session.flush()
+        except Exception as e:
+            log.warning(e)
+            session.rollback()
+        finally:
+            session.flush()
+            session.close()
 
 
 __all__ = [RouteStop.__name__, CurrentRouteStops.__name__]
