@@ -210,6 +210,24 @@ class CurrentStops(Base):
         """
         will update the current 'view' of this data
         """
+        session = db.session()
+        try:
+            session.query(CurrentStops).delete()
+
+            # import pdb; pdb.set_trace()
+            for s in Stop.active_stops(session):
+                c = CurrentStops()
+                c.stop_id = s.stop_id
+                session.add(c)
+
+            session.commit()
+            session.flush()
+        except Exception as e:
+            log.warning(e)
+            session.rollback()
+        finally:
+            session.flush()
+            session.close()
 
 
 __all__ = [Stop.__name__, CurrentStops.__name__]
