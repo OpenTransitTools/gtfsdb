@@ -8,7 +8,6 @@ from sqlalchemy import Column
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Integer, String
-from sqlalchemy.schema import ForeignKey
 
 import logging
 log = logging.getLogger(__name__)
@@ -174,7 +173,7 @@ class Route(Base):
         """
         ret_val = []
 
-        # step 1: grab all stops
+        # step 1: grab all routes
         routes = session.query(Route)\
             .filter(~Route.route_id.in_(session.query(RouteFilter.route_id)))\
             .order_by(Route.route_sort_order)\
@@ -185,15 +184,9 @@ class Route(Base):
             date = datetime.date.today()
 
         # step 3: filter routes by active date
-        #         NOTE: r.start_date and r.end_date are properties, so have to do in code vs. query
         for r in routes:
-            if r:
-                # step 3a: filter based on date (if invalid looking date objects, just pass the route on)
-                if r.start_date and r.end_date:
-                    if r.start_date <= date <= r.end_date:
-                        ret_val.append(r)
-                else:
-                    ret_val.append(r)
+            if r and r.is_active(date):
+                ret_val.append(r)
         return ret_val
 
     @classmethod

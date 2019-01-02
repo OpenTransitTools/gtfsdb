@@ -9,7 +9,6 @@ from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Date, Integer, String
-from sqlalchemy.schema import ForeignKey
 
 import logging
 log = logging.getLogger(__name__)

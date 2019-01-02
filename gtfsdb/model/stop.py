@@ -4,7 +4,6 @@ from collections import defaultdict
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import joinedload_all, object_session, relationship
-from sqlalchemy.schema import ForeignKey
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -198,12 +197,16 @@ class CurrentStops(Base):
     __tablename__ = 'current_stops'
 
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+
     stop = relationship(
         Stop.__name__,
         primaryjoin='CurrentStops.stop_id==Stop.stop_id',
         foreign_keys='(CurrentStops.stop_id)',
         uselist=False, viewonly=True,
     )
+
+    def __init__(self, stop_id):
+        self.stop_id = stop_id
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -216,8 +219,7 @@ class CurrentStops(Base):
 
             # import pdb; pdb.set_trace()
             for s in Stop.active_stops(session):
-                c = CurrentStops()
-                c.stop_id = s.stop_id
+                c = CurrentStops(s.stop_id)
                 session.add(c)
 
             session.commit()
