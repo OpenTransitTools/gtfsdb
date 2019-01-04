@@ -77,7 +77,7 @@ class Route(Base):
         build a route name out of long and short names...
         """
         if not self.is_cached_data_valid('_route_name'):
-            log.warn("query route name")
+            log.warning("query route name")
             ret_val = self.route_long_name
             if self.route_long_name and self.route_short_name:
                 ret_val = fmt.format(self=self)

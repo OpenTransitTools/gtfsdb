@@ -39,9 +39,8 @@ class TestCurrent(unittest.TestCase):
         schema = "current_test"
 
         # import pdb; pdb.set_trace()
-        path = get_test_directory_path()
-        filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
-        self.db = database_load(filename, url=url, schema=schema, current_tables=True)
+        gtfs_file = get_test_file_uri('multi-date-feed.zip')
+        self.db = database_load(gtfs_file, url=url, schema=schema, current_tables=True)
         self.assertTrue(self.check_query_counts(Stop, CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
@@ -51,8 +50,8 @@ class TestCurrent(unittest.TestCase):
             self.assertTrue(cr.route is not None)
 
     def test_sqlite_load(self):
-        filename = get_test_file_uri('multi-date-feed.zip')
-        self.db = database_load(filename, current_tables=True)
+        gtfs_file = get_test_file_uri('multi-date-feed.zip')
+        self.db = database_load(gtfs_file, current_tables=True)
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))

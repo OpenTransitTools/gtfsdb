@@ -5,10 +5,10 @@ import shutil
 import sys
 import tempfile
 
-from pkg_resources import resource_filename
-
+from . import get_test_file_uri
 from gtfsdb import *  # noqa
 from gtfsdb.api import database_load
+
 
 log = logging.getLogger(__name__)
 
@@ -19,8 +19,7 @@ except ImportError:
 
 
 class BasicModelTests(object):
-    path = resource_filename('gtfsdb', 'tests')
-    gtfs_file = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
+    gtfs_file = get_test_file_uri('multi-date-feed.zip')
     db_file = tempfile.mkstemp()[1]
     url = 'sqlite:///{0}'.format(db_file)
     db = database_load(gtfs_file, url=url)
