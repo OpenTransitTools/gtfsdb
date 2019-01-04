@@ -5,7 +5,7 @@ except ImportError:
 
 from gtfsdb import *
 from gtfsdb.api import database_load
-from . import get_test_file_uri
+from . import get_test_file_uri, get_temp_sqlite_db_url
 
 import logging
 log = logging.getLogger(__name__)
@@ -51,7 +51,8 @@ class TestCurrent(unittest.TestCase):
 
     def test_sqlite_load(self):
         gtfs_file = get_test_file_uri('multi-date-feed.zip')
-        self.db = database_load(gtfs_file, current_tables=True)
+        url = get_temp_sqlite_db_url()
+        self.db = database_load(gtfs_file, url=url, current_tables=True)
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))

@@ -1,15 +1,12 @@
 import datetime
-import logging
-import os
 import shutil
 import sys
-import tempfile
 
-from . import get_test_file_uri
+from . import get_test_file_uri, get_temp_sqlite_db_url
 from gtfsdb import *  # noqa
 from gtfsdb.api import database_load
 
-
+import logging
 log = logging.getLogger(__name__)
 
 try:
@@ -20,10 +17,8 @@ except ImportError:
 
 class BasicModelTests(object):
     gtfs_file = get_test_file_uri('multi-date-feed.zip')
-    db_file = tempfile.mkstemp()[1]
-    url = 'sqlite:///{0}'.format(db_file)
+    url = get_temp_sqlite_db_url()
     db = database_load(gtfs_file, url=url)
-    log.debug("DATABASE TMP FILE: {0}".format(db_file))
 
 
 class TestRouteStop(unittest.TestCase, BasicModelTests):

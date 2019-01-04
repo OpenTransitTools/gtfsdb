@@ -205,6 +205,10 @@ class CurrentStops(Base):
         uselist=False, viewonly=True,
     )
 
+    from sqlalchemy.types import JSON
+    #routes = Column(JSON)
+
+
     def __init__(self, stop):
         self.stop_id = stop.stop_id
 

@@ -245,10 +245,10 @@ class CurrentRoutes(Base):
         uselist=False, viewonly=True,
     )
 
-    route_sort_order = Column(Integer, index=True)
+    route_sort_order = Column(Integer)
 
     def __init__(self, route):
-        self.stop_id = route.stop_id
+        self.stop_id = route.route_id
         self.route_sort_order = route.route_sort_order
 
     @classmethod
