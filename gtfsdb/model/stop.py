@@ -205,8 +205,8 @@ class CurrentStops(Base):
         uselist=False, viewonly=True,
     )
 
-    def __init__(self, stop_id):
-        self.stop_id = stop_id
+    def __init__(self, stop):
+        self.stop_id = stop.stop_id
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -219,7 +219,7 @@ class CurrentStops(Base):
 
             # import pdb; pdb.set_trace()
             for s in Stop.active_stops(session):
-                c = CurrentStops(s.stop_id)
+                c = CurrentStops(s)
                 session.add(c)
 
             session.commit()

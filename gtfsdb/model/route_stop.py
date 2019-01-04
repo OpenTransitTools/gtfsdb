@@ -390,6 +390,9 @@ class CurrentRouteStops(Base):
         uselist=False, viewonly=True, lazy='joined'
     )
 
+    def __init__(self, route_stop):
+        self.id = route_stop.id
+
     @classmethod
     def post_process(cls, db, **kwargs):
         """
@@ -403,9 +406,7 @@ class CurrentRouteStops(Base):
             rs_list = session.query(RouteStop).all()
             for rs in rs_list:
                 if rs.is_active():
-                    # import pdb; pdb.set_trace()
-                    c = CurrentRouteStops()
-                    c.id = rs.id
+                    c = CurrentRouteStops(rs)
                     session.add(c)
 
             session.commit()

@@ -245,6 +245,12 @@ class CurrentRoutes(Base):
         uselist=False, viewonly=True,
     )
 
+    route_sort_order = Column(Integer, index=True)
+
+    def __init__(self, route):
+        self.stop_id = route.stop_id
+        self.route_sort_order = route.route_sort_order
+
     @classmethod
     def post_process(cls, db, **kwargs):
         """
@@ -265,8 +271,7 @@ class CurrentRoutes(Base):
 
             # import pdb; pdb.set_trace()
             for r in Route.active_routes(session):
-                c = CurrentRoutes()
-                c.route_id = r.route_id
+                c = CurrentRoutes(r)
                 session.add(c)
 
             session.commit()
