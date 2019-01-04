@@ -1,4 +1,3 @@
-import os
 try:
     import unittest2 as unittest
 except ImportError:
@@ -6,7 +5,7 @@ except ImportError:
 
 from gtfsdb import *
 from gtfsdb.api import database_load
-from . import get_test_directory_path
+from . import get_test_file_uri
 
 import logging
 log = logging.getLogger(__name__)
@@ -52,8 +51,7 @@ class TestCurrent(unittest.TestCase):
             self.assertTrue(cr.route is not None)
 
     def test_sqlite_load(self):
-        path = get_test_directory_path()
-        filename = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
+        filename = get_test_file_uri('multi-date-feed.zip')
         self.db = database_load(filename, current_tables=True)
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
