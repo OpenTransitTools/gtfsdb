@@ -247,9 +247,9 @@ class CurrentRoutes(Base):
 
     route_sort_order = Column(Integer)
 
-    def __init__(self, route):
-        self.stop_id = route.route_id
-        self.route_sort_order = route.route_sort_order
+    def __init__(self, route, def_order):
+        self.route_id = route.route_id
+        self.route_sort_order = route.route_sort_order if route.route_sort_order else def_order
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -270,8 +270,9 @@ class CurrentRoutes(Base):
             session.query(CurrentRoutes).delete()
 
             # import pdb; pdb.set_trace()
-            for r in Route.active_routes(session):
-                c = CurrentRoutes(r)
+            rte_list = Route.active_routes(session)
+            for i, r in enumerate(rte_list):
+                c = CurrentRoutes(r, i+1)
                 session.add(c)
 
             session.commit()

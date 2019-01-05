@@ -390,8 +390,13 @@ class CurrentRouteStops(Base):
         uselist=False, viewonly=True, lazy='joined'
     )
 
+    route_id = Column(String(255), index=True, nullable=False)
+    stop_id = Column(String(255), index=True, nullable=False)
+
     def __init__(self, route_stop):
         self.id = route_stop.id
+        self.route_id = route_stop.route_id
+        self.stop_id = route_stop.stop_id
 
     @classmethod
     def post_process(cls, db, **kwargs):
