@@ -391,7 +391,20 @@ class CurrentRouteStops(Base):
     )
 
     route_id = Column(String(255), index=True, nullable=False)
+    route = relationship(
+        'Route',
+        primaryjoin='Route.route_id==CurrentRouteStops.route_id',
+        foreign_keys='(Route.route_id)',
+        uselist=False, viewonly=True, lazy='joined'
+    )
+
     stop_id = Column(String(255), index=True, nullable=False)
+    stop = relationship(
+        'Stop',
+        primaryjoin='Stop.stop_id==CurrentRouteStops.stop_id',
+        foreign_keys='(Stop.stop_id)',
+        uselist=False, viewonly=True, lazy='joined'
+    )
 
     def __init__(self, route_stop):
         self.id = route_stop.id

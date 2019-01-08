@@ -196,6 +196,10 @@ class CurrentStops(Base):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
+    route_type = Column(Integer)
+    route_mode = Column(String(255))
+    route_mode_second = Column(String(255))
+
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
 
     stop = relationship(
@@ -204,10 +208,6 @@ class CurrentStops(Base):
         foreign_keys='(CurrentStops.stop_id)',
         uselist=False, viewonly=True,
     )
-
-    from sqlalchemy.types import JSON
-    #routes = Column(JSON)
-
 
     def __init__(self, stop):
         self.stop_id = stop.stop_id

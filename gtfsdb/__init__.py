@@ -44,6 +44,6 @@ SORTED_CLASS_NAMES = [
 
 CURRENT_CLASS_NAMES = [
     CurrentRoutes.__name__,
-    CurrentStops.__name__,
     CurrentRouteStops.__name__,
+    CurrentStops.__name__,
 ]

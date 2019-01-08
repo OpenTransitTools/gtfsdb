@@ -252,6 +252,21 @@ class CurrentRoutes(Base):
         self.route_sort_order = route.route_sort_order if route.route_sort_order else def_order
 
     @classmethod
+    def query_routes(cls, session, **kwargs):
+        """
+        query for list of this data
+        """
+        routes = []
+        try:
+            # import pdb; pdb.set_trace()
+            clist = session.query(CurrentRoutes).order_by(CurrentRoutes.route_sort_order).all()
+            for r in clist:
+                routes.append(r.route)
+        except Exception as e:
+            log.warning(e)
+        return routes
+
+    @classmethod
     def post_process(cls, db, **kwargs):
         """
         will update the current 'view' of this data
