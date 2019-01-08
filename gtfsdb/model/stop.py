@@ -231,6 +231,23 @@ class CurrentStops(Base):
                     self.route_type_other = type.route_type
 
     @classmethod
+    def query_stops(cls, session, **kwargs):
+        """
+        query for list of this data
+        """
+        ret_val = []
+        try:
+            # import pdb; pdb.set_trace()
+            clist = session.query(CurrentStops)
+            limit = kwargs.get('limit')
+            if limit:
+                clist = clist.limit(limit)
+            ret_val = clist.all()
+        except Exception as e:
+            log.warning(e)
+        return ret_val
+
+    @classmethod
     def post_process(cls, db, **kwargs):
         """
         will update the current 'view' of this data

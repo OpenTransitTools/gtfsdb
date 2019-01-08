@@ -11,10 +11,22 @@ import logging
 log = logging.getLogger(__name__)
 
 
+DB=None
+def load_sqlite():
+    global DB
+    if DB is None:
+        gtfs_file = get_test_file_uri('multi-date-feed.zip')
+        url = get_temp_sqlite_db_url()
+        # url = get_temp_sqlite_db_url('curr')
+        DB = database_load(gtfs_file, url=url, current_tables=True)
+    return DB
+
+
 class TestCurrent(unittest.TestCase):
 
     def setUp(self):
-        pass
+        #import pdb; pdb.set_trace()
+        self.db = load_sqlite()
 
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
@@ -50,19 +62,15 @@ class TestCurrent(unittest.TestCase):
             self.assertTrue(cr.route is not None)
 
     def test_sqlite_load(self):
-        gtfs_file = get_test_file_uri('multi-date-feed.zip')
-        url = get_temp_sqlite_db_url()
-        # url = get_temp_sqlite_db_url('curr')
-        self.db = database_load(gtfs_file, url=url, current_tables=True)
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
 
     def test_routes(self):
-        # import pdb; pdb.set_trace()
-        gtfs_file = get_test_file_uri('multi-date-feed.zip')
-        #url = get_temp_sqlite_db_url()
-        url = get_temp_sqlite_db_url('curr')
-        self.db = database_load(gtfs_file, url=url, current_tables=True)
         routes = CurrentRoutes.query_routes(self.db.session())
         self.assertTrue(len(routes) > 0)
+
+    def test_stops(self):
+        # import pdb; pdb.set_trace()
+        stops = CurrentStops.query_stops(self.db.session(), limit=1)
+        self.assertTrue(len(stops) == 1)
