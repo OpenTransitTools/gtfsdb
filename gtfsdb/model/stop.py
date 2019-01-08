@@ -197,8 +197,9 @@ class CurrentStops(Base):
     __tablename__ = 'current_stops'
 
     route_type = Column(Integer)
+    route_type_other = Column(Integer)
     route_mode = Column(String(255))
-    route_mode_second = Column(String(255))
+
 
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
 
@@ -209,8 +210,25 @@ class CurrentStops(Base):
         uselist=False, viewonly=True,
     )
 
-    def __init__(self, stop):
+    def __init__(self, stop, session):
         self.stop_id = stop.stop_id
+
+        # import pdb; pdb.set_trace()
+        """ convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop """
+        from .route_stop import CurrentRouteStops
+        rs_list = CurrentRouteStops.query_by_stop(session, stop.stop_id)
+        for rs in rs_list:
+            type = rs.route.type
+            if self.route_mode is None:
+                self.route_type = type.route_type
+                self.route_mode = type.otp_type
+            elif type.is_different_mode(self.route_type):
+                if type.is_higher_priority(self.route_type):
+                    self.route_type_other = self.route_type
+                    self.route_type = type.route_type
+                    self.route_mode = type.otp_type
+                else:
+                    self.route_type_other = type.route_type
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -223,7 +241,7 @@ class CurrentStops(Base):
 
             # import pdb; pdb.set_trace()
             for s in Stop.active_stops(session):
-                c = CurrentStops(s)
+                c = CurrentStops(s, session)
                 session.add(c)
 
             session.commit()

@@ -406,10 +406,35 @@ class CurrentRouteStops(Base):
         uselist=False, viewonly=True, lazy='joined'
     )
 
+    order = Column(Integer, index=True, nullable=False)
+
     def __init__(self, route_stop):
         self.id = route_stop.id
         self.route_id = route_stop.route_id
         self.stop_id = route_stop.stop_id
+        self.order = route_stop.order
+
+    @classmethod
+    def query_by_stop(cls, session, stop_id, agency_id=None, count=None, sort=False):
+        """
+        get all route stop records by looking for a given stop_id.
+        further filtering can be had by providing an active date and agency id
+        """
+        # step 1: query stop id
+        q = session.query(CurrentRouteStops).filter(CurrentRouteStops.stop_id == stop_id)
+        if agency_id is not None:
+            q = q.filter(RouteStop.agency_id == agency_id)
+
+        # step 2: limit the number of objects returned by query
+        if count:
+            q = q.limit(count)
+
+        # step 4: sort the results based on order column
+        if sort:
+            q = q.order_by(CurrentRouteStops.order)
+
+        ret_val = q.all()
+        return ret_val
 
     @classmethod
     def post_process(cls, db, **kwargs):

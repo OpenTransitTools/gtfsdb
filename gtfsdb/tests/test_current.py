@@ -59,8 +59,9 @@ class TestCurrent(unittest.TestCase):
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
 
     def test_routes(self):
+        # import pdb; pdb.set_trace()
         gtfs_file = get_test_file_uri('multi-date-feed.zip')
-        # url = get_temp_sqlite_db_url()
+        #url = get_temp_sqlite_db_url()
         url = get_temp_sqlite_db_url('curr')
         self.db = database_load(gtfs_file, url=url, current_tables=True)
         routes = CurrentRoutes.query_routes(self.db.session())

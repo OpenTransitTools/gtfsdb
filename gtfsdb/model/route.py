@@ -28,6 +28,19 @@ class RouteType(Base):
     route_type_name = Column(String(255))
     route_type_desc = Column(String(1023))
 
+    def is_bus(self):
+        return self.route_type == 3
+
+    def is_different_mode(self, cmp_route_type):
+         return self.route_type != cmp_route_type
+
+    def is_higher_priority(self, cmp_route_type):
+        """ abitrary compare of route types, where lower numbrer means higher priority in terms mode ranking (sans bus) """
+        ret_val = False
+        if cmp_route_type != 3 and cmp_route_type < self.route_type:
+            ret_val = True
+        return ret_val
+
 
 class Route(Base):
     datasource = config.DATASOURCE_GTFS
