@@ -12,8 +12,82 @@ import logging
 log = logging.getLogger(__name__)
 
 
+class StopBase(object):
+    """ provides a generic set of stop query routines """
 
-class Stop(Base):
+    @classmethod
+    def get_bbox_params(cls, **kwargs):
+        top_lat = top_lon = bot_lat = bot_lon = None
+        try:
+            top_lat = float(kwargs.get('top_lat'))
+            top_lon = float(kwargs.get('top_lat'))
+            bot_lat = float(kwargs.get('top_lat'))
+            bot_lon = float(kwargs.get('top_lat'))
+        except Exception as e:
+            log.warning(e)
+        return top_lat, top_lon, bot_lat, bot_lon
+
+    @classmethod
+    def get_point_radius(cls, **kwargs):
+        lat = lon = radius = None
+        try:
+            lat = float(kwargs.get('lat'))
+            lon = float(kwargs.get('lon'))
+            radius = float(kwargs.get('radius', 10.0))
+        except Exception as e:
+            log.warning(e)
+        return lat, lon, radius
+
+    @classmethod
+    def has_bbox_params(cls, **kwargs):
+        top_lat, top_lon, bot_lat, bot_lon = cls.get_bbox_params(**kwargs)
+        return top_lat and top_lon and bot_lat and bot_lon
+
+    @classmethod
+    def has_point_radius(cls, **kwargs):
+        lat, lon, radius = cls.get_point_radius(**kwargs)
+        return lat and lon and radius
+
+    @classmethod
+    def query_stops_via_bbox(cls, session, **kwargs):
+        ret_val = []
+        return ret_val
+
+    @classmethod
+    def query_stops_via_point_radius(cls, session, **kwargs):
+        ret_val = []
+        return ret_val
+
+    @classmethod
+    def generic_query_stops(cls, session, **kwargs):
+        """
+        query for list of this data
+        """
+        ret_val = []
+        try:
+            # import pdb; pdb.set_trace()
+            clist = session.query(cls)
+            limit = kwargs.get('limit')
+            if limit:
+                clist = clist.limit(limit)
+            ret_val = clist.all()
+        except Exception as e:
+            log.warning(e)
+        return ret_val
+
+    @classmethod
+    def query_stops(cls, session, **kwargs):
+        ret_val = []
+        if cls.has_bbox_params(**kwargs):
+            ret_val = cls.query_stops_via_bbox(session, **kwargs)
+        elif cls.has_point_radius(**kwargs):
+            ret_val = cls.query_stops_via_point_radius(session, **kwargs)
+        else:
+            ret_val = cls.generic_query_stops(session, **kwargs)
+        return ret_val
+
+
+class Stop(Base, StopBase):
     datasource = config.DATASOURCE_GTFS
     filename = 'stops.txt'
 
@@ -187,7 +261,7 @@ class Stop(Base):
         return ret_val
 
 
-class CurrentStops(Base):
+class CurrentStops(Base, StopBase):
     """
     this table is (optionally) used as a view into the currently active routes
     it is pre-calculated to list routes that are currently running service
@@ -229,23 +303,6 @@ class CurrentStops(Base):
                     self.route_mode = type.otp_type
                 else:
                     self.route_type_other = type.route_type
-
-    @classmethod
-    def query_stops(cls, session, **kwargs):
-        """
-        query for list of this data
-        """
-        ret_val = []
-        try:
-            # import pdb; pdb.set_trace()
-            clist = session.query(CurrentStops)
-            limit = kwargs.get('limit')
-            if limit:
-                clist = clist.limit(limit)
-            ret_val = clist.all()
-        except Exception as e:
-            log.warning(e)
-        return ret_val
 
     @classmethod
     def post_process(cls, db, **kwargs):
