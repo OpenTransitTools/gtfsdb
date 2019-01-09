@@ -76,15 +76,19 @@ class Database(object):
     def create(self):
         """ drop/create GTFS database """
         for cls in self.sorted_classes:
-            log.debug("create table: {0}".format(cls.__table__))
-            try:
-                cls.__table__.drop(self.engine, checkfirst=True)
-            except:
-                log.info("NOTE: couldn't *drop* table {0} (might not be a big deal)".format(cls.__table__))
-            try:
-                cls.__table__.create(self.engine)
-            except Exception as e:
-                log.info("NOTE: couldn't *create* table {0} (could be a big deal)\n{1}".format(cls.__table__, e))
+            self.create_table(cls)
+
+    def create_table(self, orm_class, check_first=True, drop_first=True):
+        log.debug("create table: {0}".format(orm_class.__table__))
+        try:
+            if drop_first:
+                orm_class.__table__.drop(self.engine, checkfirst=check_first)
+        except:
+            log.info("NOTE: couldn't *drop* table {0} (might not be a big deal)".format(orm_class.__table__))
+        try:
+            orm_class.__table__.create(self.engine, checkfirst=check_first)
+        except Exception as e:
+            log.info("NOTE: couldn't *create* table {0} (could be a big deal)\n{1}".format(orm_class.__table__, e))
 
     @property
     def dialect_name(self):

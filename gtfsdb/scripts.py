@@ -66,12 +66,13 @@ def route_stop_load():
 
 def current_tables_load():
     """
-    written as a test / debug method for RS table loader
+    current table loader
     """
     from gtfsdb import Database, CurrentRoutes, CurrentStops, CurrentRouteStops
     kwargs = get_args('gtfsdb-current-load')[1]
     db = Database(**kwargs)
-    for cls in [CurrentRoutes, CurrentStops, CurrentRouteStops]:
+    for cls in [CurrentRoutes, CurrentRouteStops, CurrentStops]:
+        db.create_table(cls)
         cls.post_process(db, **kwargs)
 
 
@@ -81,7 +82,7 @@ def db_connect_tester():
     bin/connect-tester --database_url sqlite:///gtfs.db _no_gtfs_zip_needed_
     """
     from gtfsdb import Database, Stop, Route, StopTime
-    args, kwargs = get_args()
+    args, kwargs = get_args('connect-tester')
     db = Database(**kwargs)
     for s in db.session.query(Stop).limit(2):
         print(s.stop_name)
