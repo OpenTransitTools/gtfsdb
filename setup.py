@@ -35,8 +35,9 @@ setup(
     entry_points={
         'console_scripts': [
             'gtfsdb-load = gtfsdb.scripts:gtfsdb_load',
+            'gtfsdb-current-load = gtfsdb.scripts:current_tables_load',
             'rs-test = gtfsdb.scripts:route_stop_load',
-            'connect-tester = gtfsdb.scripts:db_connect_tester'
+            'connect-tester = gtfsdb.scripts:db_connect_tester',
         ]
     },
     classifiers=(

@@ -12,14 +12,15 @@ def gtfsdb_load():
     database_load(args.file, **kwargs)
 
 
-def get_args():
+def get_args(prog_name='gtfsdb-load',):
     """
     database load command-line arg parser and help util...
     """
     tables = sorted([t.name for t in Base.metadata.sorted_tables])
     parser = argparse.ArgumentParser(
-        prog='gtfsdb-load',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        prog=prog_name,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument('file', help='URL or local path to GTFS zip FILE')
     parser.add_argument('--batch_size', '-b', type=int, default=config.DEFAULT_BATCH_SIZE,
                         help='BATCH SIZE to use for memory management')
@@ -68,7 +69,7 @@ def current_tables_load():
     written as a test / debug method for RS table loader
     """
     from gtfsdb import Database, CurrentRoutes, CurrentStops, CurrentRouteStops
-    kwargs = get_args()[1]
+    kwargs = get_args('gtfsdb-current-load')[1]
     db = Database(**kwargs)
     for cls in [CurrentRoutes, CurrentStops, CurrentRouteStops]:
         cls.post_process(db, **kwargs)
