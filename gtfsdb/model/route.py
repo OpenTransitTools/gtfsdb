@@ -265,7 +265,7 @@ class CurrentRoutes(Base):
         self.route_sort_order = route.route_sort_order if route.route_sort_order else def_order
 
     @classmethod
-    def query_routes(cls, session, **kwargs):
+    def query_routes(cls, session):
         """
         query for list of this data
         """

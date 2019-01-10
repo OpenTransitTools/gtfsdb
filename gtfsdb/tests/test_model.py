@@ -1,21 +1,21 @@
-import datetime
-
-from . import get_test_file_uri, get_temp_sqlite_db_url
 from gtfsdb import *  # noqa
+from gtfsdb import util
 from gtfsdb.api import database_load
+from . import get_test_file_uri
 
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
+import datetime
 import logging
 log = logging.getLogger(__name__)
 
 
 class BasicModelTests(object):
     gtfs_file = get_test_file_uri('large-sample-feed.zip')
-    url = get_temp_sqlite_db_url()
+    url = util.make_temp_sqlite_db_uri()
     db = database_load(gtfs_file, url=url)
 
     def get_first(self):

@@ -1,9 +1,10 @@
-import datetime
-import shutil
 import sys
+import shutil
+import datetime
 
-from . import get_test_file_uri, get_temp_sqlite_db_url
-from gtfsdb import *  # noqa
+from . import get_test_file_uri
+from gtfsdb import *
+from gtfsdb import util
 from gtfsdb.api import database_load
 
 import logging
@@ -17,7 +18,7 @@ except ImportError:
 
 class BasicModelTests(object):
     gtfs_file = get_test_file_uri('multi-date-feed.zip')
-    url = get_temp_sqlite_db_url()
+    url = util.make_temp_sqlite_db_uri()
     db = database_load(gtfs_file, url=url)
 
 
@@ -113,9 +114,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 def main(argv):
     shutil.copyfile(TestRouteStop.db_file, "gtfs.db")
     t = TestRouteStop()
-    # import pdb; pdb.set_trace()
     t.test_active_list()
-    # t.test_old_stops()
 
 if __name__ == "__main__":
     main(sys.argv)

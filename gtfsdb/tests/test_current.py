@@ -4,8 +4,9 @@ except ImportError:
     import unittest
 
 from gtfsdb import *
+from gtfsdb import util
 from gtfsdb.api import database_load
-from . import get_test_file_uri, get_temp_sqlite_db_url
+from . import get_test_file_uri
 
 import logging
 log = logging.getLogger(__name__)
@@ -16,8 +17,8 @@ def load_sqlite():
     global DB
     if DB is None:
         gtfs_file = get_test_file_uri('multi-date-feed.zip')
-        url = get_temp_sqlite_db_url()
-        # url = get_temp_sqlite_db_url('curr')
+        url = util.make_temp_sqlite_db_uri()
+        # url = util.make_temp_sqlite_db_uri('curr')
         DB = database_load(gtfs_file, url=url, current_tables=True)
     return DB
 
