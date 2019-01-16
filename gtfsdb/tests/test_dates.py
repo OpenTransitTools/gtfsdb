@@ -1,15 +1,13 @@
-import datetime
-import logging
-import os
-import shutil
 import sys
-import tempfile
+import shutil
+import datetime
 
-from pkg_resources import resource_filename
-
-from gtfsdb import *  # noqa
+from . import get_test_file_uri
+from gtfsdb import *
+from gtfsdb import util
 from gtfsdb.api import database_load
 
+import logging
 log = logging.getLogger(__name__)
 
 try:
@@ -19,19 +17,16 @@ except ImportError:
 
 
 class BasicModelTests(object):
-    path = resource_filename('gtfsdb', 'tests')
-    gtfs_file = 'file:///{0}'.format(os.path.join(path, 'multi-date-feed.zip'))
-    db_file = tempfile.mkstemp()[1]
-    url = 'sqlite:///{0}'.format(db_file)
+    gtfs_file = get_test_file_uri('multi-date-feed.zip')
+    url = util.make_temp_sqlite_db_uri()
     db = database_load(gtfs_file, url=url)
-    log.debug("DATABASE TMP FILE: {0}".format(db_file))
 
 
 class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop
 
     def test_old_routes(self):
-        date = datetime.date(2015, 6, 6)
+        date = datetime.date(2018, 12, 25)
         rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
@@ -53,10 +48,10 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         self.assertTrue(len(routes) == 1)
 
     def test_active_stop_list(self):
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 1, 3))
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 12, 25))
         self.assertTrue(len(rs) == 0)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 1, 5))
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2018, 12, 25))
         see_old_stop = False
         for r in rs:
             self.assertTrue(r.stop_id != "NEW")
@@ -64,7 +59,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
                 see_old_stop = True
         self.assertTrue(see_old_stop)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2016, 1, 5))
+        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2019, 1, 5))
         see_new_stop = False
         for r in rs:
             self.assertTrue(r.stop_id != "OLD")
@@ -73,23 +68,23 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         self.assertTrue(see_new_stop)
 
     def test_stop_dates(self):
-        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2015, 1, 5))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2018, 12, 25))
         self.assertTrue(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2015, 1, 3))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2019, 1, 3))
         self.assertFalse(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2016, 6, 6))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="OLD", date=datetime.date(2019, 6, 6))
         self.assertFalse(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2015, 1, 5))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2018, 12, 25))
         self.assertFalse(active)
 
-        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2016, 6, 6))
+        active = RouteStop.is_stop_active(self.db.session, stop_id="NEW", date=datetime.date(2019, 6, 6))
         self.assertTrue(active)
 
     def test_new_routes(self):
-        date = datetime.date(2016, 6, 6)
+        date = datetime.date(2019, 1, 1)
         rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
@@ -103,12 +98,12 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         self.assertTrue(len(rs) == 0)
 
     def test_effective_dates(self):
-        date = datetime.date(2016, 6, 6)
+        date = datetime.date(2019, 1, 1)
         rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
     def test_active_list(self):
-        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=datetime.date(2015, 6, 6))
+        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=datetime.date(2018, 12, 25))
         self.assertTrue(len(rs) > 1)
         for s in rs:
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))
@@ -119,9 +114,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 def main(argv):
     shutil.copyfile(TestRouteStop.db_file, "gtfs.db")
     t = TestRouteStop()
-    # import pdb; pdb.set_trace()
     t.test_active_list()
-    # t.test_old_stops()
 
 if __name__ == "__main__":
     main(sys.argv)

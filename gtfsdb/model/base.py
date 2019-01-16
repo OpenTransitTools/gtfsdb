@@ -141,7 +141,8 @@ class _Base(object):
 
         # step 1: check that we have elements of a file path (a file name and a directory) for the data we'll load
         if cls.filename is None:
-            log.info("{0} lacks a 'filename' attribute ... not loading a null file (exit load).".format(cls.__name__))
+            if cls.datasource is not config.DATASOURCE_DERIVED:
+                log.info("{0} didn't specify a 'filename', so won't bohter trying to load() a null file (early exit from load()).".format(cls.__name__))
             return  # note early exit
         if cls.datasource is not config.DATASOURCE_GTFS and cls.datasource is not config.DATASOURCE_LOOKUP:
             log.info("{0}.datasource != DATASOURCE_GTFS or DATASOURCE_LOOKUP (exit load).".format(cls.__name__))

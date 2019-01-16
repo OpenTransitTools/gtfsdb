@@ -37,12 +37,15 @@ class Calendar(Base):
     service_name = Column(String(255))  # Trillium extension, a human-readable name for the calendar.
 
     def weekday_list(self):
-        weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3,
-                            friday=4, saturday=5, sunday=6)
+        weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3, friday=4, saturday=5, sunday=6)
         item_func = weekday_dict.iteritems if hasattr(weekday_dict, 'iteritems') else weekday_dict.items
         return [v for k, v in item_func() if getattr(self, k)]
 
     def to_date_list(self):
+        """
+        TODO: we need better date limiting management here ... this routine could spin a long time w/forever dates
+        TODO: for example, if the begin date is 1900 or end date is 9999, then that'll cause a major slowdown
+        """
         date_list = []
         weekdays = self.weekday_list()
         diff = self.end_date - self.start_date

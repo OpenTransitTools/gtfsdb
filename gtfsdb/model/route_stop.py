@@ -1,28 +1,27 @@
 import datetime
-import logging
 import sys
 import time
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
-from sqlalchemy import Column
+
+from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Date, Integer, String
 
+import logging
 log = logging.getLogger(__name__)
-
-__all__ = ['RouteStop']
 
 
 class RouteStop(Base):
     datasource = config.DATASOURCE_DERIVED
-
     __tablename__ = 'route_stops'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    id = Column(Integer, Sequence(None, optional=True), primary_key=True)
+    route_id = Column(String(255), index=True, nullable=False)
+    direction_id = Column(Integer, index=True, nullable=False)
+    stop_id = Column(String(255), index=True, nullable=False)
     order = Column(Integer, index=True, nullable=False)
     start_date = Column(Date, index=True, nullable=False)
     end_date = Column(Date, index=True, nullable=False)
@@ -372,3 +371,95 @@ class RouteStop(Base):
         except Exception as e:
             log.info(e)
         return start, end
+
+
+class CurrentRouteStops(Base):
+    """
+    this table is (optionally) used as a view into the currently active routes
+    it is pre-calculated to list routes that are currently running service
+    (GTFS can have multiple instances of the same route, with different aspects like name and direction)
+    """
+    datasource = config.DATASOURCE_DERIVED
+    __tablename__ = 'current_route_stops'
+
+    id = Column(Integer, primary_key=True, index=True, nullable=False)
+    rs = relationship(
+        'RouteStop',
+        primaryjoin='CurrentRouteStops.id==RouteStop.id',
+        foreign_keys='(RouteStop.id)',
+        uselist=False, viewonly=True, lazy='joined'
+    )
+
+    route_id = Column(String(255), index=True, nullable=False)
+    route = relationship(
+        'Route',
+        primaryjoin='Route.route_id==CurrentRouteStops.route_id',
+        foreign_keys='(Route.route_id)',
+        uselist=False, viewonly=True, lazy='joined'
+    )
+
+    stop_id = Column(String(255), index=True, nullable=False)
+    stop = relationship(
+        'Stop',
+        primaryjoin='Stop.stop_id==CurrentRouteStops.stop_id',
+        foreign_keys='(Stop.stop_id)',
+        uselist=False, viewonly=True, lazy='joined'
+    )
+
+    order = Column(Integer, index=True, nullable=False)
+
+    def __init__(self, route_stop):
+        self.id = route_stop.id
+        self.route_id = route_stop.route_id
+        self.stop_id = route_stop.stop_id
+        self.order = route_stop.order
+
+    @classmethod
+    def query_by_stop(cls, session, stop_id, agency_id=None, count=None, sort=False):
+        """
+        get all route stop records by looking for a given stop_id.
+        further filtering can be had by providing an active date and agency id
+        """
+        # step 1: query stop id
+        q = session.query(CurrentRouteStops).filter(CurrentRouteStops.stop_id == stop_id)
+        if agency_id is not None:
+            q = q.filter(RouteStop.agency_id == agency_id)
+
+        # step 2: limit the number of objects returned by query
+        if count:
+            q = q.limit(count)
+
+        # step 4: sort the results based on order column
+        if sort:
+            q = q.order_by(CurrentRouteStops.order)
+
+        ret_val = q.all()
+        return ret_val
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        """
+        will update the current 'view' of this data
+        """
+        session = db.session()
+        try:
+            session.query(CurrentRouteStops).delete()
+
+            # import pdb; pdb.set_trace()
+            rs_list = session.query(RouteStop).all()
+            for rs in rs_list:
+                if rs.is_active():
+                    c = CurrentRouteStops(rs)
+                    session.add(c)
+
+            session.commit()
+            session.flush()
+        except Exception as e:
+            log.warning(e)
+            session.rollback()
+        finally:
+            session.flush()
+            session.close()
+
+
+__all__ = [RouteStop.__name__, CurrentRouteStops.__name__]

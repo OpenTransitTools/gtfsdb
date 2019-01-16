@@ -19,12 +19,13 @@ class GTFS(object):
 
     def __init__(self, filename):
         self.file = filename
-        self.local_file = filename
         try:
             self.local_file = urlretrieve(filename)[0]
         except Exception:
-            self.local_file = urlretrieve("file:///" + filename)[0]
-
+            try:
+                self.local_file = urlretrieve("file:///" + filename)[0]
+            except Exception:
+                self.local_file = filename
 
     def load(self, db, **kwargs):
         """

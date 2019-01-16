@@ -1,4 +1,5 @@
 from gtfsdb import config
+from gtfsdb import util
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from contextlib import contextmanager
@@ -17,7 +18,6 @@ class Database(object):
             tables: limited list of tables to load into database
             url: SQLAlchemy database url
         """
-        #import pdb; pdb.set_trace()
         self.tables = kwargs.get('tables', None)
         url = kwargs.get('url')
         if not url:
@@ -25,7 +25,13 @@ class Database(object):
         self.url = url
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
         self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
-        self.sorted_class_names = config.SORTED_CLASS_NAMES
+
+        """Order list of class names, used for creating & populating tables"""
+        from gtfsdb import SORTED_CLASS_NAMES, CURRENT_CLASS_NAMES
+        self.sorted_class_names = SORTED_CLASS_NAMES
+        if kwargs.get('current_tables'):
+            self.sorted_class_names.extend(CURRENT_CLASS_NAMES)
+        # import pdb; pdb.set_trace()
 
     @property
     def classes(self):
@@ -48,7 +54,7 @@ class Database(object):
     @classmethod
     def get_base_subclasses(cls):
         from gtfsdb.model.base import Base
-        return Base.__subclasses__()
+        return util.get_all_subclasses(Base)
 
     @property
     def metadata(self):
@@ -70,15 +76,19 @@ class Database(object):
     def create(self):
         """ drop/create GTFS database """
         for cls in self.sorted_classes:
-            log.debug("create table: {0}".format(cls.__table__))
-            try:
-                cls.__table__.drop(self.engine, checkfirst=True)
-            except:
-                log.info("NOTE: couldn't *drop* table {0} (might not be a big deal)".format(cls.__table__))
-            try:
-                cls.__table__.create(self.engine)
-            except Exception as e:
-                log.info("NOTE: couldn't *create* table {0} (could be a big deal)\n{1}".format(cls.__table__, e))
+            self.create_table(cls)
+
+    def create_table(self, orm_class, check_first=True, drop_first=True):
+        log.debug("create table: {0}".format(orm_class.__table__))
+        try:
+            if drop_first:
+                orm_class.__table__.drop(self.engine, checkfirst=check_first)
+        except:
+            log.info("NOTE: couldn't *drop* table {0} (might not be a big deal)".format(orm_class.__table__))
+        try:
+            orm_class.__table__.create(self.engine, checkfirst=check_first)
+        except Exception as e:
+            log.info("NOTE: couldn't *create* table {0} (could be a big deal)\n{1}".format(orm_class.__table__, e))
 
     @property
     def dialect_name(self):
@@ -107,7 +117,7 @@ class Database(object):
         try:
             if self._schema:
                 from sqlalchemy.schema import CreateSchema
-                self.engine.execute(CreateSchema(self._schema))
+                self.engine.execute(CreateSchema(self._schema), checkfirst=True)
         except Exception as e:
             log.info("NOTE: couldn't create schema {0} (schema might already exist)\n{1}".format(self._schema, e))
 

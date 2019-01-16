@@ -12,14 +12,15 @@ def gtfsdb_load():
     database_load(args.file, **kwargs)
 
 
-def get_args():
+def get_args(prog_name='gtfsdb-load',):
     """
     database load command-line arg parser and help util...
     """
     tables = sorted([t.name for t in Base.metadata.sorted_tables])
     parser = argparse.ArgumentParser(
-        prog='gtfsdb-load',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        prog=prog_name,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument('file', help='URL or local path to GTFS zip FILE')
     parser.add_argument('--batch_size', '-b', type=int, default=config.DEFAULT_BATCH_SIZE,
                         help='BATCH SIZE to use for memory management')
@@ -32,6 +33,8 @@ def get_args():
                         help='Database SCHEMA name')
     parser.add_argument('--tables', choices=tables, default=None, nargs='*',
                         help='Limited list of TABLES to load, if blank, load all tables')
+    parser.add_argument('--current_tables', '-ct', default=False, action='store_true',
+                        help="create tables that represent 'current' service (e.g., views)")
     parser.add_argument('--ignore_postprocess', '-np', default=False, action='store_true',
                         help="don't run any postprocess model routines (will leave some tables empty ... but will load raw gtfs data)")
     parser.add_argument('--ignore_blocks', '-nb', default=False, action='store_true',
@@ -46,6 +49,7 @@ def get_args():
         url=args.database_url,
         do_postprocess=not args.ignore_postprocess,
         ignore_blocks=args.ignore_blocks,
+        current_tables = args.current_tables
     )
     return args, kwargs
 
@@ -60,13 +64,25 @@ def route_stop_load():
     RouteStop.load(db, **kwargs)
 
 
+def current_tables_load():
+    """
+    current table loader
+    """
+    from gtfsdb import Database, CurrentRoutes, CurrentStops, CurrentRouteStops
+    kwargs = get_args('gtfsdb-current-load')[1]
+    db = Database(**kwargs)
+    for cls in [CurrentRoutes, CurrentRouteStops, CurrentStops]:
+        db.create_table(cls)
+        cls.post_process(db, **kwargs)
+
+
 def db_connect_tester():
     """
     simple routine to connect to an existing database and list a few stops
     bin/connect-tester --database_url sqlite:///gtfs.db _no_gtfs_zip_needed_
     """
     from gtfsdb import Database, Stop, Route, StopTime
-    args, kwargs = get_args()
+    args, kwargs = get_args('connect-tester')
     db = Database(**kwargs)
     for s in db.session.query(Stop).limit(2):
         print(s.stop_name)

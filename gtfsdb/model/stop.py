@@ -1,4 +1,3 @@
-import logging
 import datetime
 from collections import defaultdict
 
@@ -9,11 +8,86 @@ from sqlalchemy.orm import joinedload_all, object_session, relationship
 from gtfsdb import config
 from gtfsdb.model.base import Base
 
-
+import logging
 log = logging.getLogger(__name__)
 
 
-class Stop(Base):
+class StopBase(object):
+    """ provides a generic set of stop query routines """
+
+    @classmethod
+    def get_bbox_params(cls, **kwargs):
+        top_lat = top_lon = bot_lat = bot_lon = None
+        try:
+            top_lat = float(kwargs.get('top_lat'))
+            top_lon = float(kwargs.get('top_lat'))
+            bot_lat = float(kwargs.get('top_lat'))
+            bot_lon = float(kwargs.get('top_lat'))
+        except Exception as e:
+            log.warning(e)
+        return top_lat, top_lon, bot_lat, bot_lon
+
+    @classmethod
+    def get_point_radius(cls, **kwargs):
+        lat = lon = radius = None
+        try:
+            lat = float(kwargs.get('lat'))
+            lon = float(kwargs.get('lon'))
+            radius = float(kwargs.get('radius', 10.0))
+        except Exception as e:
+            log.warning(e)
+        return lat, lon, radius
+
+    @classmethod
+    def has_bbox_params(cls, **kwargs):
+        top_lat, top_lon, bot_lat, bot_lon = cls.get_bbox_params(**kwargs)
+        return top_lat and top_lon and bot_lat and bot_lon
+
+    @classmethod
+    def has_point_radius(cls, **kwargs):
+        lat, lon, radius = cls.get_point_radius(**kwargs)
+        return lat and lon and radius
+
+    @classmethod
+    def query_stops_via_bbox(cls, session, **kwargs):
+        ret_val = []
+        return ret_val
+
+    @classmethod
+    def query_stops_via_point_radius(cls, session, **kwargs):
+        ret_val = []
+        return ret_val
+
+    @classmethod
+    def generic_query_stops(cls, session, **kwargs):
+        """
+        query for list of this data
+        """
+        ret_val = []
+        try:
+            # import pdb; pdb.set_trace()
+            clist = session.query(cls)
+            limit = kwargs.get('limit')
+            if limit:
+                clist = clist.limit(limit)
+            ret_val = clist.all()
+        except Exception as e:
+            log.warning(e)
+        return ret_val
+
+    @classmethod
+    def query_stops(cls, session, **kwargs):
+        ret_val = []
+        if cls.has_bbox_params(**kwargs):
+            ret_val = cls.query_stops_via_bbox(session, **kwargs)
+        elif cls.has_point_radius(**kwargs):
+            ret_val = cls.query_stops_via_point_radius(session, **kwargs)
+        else:
+            ret_val = cls.generic_query_stops(session, **kwargs)
+        return ret_val
+
+
+class Stop(Base, StopBase):
     datasource = config.DATASOURCE_GTFS
     filename = 'stops.txt'
 
@@ -185,3 +259,73 @@ class Stop(Base):
         for s in stops:
             ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val
+
+
+class CurrentStops(Base, StopBase):
+    """
+    this table is (optionally) used as a view into the currently active routes
+    it is pre-calculated to list routes that are currently running service
+    (GTFS can have multiple instances of the same route, with different aspects like name and direction)
+    """
+    datasource = config.DATASOURCE_DERIVED
+    __tablename__ = 'current_stops'
+
+    route_type = Column(Integer)
+    route_type_other = Column(Integer)
+    route_mode = Column(String(255))
+
+
+    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+
+    stop = relationship(
+        Stop.__name__,
+        primaryjoin='CurrentStops.stop_id==Stop.stop_id',
+        foreign_keys='(CurrentStops.stop_id)',
+        uselist=False, viewonly=True,
+    )
+
+    def __init__(self, stop, session):
+        self.stop_id = stop.stop_id
+
+        # import pdb; pdb.set_trace()
+        """ convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop """
+        from .route_stop import CurrentRouteStops
+        rs_list = CurrentRouteStops.query_by_stop(session, stop.stop_id)
+        for rs in rs_list:
+            type = rs.route.type
+            if self.route_mode is None:
+                self.route_type = type.route_type
+                self.route_mode = type.otp_type
+            elif type.is_different_mode(self.route_type):
+                if type.is_higher_priority(self.route_type):
+                    self.route_type_other = self.route_type
+                    self.route_type = type.route_type
+                    self.route_mode = type.otp_type
+                else:
+                    self.route_type_other = type.route_type
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        """
+        will update the current 'view' of this data
+        """
+        session = db.session()
+        try:
+            session.query(CurrentStops).delete()
+
+            # import pdb; pdb.set_trace()
+            for s in Stop.active_stops(session):
+                c = CurrentStops(s, session)
+                session.add(c)
+
+            session.commit()
+            session.flush()
+        except Exception as e:
+            log.warning(e)
+            session.rollback()
+        finally:
+            session.flush()
+            session.close()
+
+
+__all__ = [Stop.__name__, CurrentStops.__name__]

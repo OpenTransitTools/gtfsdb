@@ -1,17 +1,16 @@
 import datetime
-import logging
 import time
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+
 from sqlalchemy import Column
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Integer, String
 
+import logging
 log = logging.getLogger(__name__)
-
-__all__ = ['RouteType', 'Route', 'RouteDirection', 'RouteFilter']
 
 
 class RouteType(Base):
@@ -28,6 +27,19 @@ class RouteType(Base):
     otp_type = Column(String(255))
     route_type_name = Column(String(255))
     route_type_desc = Column(String(1023))
+
+    def is_bus(self):
+        return self.route_type == 3
+
+    def is_different_mode(self, cmp_route_type):
+         return self.route_type != cmp_route_type
+
+    def is_higher_priority(self, cmp_route_type):
+        """ abitrary compare of route types, where lower numbrer means higher priority in terms mode ranking (sans bus) """
+        ret_val = False
+        if cmp_route_type != 3 and cmp_route_type < self.route_type:
+            ret_val = True
+        return ret_val
 
 
 class Route(Base):
@@ -78,7 +90,7 @@ class Route(Base):
         build a route name out of long and short names...
         """
         if not self.is_cached_data_valid('_route_name'):
-            log.warn("query route name")
+            log.warning("query route name")
             ret_val = self.route_long_name
             if self.route_long_name and self.route_short_name:
                 ret_val = fmt.format(self=self)
@@ -174,7 +186,7 @@ class Route(Base):
         """
         ret_val = []
 
-        # step 1: grab all stops
+        # step 1: grab all routes
         routes = session.query(Route)\
             .filter(~Route.route_id.in_(session.query(RouteFilter.route_id)))\
             .order_by(Route.route_sort_order)\
@@ -185,15 +197,9 @@ class Route(Base):
             date = datetime.date.today()
 
         # step 3: filter routes by active date
-        #         NOTE: r.start_date and r.end_date are properties, so have to do in code vs. query
         for r in routes:
-            if r:
-                # step 3a: filter based on date (if invalid looking date objects, just pass the route on)
-                if r.start_date and r.end_date:
-                    if r.start_date <= date <= r.end_date:
-                        ret_val.append(r)
-                else:
-                    ret_val.append(r)
+            if r and r.is_active(date):
+                ret_val.append(r)
         return ret_val
 
     @classmethod
@@ -233,3 +239,78 @@ class RouteFilter(Base):
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
     description = Column(String(1023))
+
+
+class CurrentRoutes(Base):
+    """
+    this table is (optionally) used as a view into the currently active routes
+    it is pre-calculated to list routes that are currently running service
+    (GTFS can have multiple instances of the same route, with different aspects like name and direction)
+    """
+    datasource = config.DATASOURCE_DERIVED
+    __tablename__ = 'current_routes'
+
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route = relationship(
+        Route.__name__,
+        primaryjoin='CurrentRoutes.route_id==Route.route_id',
+        foreign_keys='(CurrentRoutes.route_id)',
+        uselist=False, viewonly=True,
+    )
+
+    route_sort_order = Column(Integer)
+
+    def __init__(self, route, def_order):
+        self.route_id = route.route_id
+        self.route_sort_order = route.route_sort_order if route.route_sort_order else def_order
+
+    @classmethod
+    def query_routes(cls, session):
+        """
+        query for list of this data
+        """
+        routes = []
+        try:
+            # import pdb; pdb.set_trace()
+            clist = session.query(CurrentRoutes).order_by(CurrentRoutes.route_sort_order).all()
+            for r in clist:
+                routes.append(r.route)
+        except Exception as e:
+            log.warning(e)
+        return routes
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        """
+        will update the current 'view' of this data
+
+        steps:
+          1. open transaction
+          2. drop all data in this 'current' table
+          3. select current routes as a list
+          4. add those id's to this table
+          5. other processing (cached results)
+          6. commit
+          7. close transaction
+        """
+        session = db.session()
+        try:
+            session.query(CurrentRoutes).delete()
+
+            # import pdb; pdb.set_trace()
+            rte_list = Route.active_routes(session)
+            for i, r in enumerate(rte_list):
+                c = CurrentRoutes(r, i+1)
+                session.add(c)
+
+            session.commit()
+            session.flush()
+        except Exception as e:
+            log.warning(e)
+            session.rollback()
+        finally:
+            session.flush()
+            session.close()
+
+
+__all__ = [RouteType.__name__, Route.__name__, RouteDirection.__name__, RouteFilter.__name__, CurrentRoutes.__name__]

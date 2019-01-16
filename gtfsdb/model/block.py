@@ -142,8 +142,7 @@ class Block(Base):
                     i = i + 1
                     continue
 
-                if trips[i].block_id != b or \
-                   trips[i].service_id != s:
+                if trips[i].block_id != b or trips[i].service_id != s:
                     break
                 t.append(trips[i])
                 i = i + 1
