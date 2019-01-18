@@ -28,6 +28,62 @@ def make_temp_sqlite_db_uri(name=None):
     return url
 
 
+def make_route_short_name(route, def_name=None):
+    """
+    fix up the short name...
+    """
+    ret_val = def_name
+    try:
+        ret_val = safe_get_any(route, ['route_short_name', 'short_name', 'route_long_name', 'name'])
+
+        # strip off 'Line' from last word, ala MAX Blue Line == MAX Blue
+        if ret_val and ret_val.startswith('MAX') and ret_val.endswith('Line'):
+            ret_val = " ".join(ret_val.split()[:-1])
+        # special fix for Portland Streetcar
+        if 'Portland Streetcar' in ret_val and route.route_long_name and len(route.route_long_name) > 0:
+            ret_val = route.route_long_name.replace('Portland', '').strip()
+        # fix WES
+        if ret_val and ret_val.startswith('WES '):
+            ret_val = "WES"
+        # fix Portland Aerial Tram
+        if ret_val and ret_val == 'Portland Aerial Tram':
+            ret_val = "Tram"
+    except Exception as e:
+        log.warning(e)
+
+    return ret_val
+
+
+def safe_get(obj, key, def_val=None):
+    """
+    try to return the key'd value from either a class or a dict
+    (or return the raw value if we were handed a native type)
+    """
+    ret_val = def_val
+    try:
+        ret_val = getattr(obj, key)
+    except:
+        try:
+            ret_val = obj[key]
+        except:
+            if isinstance(obj, (int, long, str)):
+                ret_val = obj
+    return ret_val
+
+
+def safe_get_any(obj, keys, def_val=None):
+    """
+    :return object element value matching the first key to have an associated value
+    """
+    ret_val = def_val
+    for k in keys:
+        v = safe_get(obj, k)
+        if v and len(v) > 0:
+            ret_val = v
+            break
+    return ret_val
+
+
 class UTF8Recoder(object):
     """Iterator that reads an encoded stream and encodes the input to UTF-8"""
     def __init__(self, f, encoding):

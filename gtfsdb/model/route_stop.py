@@ -2,7 +2,7 @@ import datetime
 import sys
 import time
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 
 from sqlalchemy import Column, Sequence
@@ -12,6 +12,29 @@ from sqlalchemy.types import Date, Integer, String
 
 import logging
 log = logging.getLogger(__name__)
+
+
+class RouteStopBase(object):
+    @classmethod
+    def get_route_short_names(cls, session, stop):
+        """
+        add an array of short names to this DAO
+        """
+        # step 1: create a short_names list
+        short_names = []
+
+        # step 2: use either route-dao list or find the active stops
+        routes = stop.routes
+        if routes is None or len(routes) == 0:
+            routes = cls.active_unique_routes_at_stop(session, stop_id=stop.stop_id)
+            routes.sort(key=lambda x: x.route_sort_order, reverse=False)
+
+            # step 3: build the short names list
+            for r in routes:
+                sn = {'route_id': r.route_id, 'route_type': r.type.type_id, 'route_short_name': util.make_short_name(r)}
+                short_names.append(sn)
+
+        return short_names
 
 
 class RouteStop(Base):
@@ -337,7 +360,7 @@ class RouteStop(Base):
           AND st.stop_id   = '1'
         GROUP BY st.stop_id
 
-        @:return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
+        :return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
         """
         # import pdb; pdb.set_trace()
         ret_val = {}
@@ -434,6 +457,33 @@ class CurrentRouteStops(Base):
             q = q.order_by(CurrentRouteStops.order)
 
         ret_val = q.all()
+        return ret_val
+
+    @classmethod
+    def unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
+        """
+        get a unique set of route records by looking for a given stop_id.
+        further filtering can be had by providing an active date and agency id, and route name
+        """
+        ret_val = []
+
+        """
+        route_ids = []
+        route_names = []
+
+        route_stops = RouteStop.query_by_stop(session, stop_id, agency_id, date, sort=True)
+        for rs in route_stops:
+            # step 1: filter(s) check
+            if rs.route_id in route_ids:
+                continue
+            if route_name_filter and rs.route.route_name in route_names:
+                continue
+            route_ids.append(rs.route_id)
+            route_names.append(rs.route.route_name)
+
+            # step 2: append route object to results
+            ret_val.append(rs.route)
+        """
         return ret_val
 
     @classmethod
