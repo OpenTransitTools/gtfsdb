@@ -68,7 +68,7 @@ class TestCurrent(unittest.TestCase):
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
 
     def test_routes(self):
-        routes = CurrentRoutes.query_routes(self.db.session())
+        routes = CurrentRoutes.active_routes(self.db.session())
         self.assertTrue(len(routes) > 0)
 
     def test_stops(self):
