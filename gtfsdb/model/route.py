@@ -5,7 +5,7 @@ from gtfsdb import config
 from gtfsdb.model.base import Base
 
 from sqlalchemy import Column
-from sqlalchemy.orm import deferred, relationship
+from sqlalchemy.orm import deferred, relationship, joinedload
 from sqlalchemy.sql import func
 from sqlalchemy.types import Integer, String
 
@@ -64,25 +64,31 @@ class Route(Base):
         'Agency',
         primaryjoin='Route.agency_id==Agency.agency_id',
         foreign_keys='(Route.agency_id)',
-        uselist=False, viewonly=True)
+        uselist=False, viewonly=True,
+        lazy="joined", innerjoin=True,
+    )
 
     type = relationship(
         'RouteType',
         primaryjoin='Route.route_type==RouteType.route_type',
         foreign_keys='(Route.route_type)',
-        uselist=False, viewonly=True)
+        uselist=False, viewonly=True,
+        lazy="joined", innerjoin=True,
+    )
 
     trips = relationship(
         'Trip',
         primaryjoin='Route.route_id==Trip.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True)
+        uselist=True, viewonly=True
+    )
 
     directions = relationship(
         'RouteDirection',
         primaryjoin='Route.route_id==RouteDirection.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True)
+        uselist=True, viewonly=True
+    )
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
@@ -256,6 +262,7 @@ class CurrentRoutes(Base):
         primaryjoin='CurrentRoutes.route_id==Route.route_id',
         foreign_keys='(CurrentRoutes.route_id)',
         uselist=False, viewonly=True,
+        lazy="joined", innerjoin=True,
     )
 
     route_sort_order = Column(Integer)

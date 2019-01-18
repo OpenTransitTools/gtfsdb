@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import joinedload_all, object_session, relationship
+from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
@@ -14,6 +14,24 @@ log = logging.getLogger(__name__)
 
 class StopBase(object):
     """ provides a generic set of stop query routines """
+
+    @classmethod
+    def query_orm_for_stop(cls, session, stop_id, detailed=False, agency=None):
+        """
+        simple utility for quering a stop from gtfsdb
+        """
+        ret_val = None
+        try:
+            log.info("query Stop for {}".format(stop_id))
+            q = session.query(cls)
+            q = q.filter(cls.stop_id == stop_id)
+            # TODO q.filter(Stop.agency_id == agency_id)
+            if detailed:
+                q = q.options(joinedload("stop_features"))
+            ret_val = q.one()
+        except Exception as e:
+            log.info(e)
+        return ret_val
 
     @classmethod
     def get_bbox_params(cls, **kwargs):
@@ -274,7 +292,6 @@ class CurrentStops(Base, StopBase):
     route_type_other = Column(Integer)
     route_mode = Column(String(255))
 
-
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
 
     stop = relationship(
@@ -282,6 +299,7 @@ class CurrentStops(Base, StopBase):
         primaryjoin='CurrentStops.stop_id==Stop.stop_id',
         foreign_keys='(CurrentStops.stop_id)',
         uselist=False, viewonly=True,
+        lazy="joined", innerjoin=True,
     )
 
     def __init__(self, stop, session):
