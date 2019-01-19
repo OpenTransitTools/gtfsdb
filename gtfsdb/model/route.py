@@ -1,7 +1,7 @@
 import datetime
 import time
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 from .route_base import RouteBase
 
@@ -36,25 +36,31 @@ class Route(Base, RouteBase):
         'Agency',
         primaryjoin='Route.agency_id==Agency.agency_id',
         foreign_keys='(Route.agency_id)',
-        uselist=False, viewonly=True)
+        uselist=False, viewonly=True,
+        lazy="joined"
+    )
 
     type = relationship(
         'RouteType',
         primaryjoin='Route.route_type==RouteType.route_type',
         foreign_keys='(Route.route_type)',
-        uselist=False, viewonly=True)
+        uselist=False, viewonly=True,
+        lazy = "joined"
+    )
 
     trips = relationship(
         'Trip',
         primaryjoin='Route.route_id==Trip.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True)
+        uselist=True, viewonly=True
+    )
 
     directions = relationship(
         'RouteDirection',
         primaryjoin='Route.route_id==RouteDirection.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True)
+        uselist=True, viewonly=True
+    )
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
@@ -84,19 +90,13 @@ class Route(Base, RouteBase):
             pass
         return ret_val
 
-    def is_active(self, date=None):
-        """
-        :return False whenever we see that the route start and end date are outside the
-                input date (where the input date defaults to 'today')
-        """
-        _is_active = True
-        if self.start_date and self.end_date:
-            _is_active = False
-            if date is None:
-                date = datetime.date.today()
-            if self.start_date <= date <= self.end_date:
-                _is_active = True
-        return _is_active
+    @property
+    def start_date(self):
+        return self._get_start_end_dates[0]
+
+    @property
+    def end_date(self):
+        return self._get_start_end_dates[1]
 
     @property
     def _get_start_end_dates(self):
@@ -109,14 +109,6 @@ class Route(Base, RouteBase):
             self.update_cached_data('_start_date')
 
         return self._start_date, self._end_date
-
-    @property
-    def start_date(self):
-        return self._get_start_end_dates[0]
-
-    @property
-    def end_date(self):
-        return self._get_start_end_dates[1]
 
     @classmethod
     def load_geoms(cls, db):
@@ -150,6 +142,24 @@ class Route(Base, RouteBase):
         if not hasattr(cls, 'geom'):
             from geoalchemy2 import Geometry
             cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+
+    def is_active(self, date=None):
+        """
+        :return False whenever we see that the route start and end date are outside the
+                input date (where the input date defaults to 'today')
+        """
+        _is_active = True
+        if self.start_date or self.end_date:
+            _is_active = False
+            date = util.check_date(date)
+            if self.start_date and self.end_date:
+                if self.start_date <= date <= self.end_date:
+                    _is_active = True
+            elif self.start_date and self.start_date <= date:
+                _is_active = True
+            elif self.end_date and date <= self.end_date:
+                _is_active = True
+        return _is_active
 
     @classmethod
     def active_routes(cls, session, date=None):
