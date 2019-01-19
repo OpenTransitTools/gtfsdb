@@ -1,45 +1,17 @@
 import datetime
 import time
 
-from gtfsdb import config, util
+from gtfsdb import config
 from gtfsdb.model.base import Base
+from .route_base import RouteBase
 
 from sqlalchemy import Column
-from sqlalchemy.orm import deferred, relationship, joinedload
+from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Integer, String
 
 import logging
 log = logging.getLogger(__name__)
-
-
-class RouteType(Base):
-    """
-    OTP TYPES (come via service calls)
-    0:TRAM, 1:SUBWAY, 2:RAIL, 3:BUS, 4:FERRY, 5:CABLE_CAR, 6:GONDOLA, 7:FUNICULAR
-    :see https://github.com/opentripplanner/OpenTripPlanner/blob/master/src/main/java/org/opentripplanner/routing/core/TraverseMode.java :
-    """
-    datasource = config.DATASOURCE_LOOKUP
-    filename = 'route_type.txt'
-    __tablename__ = 'route_type'
-
-    route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
-    otp_type = Column(String(255))
-    route_type_name = Column(String(255))
-    route_type_desc = Column(String(1023))
-
-    def is_bus(self):
-        return self.route_type == 3
-
-    def is_different_mode(self, cmp_route_type):
-         return self.route_type != cmp_route_type
-
-    def is_higher_priority(self, cmp_route_type):
-        """ abitrary compare of route types, where lower numbrer means higher priority in terms mode ranking (sans bus) """
-        ret_val = False
-        if cmp_route_type != 3 and cmp_route_type < self.route_type:
-            ret_val = True
-        return ret_val
 
 
 class Route(Base):
@@ -64,31 +36,25 @@ class Route(Base):
         'Agency',
         primaryjoin='Route.agency_id==Agency.agency_id',
         foreign_keys='(Route.agency_id)',
-        uselist=False, viewonly=True,
-        lazy="joined", innerjoin=True,
-    )
+        uselist=False, viewonly=True)
 
     type = relationship(
         'RouteType',
         primaryjoin='Route.route_type==RouteType.route_type',
         foreign_keys='(Route.route_type)',
-        uselist=False, viewonly=True,
-        lazy="joined", innerjoin=True,
-    )
+        uselist=False, viewonly=True)
 
     trips = relationship(
         'Trip',
         primaryjoin='Route.route_id==Trip.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True
-    )
+        uselist=True, viewonly=True)
 
     directions = relationship(
         'RouteDirection',
         primaryjoin='Route.route_id==RouteDirection.route_id',
         foreign_keys='(Route.route_id)',
-        uselist=True, viewonly=True
-    )
+        uselist=True, viewonly=True)
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
@@ -118,6 +84,40 @@ class Route(Base):
             pass
         return ret_val
 
+    def is_active(self, date=None):
+        """
+        :return False whenever we see that the route start and end date are outside the
+                input date (where the input date defaults to 'today')
+        """
+        _is_active = True
+        if self.start_date and self.end_date:
+            _is_active = False
+            if date is None:
+                date = datetime.date.today()
+            if self.start_date <= date <= self.end_date:
+                _is_active = True
+        return _is_active
+
+    @property
+    def _get_start_end_dates(self):
+        """find the min & max date using Trip & UniversalCalendar"""
+        if not self.is_cached_data_valid('_start_date'):
+            from gtfsdb.model.calendar import UniversalCalendar
+            q = self.session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+            q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
+            self._start_date, self._end_date = q.one()
+            self.update_cached_data('_start_date')
+
+        return self._start_date, self._end_date
+
+    @property
+    def start_date(self):
+        return self._get_start_end_dates[0]
+
+    @property
+    def end_date(self):
+        return self._get_start_end_dates[1]
+
     @classmethod
     def load_geoms(cls, db):
         """ load derived geometries, currently only written for PostgreSQL """
@@ -141,65 +141,15 @@ class Route(Base):
             log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
     @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            from geoalchemy2 import Geometry
-            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
-
-    @classmethod
     def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
         cls.load_geoms(db)
 
-    @property
-    def _get_start_end_dates(self):
-        """find the min & max date using Trip & UniversalCalendar"""
-        if not self.is_cached_data_valid('_start_date'):
-            from gtfsdb.model.calendar import UniversalCalendar
-            q = self.session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-            q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
-            self._start_date, self._end_date = q.one()
-            self.update_cached_data('_start_date')
-
-        return self._start_date, self._end_date
-
-    @property
-    def start_date(self):
-        return self._get_start_end_dates[0]
-
-    @property
-    def end_date(self):
-        return self._get_start_end_dates[1]
-
-    def is_active(self, date=None):
-        """
-        :return False whenever we see that the route start and end date are outside the
-                input date (where the input date defaults to 'today')
-        """
-        _is_active = True
-        if self.start_date or self.end_date:
-            _is_active = False
-            date = util.check_date(date)
-            if self.start_date and self.end_date and self.start_date <= date <= self.end_date:
-                _is_active = True
-            elif self.start_date and self.start_date <= date:
-                _is_active = True
-            elif self.end_date and date <= self.end_date:
-                _is_active = True
-        return _is_active
-
     @classmethod
-    def filter_active_routes(cls, routes, date=None):
-        """
-        filter an input list of route (orm) objects via is_active
-        :return new list of routes filtered by date
-        """
-        # import pdb; pdb.set_trace()
-        ret_val = []
-        for r in routes:
-            if r and r.is_active(date):
-                ret_val.append(r)
-        return ret_val
+    def add_geometry_column(cls):
+        if not hasattr(cls, 'geom'):
+            from geoalchemy2 import Geometry
+            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
 
     @classmethod
     def active_routes(cls, session, date=None):
@@ -214,7 +164,11 @@ class Route(Base):
             .order_by(Route.route_sort_order)\
             .all()
 
-        # step 2: filter routes by active date
+        # step 2: default date
+        if date is None or not isinstance(date, datetime.date):
+            date = datetime.date.today()
+
+        # step 3: filter routes by active date
         for r in routes:
             if r and r.is_active(date):
                 ret_val.append(r)
@@ -233,33 +187,7 @@ class Route(Base):
         return ret_val
 
 
-class RouteDirection(Base):
-    datasource = config.DATASOURCE_GTFS
-    filename = 'route_directions.txt'
-
-    __tablename__ = 'route_directions'
-
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    direction_name = Column(String(255))
-
-
-class RouteFilter(Base):
-    """
-    list of filters to be used to cull routes from certain lists
-    e.g., there might be Shuttles that you never want to be shown...you can load that data here, and
-    use it in your queries
-    """
-    datasource = config.DATASOURCE_LOOKUP
-    filename = 'route_filter.txt'
-    __tablename__ = 'route_filters'
-
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), index=True, nullable=True)
-    description = Column(String(1023))
-
-
-class CurrentRoutes(Base):
+class CurrentRoutes(Base, RouteBase):
     """
     this table is (optionally) used as a view into the currently active routes
     it is pre-calculated to list routes that are currently running service
@@ -274,7 +202,6 @@ class CurrentRoutes(Base):
         primaryjoin='CurrentRoutes.route_id==Route.route_id',
         foreign_keys='(CurrentRoutes.route_id)',
         uselist=False, viewonly=True,
-        lazy="joined", innerjoin=True,
     )
 
     route_sort_order = Column(Integer)
@@ -283,11 +210,16 @@ class CurrentRoutes(Base):
         self.route_id = route.route_id
         self.route_sort_order = route.route_sort_order if route.route_sort_order else def_order
 
+    def is_active(self, date=None):
+        ret_val = True
+        if date:
+            ret_val = self.route.is_active(date)
+        return ret_val
+
     @classmethod
-    def active_routes(cls, session):
+    def query_routes(cls, session):
         """
         query for list of this data
-        :return list of Route orm objects
         """
         routes = []
         try:
@@ -331,6 +263,61 @@ class CurrentRoutes(Base):
         finally:
             session.flush()
             session.close()
+
+
+class RouteDirection(Base):
+    datasource = config.DATASOURCE_GTFS
+    filename = 'route_directions.txt'
+
+    __tablename__ = 'route_directions'
+
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
+    direction_name = Column(String(255))
+
+
+class RouteType(Base):
+    """
+    OTP TYPES (come via service calls)
+    0:TRAM, 1:SUBWAY, 2:RAIL, 3:BUS, 4:FERRY, 5:CABLE_CAR, 6:GONDOLA, 7:FUNICULAR
+    :see https://github.com/opentripplanner/OpenTripPlanner/blob/master/src/main/java/org/opentripplanner/routing/core/TraverseMode.java :
+    """
+    datasource = config.DATASOURCE_LOOKUP
+    filename = 'route_type.txt'
+    __tablename__ = 'route_type'
+
+    route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
+    otp_type = Column(String(255))
+    route_type_name = Column(String(255))
+    route_type_desc = Column(String(1023))
+
+    def is_bus(self):
+        return self.route_type == 3
+
+    def is_different_mode(self, cmp_route_type):
+         return self.route_type != cmp_route_type
+
+    def is_higher_priority(self, cmp_route_type):
+        """ abitrary compare of route types, where lower numbrer means higher priority in terms mode ranking (sans bus) """
+        ret_val = False
+        if cmp_route_type != 3 and cmp_route_type < self.route_type:
+            ret_val = True
+        return ret_val
+
+
+class RouteFilter(Base):
+    """
+    list of filters to be used to cull routes from certain lists
+    e.g., there might be Shuttles that you never want to be shown...you can load that data here, and
+    use it in your queries
+    """
+    datasource = config.DATASOURCE_LOOKUP
+    filename = 'route_filter.txt'
+    __tablename__ = 'route_filters'
+
+    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    agency_id = Column(String(255), index=True, nullable=True)
+    description = Column(String(1023))
 
 
 __all__ = [RouteType.__name__, Route.__name__, RouteDirection.__name__, RouteFilter.__name__, CurrentRoutes.__name__]

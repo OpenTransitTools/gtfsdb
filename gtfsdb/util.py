@@ -31,32 +31,6 @@ def make_temp_sqlite_db_uri(name=None):
     return url
 
 
-def make_route_short_name(route, def_name=None):
-    """
-    fix up the short name...
-    """
-    ret_val = def_name
-    try:
-        ret_val = safe_get_any(route, ['route_short_name', 'short_name', 'route_long_name', 'name'])
-
-        # strip off 'Line' from last word, ala MAX Blue Line == MAX Blue
-        if ret_val and ret_val.startswith('MAX') and ret_val.endswith('Line'):
-            ret_val = " ".join(ret_val.split()[:-1])
-        # special fix for Portland Streetcar
-        if 'Portland Streetcar' in ret_val and route.route_long_name and len(route.route_long_name) > 0:
-            ret_val = route.route_long_name.replace('Portland', '').strip()
-        # fix WES
-        if ret_val and ret_val.startswith('WES '):
-            ret_val = "WES"
-        # fix Portland Aerial Tram
-        if ret_val and ret_val == 'Portland Aerial Tram':
-            ret_val = "Tram"
-    except Exception as e:
-        log.warning(e)
-
-    return ret_val
-
-
 def safe_get(obj, key, def_val=None):
     """
     try to return the key'd value from either a class or a dict

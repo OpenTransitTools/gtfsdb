@@ -7,102 +7,10 @@ from sqlalchemy.orm import joinedload, joinedload_all, object_session, relations
 
 from gtfsdb import config
 from gtfsdb.model.base import Base
+from .stop_base import StopBase
 
 import logging
 log = logging.getLogger(__name__)
-
-
-class StopBase(object):
-    """ provides a generic set of stop query routines """
-
-    @classmethod
-    def query_orm_for_stop(cls, session, stop_id, detailed=False, agency=None):
-        """
-        simple utility for quering a stop from gtfsdb
-        """
-        ret_val = None
-        try:
-            log.info("query Stop for {}".format(stop_id))
-            q = session.query(cls)
-            q = q.filter(cls.stop_id == stop_id)
-            # TODO q.filter(Stop.agency_id == agency_id)
-            if detailed:
-                q = q.options(joinedload("stop_features"))
-            ret_val = q.one()
-        except Exception as e:
-            log.info(e)
-        return ret_val
-
-    @classmethod
-    def get_bbox_params(cls, **kwargs):
-        top_lat = top_lon = bot_lat = bot_lon = None
-        try:
-            top_lat = float(kwargs.get('top_lat'))
-            top_lon = float(kwargs.get('top_lat'))
-            bot_lat = float(kwargs.get('top_lat'))
-            bot_lon = float(kwargs.get('top_lat'))
-        except Exception as e:
-            log.warning(e)
-        return top_lat, top_lon, bot_lat, bot_lon
-
-    @classmethod
-    def get_point_radius(cls, **kwargs):
-        lat = lon = radius = None
-        try:
-            lat = float(kwargs.get('lat'))
-            lon = float(kwargs.get('lon'))
-            radius = float(kwargs.get('radius', 10.0))
-        except Exception as e:
-            log.warning(e)
-        return lat, lon, radius
-
-    @classmethod
-    def has_bbox_params(cls, **kwargs):
-        top_lat, top_lon, bot_lat, bot_lon = cls.get_bbox_params(**kwargs)
-        return top_lat and top_lon and bot_lat and bot_lon
-
-    @classmethod
-    def has_point_radius(cls, **kwargs):
-        lat, lon, radius = cls.get_point_radius(**kwargs)
-        return lat and lon and radius
-
-    @classmethod
-    def query_stops_via_bbox(cls, session, **kwargs):
-        ret_val = []
-        return ret_val
-
-    @classmethod
-    def query_stops_via_point_radius(cls, session, **kwargs):
-        ret_val = []
-        return ret_val
-
-    @classmethod
-    def generic_query_stops(cls, session, **kwargs):
-        """
-        query for list of this data
-        """
-        ret_val = []
-        try:
-            # import pdb; pdb.set_trace()
-            clist = session.query(cls)
-            limit = kwargs.get('limit')
-            if limit:
-                clist = clist.limit(limit)
-            ret_val = clist.all()
-        except Exception as e:
-            log.warning(e)
-        return ret_val
-
-    @classmethod
-    def query_stops(cls, session, **kwargs):
-        ret_val = []
-        if cls.has_bbox_params(**kwargs):
-            ret_val = cls.query_stops_via_bbox(session, **kwargs)
-        elif cls.has_point_radius(**kwargs):
-            ret_val = cls.query_stops_via_point_radius(session, **kwargs)
-        else:
-            ret_val = cls.generic_query_stops(session, **kwargs)
-        return ret_val
 
 
 class Stop(Base, StopBase):
