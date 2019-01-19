@@ -37,7 +37,7 @@ class Route(Base, RouteBase):
         primaryjoin='Route.agency_id==Agency.agency_id',
         foreign_keys='(Route.agency_id)',
         uselist=False, viewonly=True,
-        lazy="joined"
+        lazy="joined", # don't innerjoin ... causes unit test errors
     )
 
     type = relationship(
@@ -45,7 +45,7 @@ class Route(Base, RouteBase):
         primaryjoin='Route.route_type==RouteType.route_type',
         foreign_keys='(Route.route_type)',
         uselist=False, viewonly=True,
-        lazy = "joined"
+        lazy="joined", innerjoin=True,
     )
 
     trips = relationship(
@@ -111,6 +111,12 @@ class Route(Base, RouteBase):
         return self._start_date, self._end_date
 
     @classmethod
+    def add_geometry_column(cls):
+        if not hasattr(cls, 'geom'):
+            from geoalchemy2 import Geometry
+            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+
+    @classmethod
     def load_geoms(cls, db):
         """ load derived geometries, currently only written for PostgreSQL """
         from gtfsdb.model.shape import Pattern
@@ -137,12 +143,6 @@ class Route(Base, RouteBase):
         log.debug('{0}.post_process'.format(cls.__name__))
         cls.load_geoms(db)
 
-    @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            from geoalchemy2 import Geometry
-            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
-
     def is_active(self, date=None):
         """
         :return False whenever we see that the route start and end date are outside the
@@ -161,37 +161,6 @@ class Route(Base, RouteBase):
                 _is_active = True
         return _is_active
 
-    @classmethod
-    def active_routes(cls, session, date=None):
-        """
-        returns list of routes that are seen as 'active' based on dates and filters
-        """
-        ret_val = []
-
-        # step 1: grab all routes
-        routes = session.query(Route)\
-            .filter(~Route.route_id.in_(session.query(RouteFilter.route_id)))\
-            .order_by(Route.route_sort_order)\
-            .all()
-
-        # step 2: filter routes by active date
-        for r in routes:
-            if r and r.is_active(date):
-                ret_val.append(r)
-        return ret_val
-
-    @classmethod
-    def active_route_ids(cls, session):
-        """
-        return an array of route_id / agency_id pairs
-        {route_id:'2112', agency_id:'C-TRAN'}
-        """
-        ret_val = []
-        routes = cls.active_routes(session)
-        for r in routes:
-            ret_val.append({"route_id": r.route_id, "agency_id": r.agency_id})
-        return ret_val
-
 
 class CurrentRoutes(Base, RouteBase):
     """
@@ -208,6 +177,7 @@ class CurrentRoutes(Base, RouteBase):
         primaryjoin='CurrentRoutes.route_id==Route.route_id',
         foreign_keys='(CurrentRoutes.route_id)',
         uselist=False, viewonly=True,
+        lazy="joined", innerjoin=True,
     )
 
     route_sort_order = Column(Integer)
@@ -219,23 +189,30 @@ class CurrentRoutes(Base, RouteBase):
     def is_active(self, date=None):
         ret_val = True
         if date:
+            log.warning("you're calling CurrentRoutes.is_active with a date, which is slow...")
             ret_val = self.route.is_active(date)
         return ret_val
 
     @classmethod
-    def query_routes(cls, session):
+    def active_routes(cls, session, date=None):
         """
-        query for list of this data
+        wrap base active route query
+        :return list of Route orm objects
         """
-        routes = []
-        try:
-            # import pdb; pdb.set_trace()
-            clist = session.query(CurrentRoutes).order_by(CurrentRoutes.route_sort_order).all()
-            for r in clist:
-                routes.append(r.route)
-        except Exception as e:
-            log.warning(e)
-        return routes
+        # import pdb; pdb.set_trace()
+        ret_val = []
+        if date:
+            log.warning("you're calling CurrentRoutes.active_routes with a date, which is slow...")
+            ret_val = Route.active_routes(session, date)
+        else:
+            try:
+                # import pdb; pdb.set_trace()
+                clist = session.query(CurrentRoutes).order_by(CurrentRoutes.route_sort_order).all()
+                for r in clist:
+                    ret_val.append(r.route)
+            except Exception as e:
+                log.warning(e)
+        return ret_val
 
     @classmethod
     def post_process(cls, db, **kwargs):

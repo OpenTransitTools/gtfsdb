@@ -5,7 +5,13 @@ log = logging.getLogger(__name__)
 
 
 class RouteBase(object):
-    """ provides a generic set of route query routines """
+    """
+    provides a generic set of route query routines
+    """
+
+    def is_active(self, date=None):
+        log.warning("calling abstract base class")
+        return True
 
     @classmethod
     def get_route(cls, session, route_id, detailed=False, agency=None):
@@ -30,7 +36,7 @@ class RouteBase(object):
     @classmethod
     def get_route_list(cls, session):
         """
-        :return list of routes in the db
+        :return list of *all* Route orm objects queried from the db
         """
         # import pdb; pdb.set_trace()
         from .route import RouteFilter
@@ -42,11 +48,18 @@ class RouteBase(object):
         return routes
 
     @classmethod
-    def find_nearest_routes(cls, session, geom):
+    def active_routes(cls, session, date=None):
         """
-        simple utility for quering a route from gtfsdb
+        :return list of *active* Route orm objects queried from the db
+        :note 'active' is based on date ... this routine won't deal with holes in the
+              schedule (e.g., when a route is not active for a period of time, due to construction)
         """
-        ret_val = None
+        # step 1: grab all routes
+        routes = cls.get_route_list(session)
+
+        # step 2: filter routes by active date
+        ret_val = cls.filter_active_routes(routes, date)
+        return ret_val
 
     @classmethod
     def filter_active_routes(cls, route_list, date=None):
@@ -62,16 +75,11 @@ class RouteBase(object):
         return ret_val
 
     @classmethod
-    def active_routes(cls, session, date=None):
+    def find_nearest_routes(cls, session, geom):
         """
-        returns list of routes that are seen as 'active' based on date
+        simple utility for quering a route from gtfsdb
         """
-        # step 1: grab all routes
-        routes = cls.get_route_list(session)
-
-        # step 2: filter routes by active date
-        ret_val = cls.filter_active_routes(routes, date)
-        return ret_val
+        ret_val = None
 
     @classmethod
     def active_route_ids(cls, session):
