@@ -152,7 +152,7 @@ class Route(Base, RouteBase):
         if self.start_date or self.end_date:
             _is_active = False
             date = util.check_date(date)
-            if self.start_date and self.end_date:
+            if self.start_date and self.end_date:  # keep this as nested if (don't combine due to below)
                 if self.start_date <= date <= self.end_date:
                     _is_active = True
             elif self.start_date and self.start_date <= date:
@@ -174,11 +174,7 @@ class Route(Base, RouteBase):
             .order_by(Route.route_sort_order)\
             .all()
 
-        # step 2: default date
-        if date is None or not isinstance(date, datetime.date):
-            date = datetime.date.today()
-
-        # step 3: filter routes by active date
+        # step 2: filter routes by active date
         for r in routes:
             if r and r.is_active(date):
                 ret_val.append(r)
