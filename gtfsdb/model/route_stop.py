@@ -18,7 +18,7 @@ class RouteStopBase(object):
     @classmethod
     def get_route_short_names(cls, session, stop):
         """
-        add an array of short names to this DAO
+        :return an array of short names and types
         """
         # step 1: create a short_names list
         short_names = []
@@ -36,8 +36,24 @@ class RouteStopBase(object):
 
         return short_names
 
+    @classmethod
+    def get_route_short_names_as_string(cls, session, stop, sep=", "):
+        """
+        :return a string representing all short names (e.g., good for a tooltip on a stop popup)
+        """
+        ret_val = None
+        short_names = cls.get_route_short_names(session, stop)
+        for s in short_names:
+            rsn = s.get('route_short_name')
+            if rsn:
+                if ret_val is None:
+                    ret_val = rsn
+                else:
+                    ret_val = "{}{}{}".format(ret_val, sep, rsn)
+        return ret_val
 
-class RouteStop(Base):
+
+class RouteStop(Base, RouteStopBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'route_stops'
 
@@ -396,7 +412,7 @@ class RouteStop(Base):
         return start, end
 
 
-class CurrentRouteStops(Base):
+class CurrentRouteStops(Base, RouteStopBase):
     """
     this table is (optionally) used as a view into the currently active routes
     it is pre-calculated to list routes that are currently running service

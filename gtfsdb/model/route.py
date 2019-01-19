@@ -1,7 +1,7 @@
 import datetime
 import time
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 
 from sqlalchemy import Column
@@ -219,6 +219,39 @@ class Route(Base):
         for r in routes:
             ret_val.append({"route_id": r.route_id, "agency_id": r.agency_id})
         return ret_val
+
+    @classmethod
+    def filter_active_routes(cls, routes, date=None):
+        """
+        filter a list of orm routes via input date
+        :return new list of routes filtered by date
+        """
+        # import pdb; pdb.set_trace()
+        ret_val = []
+
+        # step 1: get a valid date ... note check_date will grab today's date if not provided
+        date = util.check_date(date)
+        if date:
+            for r in routes:
+                if r:
+                    # step 2a: filter based on begin and/or end dates
+                    if r.start_date or r.end_date:
+                        if r.start_date and r.end_date:
+                            if r.start_date <= date <= r.end_date:
+                                ret_val.append(r)
+                        elif r.start_date and r.start_date <= date:
+                            ret_val.append(r)
+                        elif r.end_date and date <= r.end_date:
+                            ret_val.append(r)
+                    else:
+                        # invalid Route. dates; can't determine active status, so just pass the route as 'active'
+                        ret_val.append(r)
+        else:
+            # step 2b: if no good input (default) date, just assign pull all routes into ret_val
+            ret_val = routes
+
+        return ret_val
+
 
 
 class RouteDirection(Base):

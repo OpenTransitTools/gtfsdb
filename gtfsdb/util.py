@@ -1,17 +1,20 @@
 import os
 import sys
+import datetime
 import tempfile
+
 import logging
 log = logging.getLogger(__name__)
 
 
 def get_all_subclasses(cls):
     """
-    :See:
-    https://stackoverflow.com/questions/3862310/how-to-find-all-the-subclasses-of-a-class-given-its-name
+    :see https://stackoverflow.com/questions/3862310/how-to-find-all-the-subclasses-of-a-class-given-its-name
     """
-    return set(cls.__subclasses__()).union(
-        [s for c in cls.__subclasses__() for s in get_all_subclasses(c)])
+    ret_val = set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in get_all_subclasses(c)]
+    )
+    return ret_val
 
 
 def make_temp_sqlite_db_uri(name=None):
@@ -81,6 +84,28 @@ def safe_get_any(obj, keys, def_val=None):
         if v and len(v) > 0:
             ret_val = v
             break
+    return ret_val
+
+
+def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=None):
+    """
+    utility function to parse a request object for something that looks like a date object...
+    """
+    if isinstance(in_date, datetime.date) or isinstance(in_date, datetime.datetime):
+        ret_val = in_date
+    else:
+        if def_val is None:
+            def_val = datetime.date.today()
+
+        ret_val = def_val
+        for fmt in fmt_list:
+            try:
+                d = datetime.datetime.strptime(in_date, fmt).date()
+                if d is not None:
+                    ret_val = d
+                    break
+            except Exception as e:
+                log.debug(e)
     return ret_val
 
 
