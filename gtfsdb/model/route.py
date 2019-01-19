@@ -14,7 +14,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class Route(Base):
+class Route(Base, RouteBase):
     datasource = config.DATASOURCE_GTFS
     filename = 'routes.txt'
 
