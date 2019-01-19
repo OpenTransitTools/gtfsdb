@@ -118,40 +118,6 @@ class Route(Base):
             pass
         return ret_val
 
-    def is_active(self, date=None):
-        """
-        :return False whenever we see that the route start and end date are outside the
-                input date (where the input date defaults to 'today')
-        """
-        _is_active = True
-        if self.start_date and self.end_date:
-            _is_active = False
-            if date is None:
-                date = datetime.date.today()
-            if self.start_date <= date <= self.end_date:
-                _is_active = True
-        return _is_active
-
-    @property
-    def _get_start_end_dates(self):
-        """find the min & max date using Trip & UniversalCalendar"""
-        if not self.is_cached_data_valid('_start_date'):
-            from gtfsdb.model.calendar import UniversalCalendar
-            q = self.session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
-            q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
-            self._start_date, self._end_date = q.one()
-            self.update_cached_data('_start_date')
-
-        return self._start_date, self._end_date
-
-    @property
-    def start_date(self):
-        return self._get_start_end_dates[0]
-
-    @property
-    def end_date(self):
-        return self._get_start_end_dates[1]
-
     @classmethod
     def load_geoms(cls, db):
         """ load derived geometries, currently only written for PostgreSQL """
@@ -175,15 +141,65 @@ class Route(Base):
             log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
     @classmethod
-    def post_process(cls, db, **kwargs):
-        log.debug('{0}.post_process'.format(cls.__name__))
-        cls.load_geoms(db)
-
-    @classmethod
     def add_geometry_column(cls):
         if not hasattr(cls, 'geom'):
             from geoalchemy2 import Geometry
             cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        log.debug('{0}.post_process'.format(cls.__name__))
+        cls.load_geoms(db)
+
+    @property
+    def _get_start_end_dates(self):
+        """find the min & max date using Trip & UniversalCalendar"""
+        if not self.is_cached_data_valid('_start_date'):
+            from gtfsdb.model.calendar import UniversalCalendar
+            q = self.session.query(func.min(UniversalCalendar.date), func.max(UniversalCalendar.date))
+            q = q.filter(UniversalCalendar.trips.any(route_id=self.route_id))
+            self._start_date, self._end_date = q.one()
+            self.update_cached_data('_start_date')
+
+        return self._start_date, self._end_date
+
+    @property
+    def start_date(self):
+        return self._get_start_end_dates[0]
+
+    @property
+    def end_date(self):
+        return self._get_start_end_dates[1]
+
+    def is_active(self, date=None):
+        """
+        :return False whenever we see that the route start and end date are outside the
+                input date (where the input date defaults to 'today')
+        """
+        _is_active = True
+        if self.start_date or self.end_date:
+            _is_active = False
+            date = util.check_date(date)
+            if self.start_date and self.end_date and self.start_date <= date <= self.end_date:
+                _is_active = True
+            elif self.start_date and self.start_date <= date:
+                _is_active = True
+            elif self.end_date and date <= self.end_date:
+                _is_active = True
+        return _is_active
+
+    @classmethod
+    def filter_active_routes(cls, routes, date=None):
+        """
+        filter an input list of route (orm) objects via is_active
+        :return new list of routes filtered by date
+        """
+        # import pdb; pdb.set_trace()
+        ret_val = []
+        for r in routes:
+            if r and r.is_active(date):
+                ret_val.append(r)
+        return ret_val
 
     @classmethod
     def active_routes(cls, session, date=None):
@@ -198,11 +214,7 @@ class Route(Base):
             .order_by(Route.route_sort_order)\
             .all()
 
-        # step 2: default date
-        if date is None or not isinstance(date, datetime.date):
-            date = datetime.date.today()
-
-        # step 3: filter routes by active date
+        # step 2: filter routes by active date
         for r in routes:
             if r and r.is_active(date):
                 ret_val.append(r)
@@ -219,39 +231,6 @@ class Route(Base):
         for r in routes:
             ret_val.append({"route_id": r.route_id, "agency_id": r.agency_id})
         return ret_val
-
-    @classmethod
-    def filter_active_routes(cls, routes, date=None):
-        """
-        filter a list of orm routes via input date
-        :return new list of routes filtered by date
-        """
-        # import pdb; pdb.set_trace()
-        ret_val = []
-
-        # step 1: get a valid date ... note check_date will grab today's date if not provided
-        date = util.check_date(date)
-        if date:
-            for r in routes:
-                if r:
-                    # step 2a: filter based on begin and/or end dates
-                    if r.start_date or r.end_date:
-                        if r.start_date and r.end_date:
-                            if r.start_date <= date <= r.end_date:
-                                ret_val.append(r)
-                        elif r.start_date and r.start_date <= date:
-                            ret_val.append(r)
-                        elif r.end_date and date <= r.end_date:
-                            ret_val.append(r)
-                    else:
-                        # invalid Route. dates; can't determine active status, so just pass the route as 'active'
-                        ret_val.append(r)
-        else:
-            # step 2b: if no good input (default) date, just assign pull all routes into ret_val
-            ret_val = routes
-
-        return ret_val
-
 
 
 class RouteDirection(Base):
