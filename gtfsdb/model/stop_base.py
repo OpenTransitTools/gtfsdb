@@ -30,48 +30,6 @@ class StopBase(object):
             log.info(e)
         return ret_val
 
-    @classmethod
-    def get_bbox_params(cls, **kwargs):
-        top_lat = top_lon = bot_lat = bot_lon = None
-        try:
-            top_lat = float(kwargs.get('top_lat'))
-            top_lon = float(kwargs.get('top_lat'))
-            bot_lat = float(kwargs.get('top_lat'))
-            bot_lon = float(kwargs.get('top_lat'))
-        except Exception as e:
-            log.warning(e)
-        return top_lat, top_lon, bot_lat, bot_lon
-
-    @classmethod
-    def get_point_radius(cls, **kwargs):
-        lat = lon = radius = None
-        try:
-            lat = float(kwargs.get('lat'))
-            lon = float(kwargs.get('lon'))
-            radius = float(kwargs.get('radius', 10.0))
-        except Exception as e:
-            log.warning(e)
-        return lat, lon, radius
-
-    @classmethod
-    def has_bbox_params(cls, **kwargs):
-        top_lat, top_lon, bot_lat, bot_lon = cls.get_bbox_params(**kwargs)
-        return top_lat and top_lon and bot_lat and bot_lon
-
-    @classmethod
-    def has_point_radius(cls, **kwargs):
-        lat, lon, radius = cls.get_point_radius(**kwargs)
-        return lat and lon and radius
-
-    @classmethod
-    def query_stops_via_bbox(cls, session, **kwargs):
-        ret_val = []
-        return ret_val
-
-    @classmethod
-    def query_stops_via_point_radius(cls, session, **kwargs):
-        ret_val = []
-        return ret_val
 
     @classmethod
     def generic_query_stops(cls, session, **kwargs):
@@ -88,6 +46,16 @@ class StopBase(object):
             ret_val = clist.all()
         except Exception as e:
             log.warning(e)
+        return ret_val
+
+    @classmethod
+    def query_stops_via_bbox(cls, session, **kwargs):
+        ret_val = []
+        return ret_val
+
+    @classmethod
+    def query_stops_via_point_radius(cls, session, **kwargs):
+        ret_val = []
         return ret_val
 
     @classmethod
