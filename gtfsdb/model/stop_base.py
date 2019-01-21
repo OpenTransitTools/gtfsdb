@@ -5,6 +5,9 @@ from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
 
+from gtfsdb.util import BBox
+from gtfsdb.util import Point
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -60,13 +63,16 @@ class StopBase(object):
 
     @classmethod
     def query_stops(cls, session, **kwargs):
-        ret_val = []
-        if cls.has_bbox_params(**kwargs):
+        """"""
+        bbox = BBox(**kwargs)
+        if bbox.is_valid
             ret_val = cls.query_stops_via_bbox(session, **kwargs)
-        elif cls.has_point_radius(**kwargs):
-            ret_val = cls.query_stops_via_point_radius(session, **kwargs)
         else:
-            ret_val = cls.generic_query_stops(session, **kwargs)
+            point = Point(**kwargs)
+            if point.is_valid:
+                ret_val = cls.query_stops_via_point_radius(session, **kwargs)
+            else:
+                ret_val = cls.generic_query_stops(session, **kwargs)
         return ret_val
 
 
