@@ -65,7 +65,7 @@ class StopBase(object):
     def query_stops(cls, session, **kwargs):
         """"""
         bbox = BBox(**kwargs)
-        if bbox.is_valid
+        if bbox.is_valid:
             ret_val = cls.query_stops_via_bbox(session, **kwargs)
         else:
             point = Point(**kwargs)

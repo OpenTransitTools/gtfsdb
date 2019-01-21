@@ -88,7 +88,7 @@ class Point(object):
     is_valid = False
 
     def __init__(self, **kwargs):
-        self.srid = self.kwargs.get('srid', None)
+        self.srid = kwargs.get('srid', None)
         try:
             self.lat = float(kwargs.get('lat'))
             self.lon = float(kwargs.get('lon'))
@@ -114,7 +114,7 @@ class BBox(object):
     is_valid = False
 
     def __init__(self, **kwargs):
-        self.srid = self.kwargs.get('srid', None)
+        self.srid = kwargs.get('srid', None)
         try:
             self.min_lat = float(kwargs.get('min_lat'))
             self.min_lon = float(kwargs.get('min_lon'))
