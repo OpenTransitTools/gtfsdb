@@ -33,7 +33,6 @@ class StopBase(object):
             log.info(e)
         return ret_val
 
-
     @classmethod
     def generic_query_stops(cls, session, **kwargs):
         """
@@ -63,7 +62,11 @@ class StopBase(object):
 
     @classmethod
     def query_stops(cls, session, **kwargs):
-        """"""
+        """
+        will query the db for a stop, either via bbox, point & distance or just an id
+        :return list of stops
+        """
+        # import pdb; pdb.set_trace()
         bbox = BBox(**kwargs)
         if bbox.is_valid:
             ret_val = cls.query_stops_via_bbox(session, **kwargs)

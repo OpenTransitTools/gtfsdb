@@ -84,7 +84,7 @@ def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=N
 
 
 class Point(object):
-    def_radius = 10.0
+    def_radius = 1000.0
     is_valid = False
 
     def __init__(self, **kwargs):
@@ -110,7 +110,6 @@ class Point(object):
 
 
 class BBox(object):
-    def_radius = 10.0
     is_valid = False
 
     def __init__(self, **kwargs):
