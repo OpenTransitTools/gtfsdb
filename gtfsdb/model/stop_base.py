@@ -66,16 +66,18 @@ class StopBase(object):
         will query the db for a stop, either via bbox, point & distance or just an id
         :return list of stops
         """
+        ret_val = []
         # import pdb; pdb.set_trace()
-        bbox = BBox(**kwargs)
-        if bbox.is_valid:
-            ret_val = cls.query_stops_via_bbox(session, **kwargs)
-        else:
-            point = Point(**kwargs)
-            if point.is_valid:
-                ret_val = cls.query_stops_via_point_radius(session, **kwargs)
+        if kwargs.get('lat') or kwargs.get('min_lat'):
+            bbox = BBox(**kwargs)
+            if bbox.is_valid:
+                ret_val = cls.query_stops_via_bbox(session, **kwargs)
             else:
-                ret_val = cls.generic_query_stops(session, **kwargs)
+                point = Point(**kwargs)
+                if point.is_valid:
+                    ret_val = cls.query_stops_via_point_radius(session, **kwargs)
+        else:
+            ret_val = cls.generic_query_stops(session, **kwargs)
         return ret_val
 
 
