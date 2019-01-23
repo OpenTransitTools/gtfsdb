@@ -55,7 +55,7 @@ class TestCurrent(unittest.TestCase):
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
         n2 = self.db.session.query(clz2).all()
-        return len(n1) != len(n2)
+        return len(n1) != len(n2) and len(n1) > 0 and len(n2) > 0
 
     def test_sqlite_load(self):
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))

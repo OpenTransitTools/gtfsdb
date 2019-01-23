@@ -53,11 +53,21 @@ class StopBase(object):
     @classmethod
     def query_stops_via_bbox(cls, session, bbox):
         ret_val = []
+        try:
+            # import pdb; pdb.set_trace()
+            pass
+        except Exception as e:
+            log.warning(e)
         return ret_val
 
     @classmethod
     def query_stops_via_point(cls, session, point):
         ret_val = []
+        try:
+            # import pdb; pdb.set_trace()
+            pass
+        except Exception as e:
+            log.warning(e)
         return ret_val
 
     @classmethod
