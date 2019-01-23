@@ -15,6 +15,7 @@ DB = None
 def load_sqlite():
     global DB
     if DB is None:
+        #import pdb; pdb.set_trace()
         gtfs_file = get_test_file_uri('multi-date-feed.zip')
         url = util.make_temp_sqlite_db_uri()
         # url = util.make_temp_sqlite_db_uri('curr')
@@ -45,12 +46,11 @@ def load_pgsql():
 
 
 class TestCurrent(unittest.TestCase):
+    db = None
+    DO_PG = False
+
     def setUp(self):
-        #import pdb; pdb.set_trace()
-        if False:
-            self.db = load_sqlite()
-        else:
-            self.db = load_pgsql()
+        self.db = load_pgsql() if self.DO_PG else load_sqlite()
 
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
