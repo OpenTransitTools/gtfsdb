@@ -5,8 +5,7 @@ from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
 
-from gtfsdb.util import BBox
-from gtfsdb.util import Point
+from gtfsdb.util import BBox, Point
 
 import logging
 log = logging.getLogger(__name__)
@@ -61,11 +60,16 @@ class StopBase(object):
         return ret_val
 
     @classmethod
-    def query_stops_via_point(cls, session, point):
+    def query_stops_via_point(cls, session, point, limit=2000):
         ret_val = []
         try:
             # import pdb; pdb.set_trace()
-            pass
+            log.info("query Stop table")
+            q = session.query(cls)
+            q = q.filter(cls.location_type == 0)
+            q = q.order_by(cls.geom.distance_centroid(point.get_geojson()))
+            q = q.limit(limit + 10)
+            ret_val = q.all()
         except Exception as e:
             log.warning(e)
         return ret_val

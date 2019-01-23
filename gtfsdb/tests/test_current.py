@@ -47,7 +47,7 @@ def load_pgsql():
 
 class TestCurrent(unittest.TestCase):
     db = None
-    DO_PG = False
+    DO_PG = True #False
 
     def setUp(self):
         self.db = load_pgsql() if self.DO_PG else load_sqlite()
@@ -56,6 +56,13 @@ class TestCurrent(unittest.TestCase):
         n1 = self.db.session.query(clz1).all()
         n2 = self.db.session.query(clz2).all()
         return len(n1) != len(n2) and len(n1) > 0 and len(n2) > 0
+
+    def test_stops_point(self):
+        point = util.Point(lat=36.915, lon=-116.762, srid="4326")
+        #stops = CurrentStops.query_stops_via_point(self.db.session(), point)
+        stops = Stop.query_stops_via_point(self.db.session(), point)
+        self.assertTrue(len(stops) > 1)
+
 
     def test_sqlite_load(self):
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
@@ -74,11 +81,6 @@ class TestCurrent(unittest.TestCase):
     def test_stops(self):
         stops = CurrentStops.query_stops(self.db.session(), limit=1)
         self.assertTrue(len(stops) == 1)
-
-    def test_stops_point(self):
-        point = util.Point(lat=45.5, lon=-122.5)
-        stops = CurrentStops.query_stops_via_point(self.db.session(), point)
-        #self.assertTrue(len(stops) == 1)
 
     def test_stops_bbox(self):
         # import pdb; pdb.set_trace()
