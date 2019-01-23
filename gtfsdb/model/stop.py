@@ -155,8 +155,6 @@ class Stop(Base, StopBase):
         """
         check for active stops
         """
-        ret_val = None
-
         # step 1: get stops
         q = session.query(Stop)
         if limit:
@@ -229,6 +227,11 @@ class CurrentStops(Base, StopBase):
                     self.route_mode = type.otp_type
                 else:
                     self.route_type_other = type.route_type
+
+    @classmethod
+    def add_geometry_column(cls):
+        if not hasattr(cls, 'geom'):
+            print("HI!!!")
 
     @classmethod
     def post_process(cls, db, **kwargs):

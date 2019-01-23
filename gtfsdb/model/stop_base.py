@@ -51,12 +51,12 @@ class StopBase(object):
         return ret_val
 
     @classmethod
-    def query_stops_via_bbox(cls, session, **kwargs):
+    def query_stops_via_bbox(cls, session, bbox):
         ret_val = []
         return ret_val
 
     @classmethod
-    def query_stops_via_point_radius(cls, session, **kwargs):
+    def query_stops_via_point(cls, session, point):
         ret_val = []
         return ret_val
 
@@ -71,11 +71,11 @@ class StopBase(object):
         if kwargs.get('lat') or kwargs.get('min_lat'):
             bbox = BBox(**kwargs)
             if bbox.is_valid:
-                ret_val = cls.query_stops_via_bbox(session, **kwargs)
+                ret_val = cls.query_stops_via_bbox(session, bbox)
             else:
                 point = Point(**kwargs)
                 if point.is_valid:
-                    ret_val = cls.query_stops_via_point_radius(session, **kwargs)
+                    ret_val = cls.query_stops_via_point_radius(session, point)
         else:
             ret_val = cls.generic_query_stops(session, **kwargs)
         return ret_val
