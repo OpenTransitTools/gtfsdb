@@ -22,9 +22,19 @@ def load_sqlite():
     return DB
 
 PGDB = None
-def load_pgsql(skip):
+def load_pgsql():
+    """ To run this test, do the following:
+     x) bin/test  gtfsdb.tests.test_current
+
+     You might also have to do the following:
+     a) emacs setup.py - uncomment install_requires='psycopg2'
+     b) buildout  # need psychopg2 in bin/test script
+     c) comment out "#SKIP_TESTS = True" below
+     d) psql -d postgres -c "CREATE DATABASE test WITH OWNER ott;"
+     e) bin/test gtfsdb.tests.test_current
+    """
     global PGDB
-    if not skip and PGDB is None:
+    if PGDB is None:
         # import pdb; pdb.set_trace()
         url = "postgresql+psycopg2://ott@maps7:5432/ott"
         #url = "postgresql://ott@localhost/test"
@@ -35,43 +45,27 @@ def load_pgsql(skip):
 
 
 class TestCurrent(unittest.TestCase):
-    SKIP_PG_TESTS = False
-    SKIP_PG_TESTS = True
-
     def setUp(self):
         #import pdb; pdb.set_trace()
-        self.db = load_sqlite()
-        self.pgdb = load_pgsql(self.SKIP_PG_TESTS)
+        if False:
+            self.db = load_sqlite()
+        else:
+            self.db = load_pgsql()
 
-    def check_query_counts(self, db, clz1, clz2):
-        n1 = db.session.query(clz1).all()
-        n2 = db.session.query(clz2).all()
+    def check_query_counts(self, clz1, clz2):
+        n1 = self.db.session.query(clz1).all()
+        n2 = self.db.session.query(clz2).all()
         return len(n1) != len(n2)
 
-    def test_postgres_load(self):
-        """ To run this test, do the following:
-         a) emacs setup.py - uncomment install_requires='psycopg2'
-         b) buildout  # need psychopg2 in bin/test script
-         c) comment out "#SKIP_TESTS = True" below
-         d) psql -d postgres -c "CREATE DATABASE test WITH OWNER ott;"
-         e) bin/test gtfsdb.tests.test_current
-        """
-        if self.SKIP_PG_TESTS:
-            log.warning("NOTE: skipping this postgres test of CurrentRoutes ... manually set SKIP_TESTS=False above")
-            return True
-
-        self.assertTrue(self.check_query_counts(self.pgdb, Stop, CurrentStops))
-        self.assertTrue(self.check_query_counts(self.pgdb, Route, CurrentRoutes))
-        self.assertTrue(self.check_query_counts(self.pgdb, RouteStop, CurrentRouteStops))
-
-        cr_list = self.pgdb.session.query(CurrentRoutes).all()
+    def test_sqlite_load(self):
+        self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
+        self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
+        self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
+        """""
+        cr_list = self.db.session.query(CurrentRoutes).all()
         for cr in cr_list:
             self.assertTrue(cr.route is not None)
-
-    def test_sqlite_load(self):
-        self.assertTrue(self.check_query_counts(self.db, Stop,  CurrentStops))
-        self.assertTrue(self.check_query_counts(self.db, Route, CurrentRoutes))
-        self.assertTrue(self.check_query_counts(self.db, RouteStop, CurrentRouteStops))
+        """""
 
     def test_routes(self):
         routes = CurrentRoutes.active_routes(self.db.session())
