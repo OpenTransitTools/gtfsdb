@@ -77,13 +77,13 @@ class TestCurrent(unittest.TestCase):
 
     def test_stops_point(self):
         point = util.Point(lat=45.5, lon=-122.5)
-        #stops = CurrentStops.query_stops_via_point(self.db.session(), point)
+        stops = CurrentStops.query_stops_via_point(self.db.session(), point)
         #self.assertTrue(len(stops) == 1)
 
     def test_stops_bbox(self):
         # import pdb; pdb.set_trace()
         bbox = util.BBox(min_lat=44.4, max_lat=44.4, min_lon=-122.5, max_lon=-122.5)
-        #stops = CurrentStops.query_stops_via_bbox(session, bbox)
+        stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)
         #self.assertTrue(len(stops) == 1)
 
 
