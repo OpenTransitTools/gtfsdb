@@ -199,6 +199,7 @@ class CurrentStops(Base, StopBase):
     route_mode = Column(String(255))
 
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    location_type = Column(Integer)
 
     stop = relationship(
         Stop.__name__,
@@ -209,10 +210,16 @@ class CurrentStops(Base, StopBase):
     )
 
     def __init__(self, stop, session):
-        self.stop_id = stop.stop_id
-
+        """
+        create a CurrentStop record from a stop record
+        :param stop:
+        :param session:
+        """
         # import pdb; pdb.set_trace()
-        """ convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop """
+        self.stop_id = stop.stop_id
+        self.location_type = stop.location_type
+
+        # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
         from .route_stop import CurrentRouteStops
         rs_list = CurrentRouteStops.query_by_stop(session, stop.stop_id)
         for rs in rs_list:
@@ -228,10 +235,10 @@ class CurrentStops(Base, StopBase):
                 else:
                     self.route_type_other = type.route_type
 
-    @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            print("HI!!!")
+        # add geom column to CurrentStops
+        if hasattr(stop, 'geom') and not hasattr(self, 'geom'):
+            self.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
+        #x
 
     @classmethod
     def post_process(cls, db, **kwargs):
