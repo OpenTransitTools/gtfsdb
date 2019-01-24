@@ -104,9 +104,16 @@ class Point(object):
         return self.lat, self.lon
 
     def get_geojson(self):
-        point = 'POINT({0} {1})'.format(self.lon, self.lat)
-        if self.srid: point = 'SRID={0};{1}'.format(self.srid, point)
+        point = self.make_point(self.lon, self.lat, self.srid)
         return point
+
+    @classmethod
+    def make_point(cls, lon, lat, srid=None):
+        point = 'POINT({0} {1})'.format(lon, lat)
+        if srid:
+            point = 'SRID={0};{1}'.format(srid, point)
+        return point
+
 
 
 class BBox(object):

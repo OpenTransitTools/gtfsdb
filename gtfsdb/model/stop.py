@@ -1,11 +1,10 @@
 import datetime
 from collections import defaultdict
 
-from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 from .stop_base import StopBase
 
@@ -48,14 +47,9 @@ class Stop(Base, StopBase):
         uselist=True, viewonly=True)
 
     @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
-
-    @classmethod
     def add_geom_to_dict(cls, row):
-        args = (config.SRID, row['stop_lon'], row['stop_lat'])
-        row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
+        point = util.Point.make_point(row['stop_lon'], row['stop_lat'], config.SRID)
+        row['geom'] = point
 
     @property
     def routes(self):
@@ -235,10 +229,9 @@ class CurrentStops(Base, StopBase):
                 else:
                     self.route_type_other = type.route_type
 
-        # add geom column to CurrentStops
-        if hasattr(stop, 'geom') and not hasattr(self, 'geom'):
-            self.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
-        #x
+        # copy the stop geom to CurrentStops
+        if hasattr(stop, 'geom') and hasattr(self, 'geom'):
+            self.geom = util.Point.make_point(stop.stop_lon, stop.stop_lat, config.SRID)
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -262,6 +255,5 @@ class CurrentStops(Base, StopBase):
         finally:
             session.flush()
             session.close()
-
 
 __all__ = [Stop.__name__, CurrentStops.__name__]

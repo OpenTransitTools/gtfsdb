@@ -41,7 +41,7 @@ class _Base(object):
         try:
             ret_val = object_session(self)
         except:
-            log.warn("can't get a session from object")
+            log.warning("can't get a session from object")
         return ret_val
 
     @classmethod
@@ -54,7 +54,7 @@ class _Base(object):
         try:
             cls.__mapper__.add_property('geom', deferred(cls.__table__.c.geom))
         except Exception as e:
-            log.warn(e)
+            log.warning(e)
 
     @classmethod
     def from_dict(cls, attrs):
@@ -106,7 +106,7 @@ class _Base(object):
                     if delta.days <= max_age:
                         ret_val = True
         except:
-            log.warn("is_cached_data_valid(): saw a cache exception with attribute {0}".format(attribute_name))
+            log.warning("is_cached_data_valid(): saw a cache exception with attribute {0}".format(attribute_name))
             ret_val = False
 
         return ret_val
@@ -119,7 +119,7 @@ class _Base(object):
             attribute_update = self.get_up_date_name(attribute_name)
             setattr(self, attribute_update, datetime.datetime.now())
         except:
-            log.warn("update_cached_data(): threw an exception with attribute {0}".format(attribute_name))
+            log.warning("update_cached_data(): threw an exception with attribute {0}".format(attribute_name))
 
     @classmethod
     def load(cls, db, **kwargs):

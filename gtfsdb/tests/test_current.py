@@ -37,8 +37,8 @@ def load_pgsql():
     global PGDB
     if PGDB is None:
         # import pdb; pdb.set_trace()
-        url = "postgresql+psycopg2://ott@maps7:5432/ott"
-        #url = "postgresql://ott@localhost/test"
+        #url = "postgresql://ott@maps7:5432/ott"
+        url = "postgresql://ott@localhost/ott"
         schema = "current_test"
         gtfs_file = get_test_file_uri('multi-date-feed.zip')
         PGDB = database_load(gtfs_file, url=url, schema=schema, is_geospatial=True, current_tables=True)
@@ -57,12 +57,17 @@ class TestCurrent(unittest.TestCase):
         ret_val = len(n1) != len(n2) and len(n1) > 0 and len(n2) > 0
         return ret_val
 
+    @classmethod
+    def print_stops(cls, stop_list):
+        for s in stop_list:
+            print(s.__dict__)
+
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
         n2 = self.db.session.query(clz2).all()
         return self.check_counts(n1, n2)
 
-    def test_sqlite_load(self):
+    def test_load(self):
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
         self.assertTrue(self.check_query_counts(RouteStop, CurrentRouteStops))
@@ -86,6 +91,9 @@ class TestCurrent(unittest.TestCase):
             curr_stops = CurrentStops.query_stops_via_point(self.db.session(), point)
             stops = Stop.query_stops_via_point(self.db.session(), point)
             self.assertTrue(self.check_counts(curr_stops, stops))
+            self.print_stops(curr_stops)
+            self.print_stops(stops)
+
 
     def test_stops_bbox(self):
         if self.DO_PG:
@@ -94,3 +102,5 @@ class TestCurrent(unittest.TestCase):
             curr_stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)
             stops = Stop.query_stops_via_bbox(self.db.session, bbox)
             self.assertTrue(self.check_counts(curr_stops, stops))
+            self.print_stops(curr_stops)
+            self.print_stops(stops)
