@@ -50,11 +50,15 @@ class StopBase(object):
         return ret_val
 
     @classmethod
-    def query_stops_via_bbox(cls, session, bbox):
+    def query_stops_via_bbox(cls, session, bbox, limit=2000):
         ret_val = []
         try:
-            # import pdb; pdb.set_trace()
-            pass
+            log.info("query gtfsdb Stop table")
+            q = session.query(cls)
+            q = q.filter(cls.location_type == 0)  # just stops (not stations or entrances to stations)
+            q = q.filter(cls.geom.ST_Within(bbox.get_geojson()))
+            q = q.limit(limit + 10)
+            ret_val = q.all()
         except Exception as e:
             log.warning(e)
         return ret_val

@@ -57,13 +57,6 @@ class TestCurrent(unittest.TestCase):
         n2 = self.db.session.query(clz2).all()
         return len(n1) != len(n2) and len(n1) > 0 and len(n2) > 0
 
-    def test_stops_point(self):
-        point = util.Point(lat=36.915, lon=-116.762, srid="4326")
-        #stops = CurrentStops.query_stops_via_point(self.db.session(), point)
-        stops = Stop.query_stops_via_point(self.db.session(), point)
-        self.assertTrue(len(stops) > 1)
-
-
     def test_sqlite_load(self):
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
@@ -82,10 +75,17 @@ class TestCurrent(unittest.TestCase):
         stops = CurrentStops.query_stops(self.db.session(), limit=1)
         self.assertTrue(len(stops) == 1)
 
+    def test_stops_point(self):
+        point = util.Point(lat=36.915, lon=-116.762, srid="4326")
+        #stops = CurrentStops.query_stops_via_point(self.db.session(), point)
+        stops = Stop.query_stops_via_point(self.db.session(), point)
+        self.assertTrue(len(stops) > 1)
+
     def test_stops_bbox(self):
         # import pdb; pdb.set_trace()
-        bbox = util.BBox(min_lat=44.4, max_lat=44.4, min_lon=-122.5, max_lon=-122.5)
-        stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)
-        #self.assertTrue(len(stops) == 1)
+        bbox = util.BBox(min_lat=36.0, max_lat=37.0, min_lon=-117.5, max_lon=-116.0, srid="4326")
+        #stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)
+        stops = Stop.query_stops_via_bbox(self.db.session, bbox)
+        self.assertTrue(len(stops) > 1)
 
 
