@@ -54,7 +54,8 @@ class TestCurrent(unittest.TestCase):
 
     @classmethod
     def check_counts(cls, n1, n2):
-        return len(n1) != len(n2) and len(n1) > 0 and len(n2) > 0
+        ret_val = len(n1) != len(n2) and len(n1) > 0 and len(n2) > 0
+        return ret_val
 
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
@@ -84,12 +85,12 @@ class TestCurrent(unittest.TestCase):
             point = util.Point(lat=36.915, lon=-116.762, srid="4326")
             curr_stops = CurrentStops.query_stops_via_point(self.db.session(), point)
             stops = Stop.query_stops_via_point(self.db.session(), point)
-            self.check_counts(curr_stops, stops)
+            self.assertTrue(self.check_counts(curr_stops, stops))
 
     def test_stops_bbox(self):
         if self.DO_PG:
-            # import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             bbox = util.BBox(min_lat=36.0, max_lat=37.0, min_lon=-117.5, max_lon=-116.0, srid="4326")
             curr_stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)
             stops = Stop.query_stops_via_bbox(self.db.session, bbox)
-            self.check_counts(curr_stops, stops)
+            self.assertTrue(self.check_counts(curr_stops, stops))
