@@ -45,7 +45,7 @@ def load_pgsql():
     return PGDB
 
 
-class TestCurrentBase(unittest.TestCase):
+class TestCurrent(unittest.TestCase):
     db = None
     DO_PG = True #False
 
@@ -67,8 +67,6 @@ class TestCurrentBase(unittest.TestCase):
         n2 = self.db.session.query(clz2).all()
         return self.check_counts(n1, n2)
 
-
-class TestCurrent(TestCurrentBase):
     def test_load(self):
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
