@@ -188,12 +188,15 @@ class CurrentStops(Base, StopBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
+    route_short_names = Column(String(1023))
     route_type = Column(Integer)
     route_type_other = Column(Integer)
     route_mode = Column(String(255))
 
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     location_type = Column(Integer)
+    stop_lat = Column(Numeric(12, 9), nullable=False)
+    stop_lon = Column(Numeric(12, 9), nullable=False)
 
     stop = relationship(
         Stop.__name__,
@@ -209,15 +212,21 @@ class CurrentStops(Base, StopBase):
         :param stop:
         :param session:
         """
-        # import pdb; pdb.set_trace()
         self.stop_id = stop.stop_id
         self.location_type = stop.location_type
+        self.stop_lon = stop.stop_lon
+        self.stop_lat = stop.stop_lat
+
+        # copy the stop geom to CurrentStops (if we're in is_geospatial mode)
+        if hasattr(stop, 'geom') and hasattr(self, 'geom'):
+            self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
 
         # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
+        # import pdb; pdb.set_trace()
         from .route_stop import CurrentRouteStops
-        rs_list = CurrentRouteStops.query_by_stop(session, stop.stop_id)
+        rs_list = CurrentRouteStops.get_route_short_names(session, stop)
         for rs in rs_list:
-            type = rs.route.type
+            type = rs.get('type')
             if self.route_mode is None:
                 self.route_type = type.route_type
                 self.route_mode = type.otp_type
@@ -229,9 +238,8 @@ class CurrentStops(Base, StopBase):
                 else:
                     self.route_type_other = type.route_type
 
-        # copy the stop geom to CurrentStops
-        if hasattr(stop, 'geom') and hasattr(self, 'geom'):
-            self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
+        # route short names
+        self.route_short_names = CurrentRouteStops.get_route_short_names_as_string(rs_list)
 
     @classmethod
     def post_process(cls, db, **kwargs):

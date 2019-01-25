@@ -26,23 +26,22 @@ class RouteStopBase(object):
         # step 2: use either route-dao list or find the active stops
         routes = stop.routes
         if routes is None or len(routes) == 0:
-            routes = cls.active_unique_routes_at_stop(session, stop_id=stop.stop_id)
+            routes = RouteStop.active_unique_routes_at_stop(session, stop_id=stop.stop_id)
             routes.sort(key=lambda x: x.route_sort_order, reverse=False)
 
-            # step 3: build the short names list
-            for r in routes:
-                sn = {'route_id': r.route_id, 'route_type': r.type.type_id, 'route_short_name': util.make_short_name(r)}
-                short_names.append(sn)
+        # step 3: build the short names list
+        for r in routes:
+            sn = {'route_id': r.route_id, 'type': r.type, 'route_type': r.type.route_type, 'otp_type': r.type.otp_type, 'route_short_name': r.make_route_short_name(r)}
+            short_names.append(sn)
 
         return short_names
 
     @classmethod
-    def get_route_short_names_as_string(cls, session, stop, sep=", "):
+    def get_route_short_names_as_string(cls, short_names, sep=", "):
         """
         :return a string representing all short names (e.g., good for a tooltip on a stop popup)
         """
         ret_val = None
-        short_names = cls.get_route_short_names(session, stop)
         for s in short_names:
             rsn = s.get('route_short_name')
             if rsn:
