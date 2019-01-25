@@ -69,7 +69,7 @@ class StopBase(object):
         return ret_val
 
     @classmethod
-    def query_stops_via_point(cls, session, point, limit=10, sort=False):
+    def query_stops_via_point(cls, session, point, limit=10):
         ret_val = []
         try:
             # import pdb; pdb.set_trace()
@@ -79,8 +79,6 @@ class StopBase(object):
             q = q.order_by(cls.geom.distance_centroid(point.get_geojson()))
             q = q.limit(limit)
             ret_val = q.all()
-            if sort:
-                ret_val = cls.sort_list_by_distance(point, ret_val)
         except Exception as e:
             log.warning(e)
         return ret_val
@@ -104,22 +102,3 @@ class StopBase(object):
         else:
             ret_val = cls.generic_query_stops(session, **kwargs)
         return ret_val
-
-    @classmethod
-    def sort_list_by_distance(cls, point, stop_list, order=True):
-        """
-        sort a python list [] by distance, and assign order
-        """
-        # step 1: calculate distance from a point
-        for s in stop_list:
-            s.distance = point * 1111.1111
-
-        # step 2: sort the list
-        stop_list.sort(key=lambda x: x.distance, reverse=False)
-
-        # step 3: (optionally) append a numeric order
-        if order:
-            for i, s in enumerate(stop_list):
-                s.order = i + 1
-
-        return stop_list

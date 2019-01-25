@@ -84,7 +84,6 @@ def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=N
 
 
 class Point(object):
-    def_radius = 1000.0
     is_valid = False
 
     def __init__(self, **kwargs):
@@ -92,16 +91,12 @@ class Point(object):
         try:
             self.lat = float(kwargs.get('lat'))
             self.lon = float(kwargs.get('lon'))
-            self.radius = float(kwargs.get('radius', self.def_radius))
             self.is_valid = True
         except:
-            self.lat = self.lon = self.radius = None
-
-    def get_point_radius(self):
-        return self.lat, self.lon, self.radius
+            self.lat = self.lon = None
 
     def get_point(self):
-        return self.lat, self.lon
+        return self.lon, self.lat
 
     def get_geojson(self):
         point = self.make_geo(self.lon, self.lat, self.srid)
@@ -113,7 +108,6 @@ class Point(object):
         if geo:
             geo = 'SRID={0};{1}'.format(srid, geo)
         return geo
-
 
 
 class BBox(object):
