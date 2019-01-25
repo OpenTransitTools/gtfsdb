@@ -69,7 +69,7 @@ class StopBase(object):
         return ret_val
 
     @classmethod
-    def query_stops_via_point(cls, session, point, limit=2000, sort=False):
+    def query_stops_via_point(cls, session, point, limit=10, sort=False):
         ret_val = []
         try:
             # import pdb; pdb.set_trace()
@@ -77,7 +77,7 @@ class StopBase(object):
             q = session.query(cls)
             q = q.filter(cls.location_type == 0)
             q = q.order_by(cls.geom.distance_centroid(point.get_geojson()))
-            q = q.limit(limit + 10)
+            q = q.limit(limit)
             ret_val = q.all()
             if sort:
                 ret_val = cls.sort_list_by_distance(point, ret_val)

@@ -11,6 +11,7 @@ from . import get_test_file_uri
 import logging
 log = logging.getLogger(__name__)
 
+
 DB = None
 def load_sqlite():
     global DB
@@ -21,6 +22,7 @@ def load_sqlite():
         # url = util.make_temp_sqlite_db_uri('curr')
         DB = database_load(gtfs_file, url=url, current_tables=True)
     return DB
+
 
 PGDB = None
 def load_pgsql():
@@ -45,6 +47,32 @@ def load_pgsql():
     return PGDB
 
 
+def print_list(list):
+    for i in list:
+        print(i.__dict__)
+
+
+def check_counts(list1, list2, id='stop_id'):
+    """ check first that lists both have content; then chekc that either the lists are diff in size or content """
+    # import pdb; pdb.set_trace()
+    ret_val = False
+    #print_list(list1)
+    #print_list(list2)
+    if len(list1) > 0 and len(list2) > 0:
+        if len(list1) != len(list2):
+            ret_val = True
+        else:
+            for i, e1 in enumerate(list1):
+                v1 = getattr(e1, id)
+                v2 = getattr(list2[i], id)
+                if v1 != v2:
+                    ret_val = True
+                    #print("{} VS. {}".format(v1, v2))
+                    #print("{} VS. {}".format(e1.stop.stop_name, list2[i].stop_name))
+                    break
+    return ret_val
+
+
 class TestCurrent(unittest.TestCase):
     db = None
     DO_PG = True #False
@@ -52,20 +80,10 @@ class TestCurrent(unittest.TestCase):
     def setUp(self):
         self.db = load_pgsql() if self.DO_PG else load_sqlite()
 
-    @classmethod
-    def check_counts(cls, n1, n2):
-        ret_val = len(n1) != len(n2) and len(n1) > 0 and len(n2) > 0
-        return ret_val
-
-    @classmethod
-    def print_stops(cls, stop_list):
-        for s in stop_list:
-            print(s.__dict__)
-
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
         n2 = self.db.session.query(clz2).all()
-        return self.check_counts(n1, n2)
+        return check_counts(n1, n2)
 
     def test_load(self):
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
@@ -90,16 +108,11 @@ class TestCurrent(unittest.TestCase):
             point = util.Point(lat=36.915, lon=-116.762, srid="4326")
             curr_stops = CurrentStops.query_stops_via_point(self.db.session(), point)
             stops = Stop.query_stops_via_point(self.db.session(), point)
-            self.assertTrue(self.check_counts(curr_stops, stops))
-            #self.print_stops(curr_stops)
-            #self.print_stops(stops)
+            self.assertTrue(check_counts(curr_stops, stops))
 
     def test_stops_bbox(self):
         if self.DO_PG:
-            #import pdb; pdb.set_trace()
             bbox = util.BBox(min_lat=36.0, max_lat=37.0, min_lon=-117.5, max_lon=-116.0, srid="4326")
             curr_stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)
             stops = Stop.query_stops_via_bbox(self.db.session, bbox)
-            self.assertTrue(self.check_counts(curr_stops, stops))
-            #self.print_stops(curr_stops)
-            #self.print_stops(stops)
+            self.assertTrue(check_counts(curr_stops, stops))
