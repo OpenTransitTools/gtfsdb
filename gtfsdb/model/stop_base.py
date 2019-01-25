@@ -112,7 +112,7 @@ class StopBase(object):
         """
         # step 1: calculate distance from a point
         for s in stop_list:
-            s.distance = 1111.1111
+            s.distance = point * 1111.1111
 
         # step 2: sort the list
         stop_list.sort(key=lambda x: x.distance, reverse=False)

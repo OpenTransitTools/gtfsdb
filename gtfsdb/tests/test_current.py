@@ -45,7 +45,7 @@ def load_pgsql():
     return PGDB
 
 
-class TestCurrent(unittest.TestCase):
+class TestCurrentBase(unittest.TestCase):
     db = None
     DO_PG = True #False
 
@@ -67,6 +67,8 @@ class TestCurrent(unittest.TestCase):
         n2 = self.db.session.query(clz2).all()
         return self.check_counts(n1, n2)
 
+
+class TestCurrent(TestCurrentBase):
     def test_load(self):
         self.assertTrue(self.check_query_counts(Stop,  CurrentStops))
         self.assertTrue(self.check_query_counts(Route, CurrentRoutes))
@@ -91,9 +93,8 @@ class TestCurrent(unittest.TestCase):
             curr_stops = CurrentStops.query_stops_via_point(self.db.session(), point)
             stops = Stop.query_stops_via_point(self.db.session(), point)
             self.assertTrue(self.check_counts(curr_stops, stops))
-            self.print_stops(curr_stops)
-            self.print_stops(stops)
-
+            #self.print_stops(curr_stops)
+            #self.print_stops(stops)
 
     def test_stops_bbox(self):
         if self.DO_PG:
@@ -102,5 +103,5 @@ class TestCurrent(unittest.TestCase):
             curr_stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)
             stops = Stop.query_stops_via_bbox(self.db.session, bbox)
             self.assertTrue(self.check_counts(curr_stops, stops))
-            self.print_stops(curr_stops)
-            self.print_stops(stops)
+            #self.print_stops(curr_stops)
+            #self.print_stops(stops)

@@ -104,15 +104,15 @@ class Point(object):
         return self.lat, self.lon
 
     def get_geojson(self):
-        point = self.make_point(self.lon, self.lat, self.srid)
+        point = self.make_geo(self.lon, self.lat, self.srid)
         return point
 
     @classmethod
-    def make_point(cls, lon, lat, srid=None):
-        point = 'POINT({0} {1})'.format(lon, lat)
-        if srid:
-            point = 'SRID={0};{1}'.format(srid, point)
-        return point
+    def make_geo(cls, lon, lat, srid=None):
+        geo = 'POINT({0} {1})'.format(lon, lat)
+        if geo:
+            geo = 'SRID={0};{1}'.format(srid, geo)
+        return geo
 
 
 
@@ -131,16 +131,23 @@ class BBox(object):
             self.min_lat = self.min_lon = self.max_lat = self.max_lon = None
 
     def get_bbox(self):
-        return self.min_lat, self.min_lon, self.max_lat, self.max_lon
+        return self.min_lon, self.min_lat, self.max_lon, self.max_lat
 
     def get_geojson(self):
+        poly = self.make_geo(self.min_lon, self.max_lon, self.min_lat, self.max_lat, self.srid)
+        return poly
+
+    @classmethod
+    def make_geo(cls, left_lon, right_lon, bot_lat, top_lat, srid=None):
         """
         see: https://gis.stackexchange.com/questions/25797/select-bounding-box-using-postgis
-        note: 5-pt POLYGON ulx uly, urx ury, lrx lry, llx llr, ulx uly
+        note: 5-pt POLY top-left, top-right, bot-right, bot-left,         ulx uly
+                        llon/tlat, rlon/tlat, rlon/blat, min-lon/max-lat, min-lon/max-lat
         """
-        polygon = 'POLYGON(({2} {1}, {3} {1}, {3} {0}, {2} {0}, {2} {1}))'.format(self.min_lat, self.max_lat, self.min_lon, self.max_lon)
-        if self.srid: polygon = 'SRID={0};{1}'.format(self.srid, polygon)
-        return polygon
+        geo = 'POLYGON(({0} {3}, {1} {3}, {1} {2}, {0} {2}, {0} {3}))'.format(left_lon, right_lon, bot_lat, top_lat)
+        if geo:
+            geo = 'SRID={0};{1}'.format(srid, geo)
+        return geo
 
 
 class UTF8Recoder(object):

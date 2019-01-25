@@ -48,7 +48,7 @@ class Stop(Base, StopBase):
 
     @classmethod
     def add_geom_to_dict(cls, row):
-        point = util.Point.make_point(row['stop_lon'], row['stop_lat'], config.SRID)
+        point = util.Point.make_geo(row['stop_lon'], row['stop_lat'], config.SRID)
         row['geom'] = point
 
     @property
@@ -231,7 +231,7 @@ class CurrentStops(Base, StopBase):
 
         # copy the stop geom to CurrentStops
         if hasattr(stop, 'geom') and hasattr(self, 'geom'):
-            self.geom = util.Point.make_point(stop.stop_lon, stop.stop_lat, config.SRID)
+            self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -255,5 +255,6 @@ class CurrentStops(Base, StopBase):
         finally:
             session.flush()
             session.close()
+
 
 __all__ = [Stop.__name__, CurrentStops.__name__]
