@@ -16,7 +16,7 @@ class TestGeomQueries(unittest.TestCase):
     bin/gtfsdb-current-load -g -s trimet -d postgresql://ott@localhost/ott x
     """
     db = None
-    DO_PG = True # False
+    DO_PG = False
 
     def setUp(self):
         url = "postgresql://ott@localhost/ott"

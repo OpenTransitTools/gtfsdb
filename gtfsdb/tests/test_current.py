@@ -75,7 +75,7 @@ def check_counts(list1, list2, id='stop_id'):
 
 class TestCurrent(unittest.TestCase):
     db = None
-    DO_PG = True #False
+    DO_PG = False
 
     def setUp(self):
         self.db = load_pgsql() if self.DO_PG else load_sqlite()
