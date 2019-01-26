@@ -48,7 +48,7 @@ class RouteBase(object):
         return routes
 
     @classmethod
-    def active_routes(cls, session, date=None):
+    def query_active_routes(cls, session, date=None):
         """
         :return list of *active* Route orm objects queried from the db
         :note 'active' is based on date ... this routine won't deal with holes in the
@@ -75,20 +75,20 @@ class RouteBase(object):
         return ret_val
 
     @classmethod
-    def find_nearest_routes(cls, session, geom):
+    def query_nearest_routes(cls, session, geom):
         """
         simple utility for quering a route from gtfsdb
         """
         ret_val = None
 
     @classmethod
-    def active_route_ids(cls, session):
+    def query_active_route_ids(cls, session):
         """
         return an array of route_id / agency_id pairs
         {route_id:'2112', agency_id:'C-TRAN'}
         """
         ret_val = []
-        routes = cls.active_routes(session)
+        routes = cls.query_active_routes(session)
         for r in routes:
             ret_val.append({"route_id": r.route_id, "agency_id": r.agency_id})
         return ret_val

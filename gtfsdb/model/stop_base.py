@@ -13,6 +13,20 @@ class StopBase(object):
     provides a generic set of stop query routines
     """
 
+    def active_stops(self, date=None):
+        """
+        this common method will call route.is_active(), which means it will probably be slow
+        note: this method, even when called from ActiveRoutes or ActiveStops, will probably be *slow*
+        """
+        ret_val = []
+        try:
+            for r in self.routes:
+                if r.is_active(date):
+                    ret_val.append(r)
+        except Exception as e:
+            log.warning(e)
+        return ret_val
+
     @classmethod
     def add_geometry_column(cls):
         if not hasattr(cls, 'geom'):

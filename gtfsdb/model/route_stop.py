@@ -197,7 +197,7 @@ class RouteStop(Base, RouteStopBase):
         return cls.unique_routes_at_stop(session, stop_id, agency_id, date, route_name_filter)
 
     @classmethod
-    def active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
+    def query_active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
         """
         returns list of routes that are seen as 'active' based on dates and filters
         """

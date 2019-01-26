@@ -96,7 +96,7 @@ class TestCurrent(unittest.TestCase):
         """""
 
     def test_routes(self):
-        routes = CurrentRoutes.active_routes(self.db.session())
+        routes = CurrentRoutes.query_active_routes(self.db.session())
         self.assertTrue(len(routes) > 0)
 
     def test_stops(self):

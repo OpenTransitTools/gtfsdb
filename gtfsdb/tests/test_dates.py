@@ -27,16 +27,16 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 
     def test_old_routes(self):
         date = datetime.date(2018, 12, 25)
-        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="OLD", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="0", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="OLD", direction_id="0", date=date)
         self.assertTrue(len(rs) > 2)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
         self.assertTrue(len(rs) == 0)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="0", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="NEW", direction_id="0", date=date)
         self.assertTrue(len(rs) == 0)
 
     def test_via_stops(self):
@@ -48,10 +48,10 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
         self.assertTrue(len(routes) == 1)
 
     def test_active_stop_list(self):
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 12, 25))
+        rs = RouteStop.query_active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2015, 12, 25))
         self.assertTrue(len(rs) == 0)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2018, 12, 25))
+        rs = RouteStop.query_active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2018, 12, 25))
         see_old_stop = False
         for r in rs:
             self.assertTrue(r.stop_id != "NEW")
@@ -59,7 +59,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
                 see_old_stop = True
         self.assertTrue(see_old_stop)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2019, 1, 5))
+        rs = RouteStop.query_active_stops(self.db.session, route_id="ALWAYS", date=datetime.date(2019, 1, 5))
         see_new_stop = False
         for r in rs:
             self.assertTrue(r.stop_id != "OLD")
@@ -85,25 +85,25 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 
     def test_new_routes(self):
         date = datetime.date(2019, 1, 1)
-        rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="0", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="NEW", direction_id="0", date=date)
         self.assertTrue(len(rs) > 2)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="OLD", direction_id="1", date=date)
         self.assertTrue(len(rs) == 0)
 
-        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="0", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="OLD", direction_id="0", date=date)
         self.assertTrue(len(rs) == 0)
 
     def test_effective_dates(self):
         date = datetime.date(2019, 1, 1)
-        rs = RouteStop.active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
+        rs = RouteStop.query_active_stops(self.db.session, route_id="NEW", direction_id="1", date=date)
         self.assertTrue(len(rs) > 2)
 
     def test_active_list(self):
-        rs = RouteStop.active_stops(self.db.session, route_id="OLD", direction_id="1", date=datetime.date(2018, 12, 25))
+        rs = RouteStop.query_active_stops(self.db.session, route_id="OLD", direction_id="1", date=datetime.date(2018, 12, 25))
         self.assertTrue(len(rs) > 1)
         for s in rs:
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))

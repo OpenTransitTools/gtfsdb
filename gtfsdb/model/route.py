@@ -194,7 +194,7 @@ class CurrentRoutes(Base, RouteBase):
         return ret_val
 
     @classmethod
-    def active_routes(cls, session, date=None):
+    def query_active_routes(cls, session, date=None):
         """
         wrap base active route query
         :return list of Route orm objects
@@ -203,7 +203,7 @@ class CurrentRoutes(Base, RouteBase):
         ret_val = []
         if date:
             log.warning("you're calling CurrentRoutes.active_routes with a date, which is slow...")
-            ret_val = Route.active_routes(session, date)
+            ret_val = Route.query_active_routes(session, date)
         else:
             try:
                 # import pdb; pdb.set_trace()
@@ -233,7 +233,7 @@ class CurrentRoutes(Base, RouteBase):
             session.query(CurrentRoutes).delete()
 
             # import pdb; pdb.set_trace()
-            rte_list = Route.active_routes(session)
+            rte_list = Route.query_active_routes(session)
             for i, r in enumerate(rte_list):
                 c = CurrentRoutes(r, i+1)
                 session.add(c)

@@ -145,7 +145,7 @@ class Stop(Base, StopBase):
         return _is_active
 
     @classmethod
-    def active_stops(cls, session, limit=None, active_filter=True, date=None):
+    def query_active_stops(cls, session, limit=None, location_types=[0], active_filter=True, date=None):
         """
         check for active stops
         """
@@ -153,6 +153,9 @@ class Stop(Base, StopBase):
         q = session.query(Stop)
         if limit:
             q = q.limit(limit)
+        if location_types and len(location_types) > 0:
+            # note: default is to filter location_type=0, which is just stops (not stations)
+            q.filter(Stop.location_type.in_(location_types))
         stops = q.all()
 
         # step 2: filter active stops only ???
@@ -163,17 +166,16 @@ class Stop(Base, StopBase):
                     ret_val.append(s)
         else:
             ret_val = stops
-
         return ret_val
 
     @classmethod
-    def active_stop_ids(cls, session, limit=None, active_filter=True):
+    def query_active_stop_ids(cls, session, limit=None, active_filter=True):
         """
         return an array of stop_id / agencies pairs
         {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
         """
         ret_val = []
-        stops = cls.active_stops(session, limit, active_filter)
+        stops = cls.query_active_stops(session, limit, active_filter)
         for s in stops:
             ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val
@@ -251,7 +253,7 @@ class CurrentStops(Base, StopBase):
             session.query(CurrentStops).delete()
 
             # import pdb; pdb.set_trace()
-            for s in Stop.active_stops(session):
+            for s in Stop.query_active_stops(session):
                 c = CurrentStops(s, session)
                 session.add(c)
 
