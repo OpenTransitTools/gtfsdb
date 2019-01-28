@@ -475,33 +475,6 @@ class CurrentRouteStops(Base, RouteStopBase):
         return ret_val
 
     @classmethod
-    def unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
-        """
-        get a unique set of route records by looking for a given stop_id.
-        further filtering can be had by providing an active date and agency id, and route name
-        """
-        ret_val = []
-
-        """
-        route_ids = []
-        route_names = []
-
-        route_stops = RouteStop.query_by_stop(session, stop_id, agency_id, date, sort=True)
-        for rs in route_stops:
-            # step 1: filter(s) check
-            if rs.route_id in route_ids:
-                continue
-            if route_name_filter and rs.route.route_name in route_names:
-                continue
-            route_ids.append(rs.route_id)
-            route_names.append(rs.route.route_name)
-
-            # step 2: append route object to results
-            ret_val.append(rs.route)
-        """
-        return ret_val
-
-    @classmethod
     def post_process(cls, db, **kwargs):
         """
         will update the current 'view' of this data
