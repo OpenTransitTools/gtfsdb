@@ -45,7 +45,10 @@ class StopBase(object):
             q = q.filter(cls.stop_id == stop_id)
             # TODO q.filter(Stop.agency_id == agency_id)
             if detailed:
-                q = q.options(joinedload("stop_features"))
+                try:
+                    q = q.options(joinedload("stop_features"))
+                except:
+                    pass
             ret_val = q.one()
         except Exception as e:
             log.info(e)
