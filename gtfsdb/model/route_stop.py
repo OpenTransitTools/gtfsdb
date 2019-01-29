@@ -2,7 +2,7 @@ import datetime
 import sys
 import time
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 
 from sqlalchemy import Column, Sequence
@@ -14,7 +14,45 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class RouteStop(Base):
+class RouteStopBase(object):
+    @classmethod
+    def get_route_short_names(cls, session, stop):
+        """
+        :return an array of short names and types
+        """
+        # step 1: create a short_names list
+        short_names = []
+
+        # step 2: use either route-dao list or find the active stops
+        routes = stop.routes
+        if routes is None or len(routes) == 0:
+            routes = RouteStop.active_unique_routes_at_stop(session, stop_id=stop.stop_id)
+            routes.sort(key=lambda x: x.route_sort_order, reverse=False)
+
+        # step 3: build the short names list
+        for r in routes:
+            sn = {'route_id': r.route_id, 'type': r.type, 'route_type': r.type.route_type, 'otp_type': r.type.otp_type, 'route_short_name': r.make_route_short_name(r)}
+            short_names.append(sn)
+
+        return short_names
+
+    @classmethod
+    def get_route_short_names_as_string(cls, short_names, sep=", "):
+        """
+        :return a string representing all short names (e.g., good for a tooltip on a stop popup)
+        """
+        ret_val = None
+        for s in short_names:
+            rsn = s.get('route_short_name')
+            if rsn:
+                if ret_val is None:
+                    ret_val = rsn
+                else:
+                    ret_val = "{}{}{}".format(ret_val, sep, rsn)
+        return ret_val
+
+
+class RouteStop(Base, RouteStopBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'route_stops'
 
@@ -159,7 +197,7 @@ class RouteStop(Base):
         return cls.unique_routes_at_stop(session, stop_id, agency_id, date, route_name_filter)
 
     @classmethod
-    def active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
+    def query_active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
         """
         returns list of routes that are seen as 'active' based on dates and filters
         """
@@ -337,7 +375,7 @@ class RouteStop(Base):
           AND st.stop_id   = '1'
         GROUP BY st.stop_id
 
-        @:return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
+        :return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
         """
         # import pdb; pdb.set_trace()
         ret_val = {}
@@ -373,7 +411,7 @@ class RouteStop(Base):
         return start, end
 
 
-class CurrentRouteStops(Base):
+class CurrentRouteStops(Base, RouteStopBase):
     """
     this table is (optionally) used as a view into the currently active routes
     it is pre-calculated to list routes that are currently running service

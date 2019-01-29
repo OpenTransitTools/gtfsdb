@@ -42,13 +42,13 @@ class TestRoute(unittest.TestCase, BasicModelTests):
 
     def test_active_date(self):
         # import pdb; pdb.set_trace()
-        routes = Route.active_routes(self.db.session, datetime.date(2014, 6, 6))
+        routes = Route.query_active_routes(self.db.session, datetime.date(2014, 6, 6))
         self.assertTrue(len(routes) > 1)
         for r in routes:
             self.assertTrue("good, I see active route id: {0}".format(r.route_id))
 
     def test_active_today(self):
-        routes = Route.active_routes(self.db.session)
+        routes = Route.query_active_routes(self.db.session)
         for r in routes:
             self.assertFalse("we should not have any routes, but I see route id: {0}".format(r.route_id))
 
@@ -57,7 +57,7 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
     model = RouteStop
 
     def test_active_list(self):
-        stops = RouteStop.active_stops(self.db.session, route_id="194", direction_id="1", date=datetime.date(2014, 6, 6))
+        stops = RouteStop.query_active_stops(self.db.session, route_id="194", direction_id="1", date=datetime.date(2014, 6, 6))
         self.assertTrue(len(stops) > 1)
         for s in stops:
             self.assertTrue("good, I see active stop id: {0}".format(s.stop_id))
@@ -72,16 +72,16 @@ class TestRouteStop(unittest.TestCase, BasicModelTests):
 
     def test_route_stops(self):
         date = datetime.date(2014, 6, 6)
-        stops = RouteStop.active_stops(self.db.session, route_id="193", direction_id="1", date=date)
+        stops = RouteStop.query_active_stops(self.db.session, route_id="193", direction_id="1", date=date)
         self.assertTrue(len(stops) > 5)
 
-        stops = RouteStop.active_stops(self.db.session, route_id="193", direction_id="0", date=date)
+        stops = RouteStop.query_active_stops(self.db.session, route_id="193", direction_id="0", date=date)
         self.assertTrue(len(stops) > 5)
 
-        stops = RouteStop.active_stops(self.db.session, route_id="194", direction_id="1", date=date)
+        stops = RouteStop.query_active_stops(self.db.session, route_id="194", direction_id="1", date=date)
         self.assertTrue(len(stops) > 5)
 
-        stops = RouteStop.active_stops(self.db.session, route_id="194", direction_id="0", date=date)
+        stops = RouteStop.query_active_stops(self.db.session, route_id="194", direction_id="0", date=date)
         self.assertTrue(len(stops) > 5)
 
     def test_active_date(self):

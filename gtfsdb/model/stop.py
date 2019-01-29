@@ -1,90 +1,15 @@
 import datetime
 from collections import defaultdict
 
-from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import joinedload_all, object_session, relationship
+from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
+from .stop_base import StopBase
 
 import logging
 log = logging.getLogger(__name__)
-
-
-class StopBase(object):
-    """ provides a generic set of stop query routines """
-
-    @classmethod
-    def get_bbox_params(cls, **kwargs):
-        top_lat = top_lon = bot_lat = bot_lon = None
-        try:
-            top_lat = float(kwargs.get('top_lat'))
-            top_lon = float(kwargs.get('top_lat'))
-            bot_lat = float(kwargs.get('top_lat'))
-            bot_lon = float(kwargs.get('top_lat'))
-        except Exception as e:
-            log.warning(e)
-        return top_lat, top_lon, bot_lat, bot_lon
-
-    @classmethod
-    def get_point_radius(cls, **kwargs):
-        lat = lon = radius = None
-        try:
-            lat = float(kwargs.get('lat'))
-            lon = float(kwargs.get('lon'))
-            radius = float(kwargs.get('radius', 10.0))
-        except Exception as e:
-            log.warning(e)
-        return lat, lon, radius
-
-    @classmethod
-    def has_bbox_params(cls, **kwargs):
-        top_lat, top_lon, bot_lat, bot_lon = cls.get_bbox_params(**kwargs)
-        return top_lat and top_lon and bot_lat and bot_lon
-
-    @classmethod
-    def has_point_radius(cls, **kwargs):
-        lat, lon, radius = cls.get_point_radius(**kwargs)
-        return lat and lon and radius
-
-    @classmethod
-    def query_stops_via_bbox(cls, session, **kwargs):
-        ret_val = []
-        return ret_val
-
-    @classmethod
-    def query_stops_via_point_radius(cls, session, **kwargs):
-        ret_val = []
-        return ret_val
-
-    @classmethod
-    def generic_query_stops(cls, session, **kwargs):
-        """
-        query for list of this data
-        """
-        ret_val = []
-        try:
-            # import pdb; pdb.set_trace()
-            clist = session.query(cls)
-            limit = kwargs.get('limit')
-            if limit:
-                clist = clist.limit(limit)
-            ret_val = clist.all()
-        except Exception as e:
-            log.warning(e)
-        return ret_val
-
-    @classmethod
-    def query_stops(cls, session, **kwargs):
-        ret_val = []
-        if cls.has_bbox_params(**kwargs):
-            ret_val = cls.query_stops_via_bbox(session, **kwargs)
-        elif cls.has_point_radius(**kwargs):
-            ret_val = cls.query_stops_via_point_radius(session, **kwargs)
-        else:
-            ret_val = cls.generic_query_stops(session, **kwargs)
-        return ret_val
 
 
 class Stop(Base, StopBase):
@@ -122,14 +47,9 @@ class Stop(Base, StopBase):
         uselist=True, viewonly=True)
 
     @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
-
-    @classmethod
     def add_geom_to_dict(cls, row):
-        args = (config.SRID, row['stop_lon'], row['stop_lat'])
-        row['geom'] = 'SRID={0};POINT({1} {2})'.format(*args)
+        point = util.Point.make_geo(row['stop_lon'], row['stop_lat'], config.SRID)
+        row['geom'] = point
 
     @property
     def routes(self):
@@ -225,16 +145,17 @@ class Stop(Base, StopBase):
         return _is_active
 
     @classmethod
-    def active_stops(cls, session, limit=None, active_filter=True, date=None):
+    def query_active_stops(cls, session, limit=None, location_types=[0], active_filter=True, date=None):
         """
         check for active stops
         """
-        ret_val = None
-
         # step 1: get stops
         q = session.query(Stop)
         if limit:
             q = q.limit(limit)
+        if location_types and len(location_types) > 0:
+            # note: default is to filter location_type=0, which is just stops (not stations)
+            q.filter(Stop.location_type.in_(location_types))
         stops = q.all()
 
         # step 2: filter active stops only ???
@@ -245,17 +166,16 @@ class Stop(Base, StopBase):
                     ret_val.append(s)
         else:
             ret_val = stops
-
         return ret_val
 
     @classmethod
-    def active_stop_ids(cls, session, limit=None, active_filter=True):
+    def query_active_stop_ids(cls, session, limit=None, active_filter=True):
         """
         return an array of stop_id / agencies pairs
         {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
         """
         ret_val = []
-        stops = cls.active_stops(session, limit, active_filter)
+        stops = cls.query_active_stops(session, limit, active_filter)
         for s in stops:
             ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val
@@ -270,29 +190,45 @@ class CurrentStops(Base, StopBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
+    route_short_names = Column(String(1023))
     route_type = Column(Integer)
     route_type_other = Column(Integer)
     route_mode = Column(String(255))
 
-
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    location_type = Column(Integer)
+    stop_lat = Column(Numeric(12, 9), nullable=False)
+    stop_lon = Column(Numeric(12, 9), nullable=False)
 
     stop = relationship(
         Stop.__name__,
         primaryjoin='CurrentStops.stop_id==Stop.stop_id',
         foreign_keys='(CurrentStops.stop_id)',
         uselist=False, viewonly=True,
+        lazy="joined", innerjoin=True,
     )
 
     def __init__(self, stop, session):
+        """
+        create a CurrentStop record from a stop record
+        :param stop:
+        :param session:
+        """
         self.stop_id = stop.stop_id
+        self.location_type = stop.location_type
+        self.stop_lon = stop.stop_lon
+        self.stop_lat = stop.stop_lat
 
+        # copy the stop geom to CurrentStops (if we're in is_geospatial mode)
+        if hasattr(stop, 'geom') and hasattr(self, 'geom'):
+            self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
+
+        # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
         # import pdb; pdb.set_trace()
-        """ convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop """
         from .route_stop import CurrentRouteStops
-        rs_list = CurrentRouteStops.query_by_stop(session, stop.stop_id)
+        rs_list = CurrentRouteStops.get_route_short_names(session, stop)
         for rs in rs_list:
-            type = rs.route.type
+            type = rs.get('type')
             if self.route_mode is None:
                 self.route_type = type.route_type
                 self.route_mode = type.otp_type
@@ -304,6 +240,9 @@ class CurrentStops(Base, StopBase):
                 else:
                     self.route_type_other = type.route_type
 
+        # route short names
+        self.route_short_names = CurrentRouteStops.get_route_short_names_as_string(rs_list)
+
     @classmethod
     def post_process(cls, db, **kwargs):
         """
@@ -314,7 +253,7 @@ class CurrentStops(Base, StopBase):
             session.query(CurrentStops).delete()
 
             # import pdb; pdb.set_trace()
-            for s in Stop.active_stops(session):
+            for s in Stop.query_active_stops(session):
                 c = CurrentStops(s, session)
                 session.add(c)
 
