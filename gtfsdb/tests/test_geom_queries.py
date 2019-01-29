@@ -4,7 +4,7 @@ except ImportError:
     import unittest
 
 from gtfsdb import *
-from .test_current import check_counts, TestCurrent
+from .test_current import check_counts
 
 import logging
 log = logging.getLogger(__name__)
@@ -16,20 +16,23 @@ class TestGeomQueries(unittest.TestCase):
     bin/gtfsdb-current-load -g -s trimet -d postgresql://ott@localhost:5432/ott x
     """
     db = None
+    DO_PG = False
 
     def setUp(self):
+        from .test_current import TestCurrent
         if TestCurrent.DO_PG and TestGeomQueries.db is None:
+            self.DO_PG = True
             self.db = Database(url=TestCurrent.PG_URL, schema=TestCurrent.PG_SCHEMA, is_geospatial=True, current_tables=True)
 
     def test_nearest(self):
-        if TestCurrent.DO_PG:
+        if self.DO_PG:
             point = util.Point(lat=45.53, lon=-122.6664, srid="4326")
             curr_stops = CurrentStops.query_stops_via_point(self.db.session(), point)
             stops = Stop.query_stops_via_point(self.db.session(), point)
             self.assertTrue(check_counts(curr_stops, stops))
 
     def test_bbox(self):
-        if TestCurrent.DO_PG and False:
+        if self.DO_PG and False:
             #import pdb; pdb.set_trace()
             bbox = util.BBox(min_lat=45.530, max_lat=45.535, min_lon=-122.665, max_lon=-122.667, srid="4326")
             curr_stops = CurrentStops.query_stops_via_bbox(self.db.session, bbox)

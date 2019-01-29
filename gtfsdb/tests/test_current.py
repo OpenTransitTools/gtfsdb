@@ -16,7 +16,7 @@ def load_sqlite():
     #import pdb; pdb.set_trace()
     gtfs_file = get_test_file_uri('multi-date-feed.zip')
     url = util.make_temp_sqlite_db_uri()
-    # url = util.make_temp_sqlite_db_uri('curr')
+    #url = util.make_temp_sqlite_db_uri('curr')  # write sqlite to this filename file (rather than a random file name)
     db = database_load(gtfs_file, url=url, current_tables=True)
     return db
 
@@ -32,7 +32,7 @@ def load_pgsql(url, schema="current_test"):
      d) psql -d postgres -c "CREATE DATABASE test WITH OWNER ott;"
      e) bin/test gtfsdb.tests.test_current
     """
-    # import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     gtfs_file = get_test_file_uri('multi-date-feed.zip')
     db = database_load(gtfs_file, url=url, schema=schema, is_geospatial=True, current_tables=True)
     return db
@@ -45,7 +45,6 @@ def print_list(list):
 
 def check_counts(list1, list2, id='stop_id'):
     """ check first that lists both have content; then chekc that either the lists are diff in size or content """
-    # import pdb; pdb.set_trace()
     ret_val = False
     #print_list(list1)
     #print_list(list2)
@@ -72,7 +71,7 @@ class TestCurrent(unittest.TestCase):
 
     def setUp(self):
         if TestCurrent.db is None:
-            self.db = load_pgsql() if self.DO_PG else load_sqlite()
+            self.db = load_pgsql(self.PG_URL, self.PG_SCHEMA) if self.DO_PG else load_sqlite()
             TestCurrent.db = self.db
 
     def check_query_counts(self, clz1, clz2):
