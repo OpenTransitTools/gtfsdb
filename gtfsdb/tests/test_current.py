@@ -12,20 +12,16 @@ import logging
 log = logging.getLogger(__name__)
 
 
-DB = None
 def load_sqlite():
-    global DB
-    if DB is None:
-        #import pdb; pdb.set_trace()
-        gtfs_file = get_test_file_uri('multi-date-feed.zip')
-        url = util.make_temp_sqlite_db_uri()
-        # url = util.make_temp_sqlite_db_uri('curr')
-        DB = database_load(gtfs_file, url=url, current_tables=True)
-    return DB
+    #import pdb; pdb.set_trace()
+    gtfs_file = get_test_file_uri('multi-date-feed.zip')
+    url = util.make_temp_sqlite_db_uri()
+    # url = util.make_temp_sqlite_db_uri('curr')
+    db = database_load(gtfs_file, url=url, current_tables=True)
+    return db
 
 
-PGDB = None
-def load_pgsql():
+def load_pgsql(url, schema="current_test"):
     """ To run this test, do the following:
      x) bin/test  gtfsdb.tests.test_current
 
@@ -36,15 +32,10 @@ def load_pgsql():
      d) psql -d postgres -c "CREATE DATABASE test WITH OWNER ott;"
      e) bin/test gtfsdb.tests.test_current
     """
-    global PGDB
-    if PGDB is None:
-        # import pdb; pdb.set_trace()
-        #url = "postgresql://ott@maps7:5432/ott"
-        url = "postgresql://ott@localhost/ott"
-        schema = "current_test"
-        gtfs_file = get_test_file_uri('multi-date-feed.zip')
-        PGDB = database_load(gtfs_file, url=url, schema=schema, is_geospatial=True, current_tables=True)
-    return PGDB
+    # import pdb; pdb.set_trace()
+    gtfs_file = get_test_file_uri('multi-date-feed.zip')
+    db = database_load(gtfs_file, url=url, schema=schema, is_geospatial=True, current_tables=True)
+    return db
 
 
 def print_list(list):
@@ -76,9 +67,13 @@ def check_counts(list1, list2, id='stop_id'):
 class TestCurrent(unittest.TestCase):
     db = None
     DO_PG = False
+    PG_URL = "postgresql://ott@localhost:5432/ott"
+    PG_SCHEMA = "current_test"
 
     def setUp(self):
-        self.db = load_pgsql() if self.DO_PG else load_sqlite()
+        if TestCurrent.db is None:
+            self.db = load_pgsql() if self.DO_PG else load_sqlite()
+            TestCurrent.db = self.db
 
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()
