@@ -98,7 +98,7 @@ class Point(object):
     def get_point(self):
         return self.lon, self.lat
 
-    def get_geojson(self):
+    def to_geojson(self):
         point = self.make_geo(self.lon, self.lat, self.srid)
         return point
 
@@ -127,7 +127,7 @@ class BBox(object):
     def get_bbox(self):
         return self.min_lon, self.min_lat, self.max_lon, self.max_lat
 
-    def get_geojson(self):
+    def to_geojson(self):
         poly = self.make_geo(self.min_lon, self.max_lon, self.min_lat, self.max_lat, self.srid)
         return poly
 

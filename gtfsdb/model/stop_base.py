@@ -78,7 +78,7 @@ class StopBase(object):
             log.info("query gtfsdb Stop table")
             q = session.query(cls)
             q = q.filter(cls.location_type == 0)  # just stops (not stations or entrances to stations)
-            q = q.filter(cls.geom.ST_Within(bbox.get_geojson()))
+            q = q.filter(cls.geom.ST_Within(bbox.to_geojson()))
             q = q.limit(limit + 10)
             ret_val = q.all()
         except Exception as e:
@@ -93,7 +93,7 @@ class StopBase(object):
             log.info("query Stop table")
             q = session.query(cls)
             q = q.filter(cls.location_type == 0)
-            q = q.order_by(cls.geom.distance_centroid(point.get_geojson()))
+            q = q.order_by(cls.geom.distance_centroid(point.to_geojson()))
             q = q.limit(limit)
             ret_val = q.all()
         except Exception as e:
