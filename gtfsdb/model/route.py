@@ -189,9 +189,13 @@ class CurrentRoutes(Base, RouteBase):
     def is_active(self, date=None):
         ret_val = True
         if date:
-            log.warning("you're calling CurrentRoutes.is_active with a date, which is slow...")
+            log.warning("you're calling CurrentRoutes.is_active with a date, which is both slow and redundant...")
             ret_val = self.route.is_active(date)
         return ret_val
+
+    def get_route(self, session, route_id, detailed=False):
+        r = super(CurrentRoutes, self).get_route(session, route_id, detailed)
+        return r.route
 
     @classmethod
     def query_active_routes(cls, session, date=None):
@@ -206,7 +210,6 @@ class CurrentRoutes(Base, RouteBase):
             ret_val = Route.query_active_routes(session, date)
         else:
             try:
-                # import pdb; pdb.set_trace()
                 clist = session.query(CurrentRoutes).order_by(CurrentRoutes.route_sort_order).all()
                 for r in clist:
                     ret_val.append(r.route)

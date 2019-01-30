@@ -14,20 +14,19 @@ class RouteBase(object):
         return True
 
     @classmethod
-    def get_route(cls, session, route_id, detailed=False, agency=None):
+    def get_route(cls, session, route_id, detailed=False):
         """
         simple utility for quering a route from gtfsdb
         """
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         ret_val = None
         try:
             log.info("query Route for {}".format(route_id))
             q = session.query(cls)
             q = q.filter(cls.route_id == route_id)
-            # TODO q.filter(Stop.agency_id == agency_id)
             if detailed:
+                # todo: some joined junk, ala what we see in stops? -- q = q.options(joinedload("stop_features"))
                 pass
-                #  q = q.options(joinedload("stop_features"))
             ret_val = q.one()
         except Exception as e:
             log.info(e)
