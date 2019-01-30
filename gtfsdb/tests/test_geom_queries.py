@@ -3,8 +3,8 @@ try:
 except ImportError:
     import unittest
 
+from .base import check_counts
 from gtfsdb import *
-from .test_current import check_counts
 
 import logging
 log = logging.getLogger(__name__)
