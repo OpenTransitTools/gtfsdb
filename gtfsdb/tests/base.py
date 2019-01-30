@@ -1,5 +1,6 @@
-from gtfsdb.api import database_load
 from gtfsdb import util
+from gtfsdb.model.db import Database
+from gtfsdb.api import database_load
 
 from pkg_resources import resource_filename
 import os
@@ -45,6 +46,11 @@ def load_pgsql(url, schema="current_test"):
     #import pdb; pdb.set_trace()
     gtfs_file = get_test_file_uri('multi-date-feed.zip')
     db = database_load(gtfs_file, url=url, schema=schema, is_geospatial=True, current_tables=True)
+    return db
+
+
+def get_pg_db(url, schema='trimet'):
+    db = Database(url=url, schema=schema, is_geospatial=True, current_tables=True)
     return db
 
 
