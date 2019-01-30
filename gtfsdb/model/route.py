@@ -62,6 +62,24 @@ class Route(Base, RouteBase):
         uselist=True, viewonly=True
     )
 
+    def is_active(self, date=None):
+        """
+        :return False whenever we see that the route start and end date are outside the
+                input date (where the input date defaults to 'today')
+        """
+        _is_active = True
+        if self.start_date or self.end_date:
+            _is_active = False
+            date = util.check_date(date)
+            if self.start_date and self.end_date:  # keep this as nested if (don't combine due to below)
+                if self.start_date <= date <= self.end_date:
+                    _is_active = True
+            elif self.start_date and self.start_date <= date:
+                _is_active = True
+            elif self.end_date and date <= self.end_date:
+                _is_active = True
+        return _is_active
+
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
         """
@@ -143,24 +161,6 @@ class Route(Base, RouteBase):
         log.debug('{0}.post_process'.format(cls.__name__))
         cls.load_geoms(db)
 
-    def is_active(self, date=None):
-        """
-        :return False whenever we see that the route start and end date are outside the
-                input date (where the input date defaults to 'today')
-        """
-        _is_active = True
-        if self.start_date or self.end_date:
-            _is_active = False
-            date = util.check_date(date)
-            if self.start_date and self.end_date:  # keep this as nested if (don't combine due to below)
-                if self.start_date <= date <= self.end_date:
-                    _is_active = True
-            elif self.start_date and self.start_date <= date:
-                _is_active = True
-            elif self.end_date and date <= self.end_date:
-                _is_active = True
-        return _is_active
-
 
 class CurrentRoutes(Base, RouteBase):
     """
@@ -193,8 +193,10 @@ class CurrentRoutes(Base, RouteBase):
             ret_val = self.route.is_active(date)
         return ret_val
 
-    def get_route(self, session, route_id, detailed=False):
-        r = super(CurrentRoutes, self).get_route(session, route_id, detailed)
+    @classmethod
+    def query_route(cls, session, route_id, detailed=False):
+        """ get a gtfsdb Route object from the db """
+        r = super(CurrentRoutes, cls).query_route(session, route_id, detailed)
         return r.route
 
     @classmethod
@@ -203,7 +205,6 @@ class CurrentRoutes(Base, RouteBase):
         wrap base active route query
         :return list of Route orm objects
         """
-        # import pdb; pdb.set_trace()
         ret_val = []
         if date:
             log.warning("you're calling CurrentRoutes.active_routes with a date, which is slow...")
@@ -232,6 +233,7 @@ class CurrentRoutes(Base, RouteBase):
           7. close transaction
         """
         session = db.session()
+        num_inserts = 0
         try:
             session.query(CurrentRoutes).delete()
 
@@ -240,6 +242,7 @@ class CurrentRoutes(Base, RouteBase):
             for i, r in enumerate(rte_list):
                 c = CurrentRoutes(r, i+1)
                 session.add(c)
+                num_inserts += 1
 
             session.commit()
             session.flush()
@@ -249,6 +252,8 @@ class CurrentRoutes(Base, RouteBase):
         finally:
             session.flush()
             session.close()
+        if num_inserts == 0:
+            log.warning("CurrentRoutes did not insert any route records...hmmmm...")
 
 
 class RouteDirection(Base):

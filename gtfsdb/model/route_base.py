@@ -14,7 +14,7 @@ class RouteBase(object):
         return True
 
     @classmethod
-    def get_route(cls, session, route_id, detailed=False):
+    def query_route(cls, session, route_id, detailed=False):
         """
         simple utility for quering a route from gtfsdb
         """
@@ -33,7 +33,7 @@ class RouteBase(object):
         return ret_val
 
     @classmethod
-    def get_route_list(cls, session):
+    def query_route_list(cls, session):
         """
         :return list of *all* Route orm objects queried from the db
         """
@@ -43,7 +43,6 @@ class RouteBase(object):
             .filter(~cls.route_id.in_(session.query(RouteFilter.route_id)))\
             .order_by(cls.route_sort_order)\
             .all()
-
         return routes
 
     @classmethod
@@ -54,7 +53,7 @@ class RouteBase(object):
               schedule (e.g., when a route is not active for a period of time, due to construction)
         """
         # step 1: grab all routes
-        routes = cls.get_route_list(session)
+        routes = cls.query_route_list(session)
 
         # step 2: filter routes by active date
         ret_val = cls.filter_active_routes(routes, date)
