@@ -1,7 +1,5 @@
-from gtfsdb import *  # noqa
-from gtfsdb import util
-from gtfsdb.api import database_load
-from . import get_test_file_uri
+from gtfsdb import *
+from .base import load_sqlite
 
 try:
     import unittest2 as unittest
@@ -14,9 +12,7 @@ log = logging.getLogger(__name__)
 
 
 class BasicModelTests(object):
-    gtfs_file = get_test_file_uri('large-sample-feed.zip')
-    url = util.make_temp_sqlite_db_uri()
-    db = database_load(gtfs_file, url=url)
+    db = load_sqlite(gtfs_name='large-sample-feed.zip')
 
     def get_first(self):
         try:
