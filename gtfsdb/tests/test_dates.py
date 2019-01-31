@@ -1,29 +1,27 @@
-import sys
-import shutil
-import datetime
-
-from . import get_test_file_uri
-from gtfsdb import *
-from gtfsdb import util
-from gtfsdb.api import database_load
-
-import logging
-log = logging.getLogger(__name__)
-
 try:
     import unittest2 as unittest
 except ImportError:
     import unittest
 
+import sys
+import shutil
+import datetime
 
-class BasicModelTests(object):
-    gtfs_file = get_test_file_uri('multi-date-feed.zip')
-    url = util.make_temp_sqlite_db_uri()
-    db = database_load(gtfs_file, url=url)
+from gtfsdb import *
+from .base import load_sqlite
+
+import logging
+log = logging.getLogger(__name__)
 
 
-class TestRouteStop(unittest.TestCase, BasicModelTests):
+class TestRouteStop(unittest.TestCase):
     model = RouteStop
+    db = None
+
+    def setUp(self):
+        if TestRouteStop.db is None:
+            TestRouteStop.db = load_sqlite()
+        self.db = TestRouteStop.db
 
     def test_old_routes(self):
         date = datetime.date(2018, 12, 25)

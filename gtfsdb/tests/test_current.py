@@ -20,8 +20,8 @@ class TestCurrent(unittest.TestCase):
 
     def setUp(self):
         if TestCurrent.db is None:
-            self.db = load_pgsql(self.PG_URL, self.PG_SCHEMA) if self.DO_PG else load_sqlite('curr')
-            TestCurrent.db = self.db
+            TestCurrent.db = load_pgsql(self.PG_URL, self.PG_SCHEMA) if self.DO_PG else load_sqlite('curr')
+        self.db = TestCurrent.db
 
     def check_query_counts(self, clz1, clz2):
         n1 = self.db.session.query(clz1).all()

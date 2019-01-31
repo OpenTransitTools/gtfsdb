@@ -3,15 +3,18 @@ try:
 except ImportError:
     import unittest
 
-from . import get_test_file_uri
 from gtfsdb import *
-from gtfsdb.api import database_load
+from .base import load_sqlite
 
 
-class TestAPI(unittest.TestCase):
+class TestLoad(unittest.TestCase):
+    db = None
+
+    def setUp(self):
+        if TestLoad.db is None:
+            TestLoad.db = load_sqlite(gtfs_name='sample-feed.zip')
+        self.db = TestLoad.db
+
     def test_database_load(self):
-        gtfs_file = get_test_file_uri('sample-feed.zip')
-        db = database_load(gtfs_file, ignore_blocks=True)
-        self.assertTrue(len(db.session.query(Stop).all()) > 0)
-        self.assertTrue(len(db.session.query(Route).all()) > 0)
-
+        self.assertTrue(len(self.db.session.query(Stop).all()) > 0)
+        self.assertTrue(len(self.db.session.query(Route).all()) > 0)
