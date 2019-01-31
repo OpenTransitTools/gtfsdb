@@ -16,10 +16,11 @@ log = logging.getLogger(__name__)
 
 class RouteStopBase(object):
     @classmethod
-    def get_route_short_names(cls, session, stop):
+    def query_route_short_names(cls, session, stop, filter_active=False):
         """
         :return an array of short names and types
         """
+        # import pdb; pdb.set_trace()
         # step 1: create a short_names list
         short_names = []
 
@@ -31,13 +32,15 @@ class RouteStopBase(object):
 
         # step 3: build the short names list
         for r in routes:
+            if filter_active and r.is_active() is False:
+                continue
             sn = {'route_id': r.route_id, 'type': r.type, 'route_type': r.type.route_type, 'otp_type': r.type.otp_type, 'route_short_name': r.make_route_short_name(r)}
             short_names.append(sn)
 
         return short_names
 
     @classmethod
-    def get_route_short_names_as_string(cls, short_names, sep=", "):
+    def to_route_short_names_as_string(cls, short_names, sep=", "):
         """
         :return a string representing all short names (e.g., good for a tooltip on a stop popup)
         """
@@ -140,7 +143,6 @@ class RouteStop(Base, RouteStopBase):
         get all route stop records by looking for a given stop_id.
         further filtering can be had by providing an active date and agency id
         """
-        # import pdb; pdb.set_trace()
         # step 1: query all route stops by stop id (and maybe agency)
         q = session.query(RouteStop).filter(RouteStop.stop_id == stop_id)
         if agency_id is not None:

@@ -15,20 +15,19 @@ def get_test_directory_path():
     return path
 
 
-def get_test_file_uri(test_file):
+def get_gtfs_file_uri(gtfs_file):
     """ will send back proper file:////blah/test_file.zip """
     dir_path = get_test_directory_path()
-    file_path = "file://{0}".format(os.path.join(dir_path, test_file))
-    file_path = file_path.replace('\\', '/')
-    return file_path
+    file_uri = "file://{0}".format(os.path.join(dir_path, gtfs_file))
+    file_uri = file_uri.replace('\\', '/')
+    return file_uri
 
 
-def load_sqlite():
-    #import pdb; pdb.set_trace()
-    gtfs_file = get_test_file_uri('multi-date-feed.zip')
-    url = util.make_temp_sqlite_db_uri()
-    #url = util.make_temp_sqlite_db_uri('curr')  # write sqlite to this filename file (rather than a random file name)
-    db = database_load(gtfs_file, url=url, current_tables=True)
+def load_sqlite(db_name=None, gtfs_name='multi-date-feed.zip'):
+    # import pdb; pdb.set_trace()
+    gtfs_uri = get_gtfs_file_uri(gtfs_name)
+    url = util.make_temp_sqlite_db_uri(db_name)
+    db = database_load(gtfs_uri, url=url, current_tables=True)
     return db
 
 

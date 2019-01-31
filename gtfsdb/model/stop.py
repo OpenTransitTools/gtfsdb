@@ -226,7 +226,7 @@ class CurrentStops(Base, StopBase):
         # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
         # import pdb; pdb.set_trace()
         from .route_stop import CurrentRouteStops
-        rs_list = CurrentRouteStops.get_route_short_names(session, stop)
+        rs_list = CurrentRouteStops.query_route_short_names(session, stop, filter_active=True)
         for rs in rs_list:
             type = rs.get('type')
             if self.route_mode is None:
@@ -241,7 +241,7 @@ class CurrentStops(Base, StopBase):
                     self.route_type_other = type.route_type
 
         # route short names
-        self.route_short_names = CurrentRouteStops.get_route_short_names_as_string(rs_list)
+        self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
 
     @classmethod
     def post_process(cls, db, **kwargs):
