@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 class TestCurrent(unittest.TestCase):
     db = None
-    DO_PG = False
+    DO_PG = True
     PG_URL = "postgresql://ott@localhost:5432/ott"
     PG_SCHEMA = "current_test"
 
