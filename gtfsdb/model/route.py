@@ -294,6 +294,14 @@ class RouteType(Base):
             ret_val = True
         return ret_val
 
+    def is_lower_priority(self, cmp_route_type):
+        """ abitrary compare of route types, where lower numbrer means higher priority in terms mode ranking (sans bus) """
+        ret_val = False
+        if cmp_route_type != self.route_type:
+            if cmp_route_type == 3 or cmp_route_type > self.route_type:
+                ret_val = True
+        return ret_val
+
 
 class RouteFilter(Base):
     """

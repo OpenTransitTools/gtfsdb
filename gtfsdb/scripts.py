@@ -7,11 +7,6 @@ from gtfsdb.model.base import Base
 from gtfsdb.api import database_load
 
 
-def gtfsdb_load():
-    args, kwargs = get_args()
-    database_load(args.file, **kwargs)
-
-
 def get_args(prog_name='gtfsdb-load',):
     """
     database load command-line arg parser and help util...
@@ -42,16 +37,24 @@ def get_args(prog_name='gtfsdb-load',):
     args = parser.parse_args()
 
     kwargs = dict(
-        batch_size=args.batch_size,
+        # common cmd line items
+        url=args.database_url,
         schema=args.schema,
         is_geospatial=args.is_geospatial,
-        tables=args.tables,
-        url=args.database_url,
+        current_tables=args.current_tables,
+
+        # less used params
         do_postprocess=not args.ignore_postprocess,
         ignore_blocks=args.ignore_blocks,
-        current_tables = args.current_tables
+        tables=args.tables,
+        batch_size=args.batch_size
     )
     return args, kwargs
+
+
+def gtfsdb_load():
+    args, kwargs = get_args()
+    database_load(args.file, **kwargs)
 
 
 def route_stop_load():
@@ -64,16 +67,20 @@ def route_stop_load():
     RouteStop.load(db, **kwargs)
 
 
-def current_tables_load():
+def current_tables_load(**kwargs):
     """
     current table loader
     """
     from gtfsdb import Database, CurrentRoutes, CurrentStops, CurrentRouteStops
-    kwargs = get_args('gtfsdb-current-load')[1]
     db = Database(**kwargs)
     for cls in [CurrentRoutes, CurrentRouteStops, CurrentStops]:
         db.create_table(cls)
         cls.post_process(db, **kwargs)
+
+
+def current_tables_cmdline():
+    kwargs = get_args('gtfsdb-current-load')[1]
+    current_tables_load(**kwargs)
 
 
 def db_connect_tester():
@@ -88,7 +95,6 @@ def db_connect_tester():
         print(s.stop_name)
     for r in db.session.query(Route).limit(2):
         print(r.route_name)
-    # import pdb; pdb.set_trace()
     stop_times = StopTime.get_departure_schedule(db.session, stop_id='11411')
     for st in stop_times:
         print(st.get_direction_name())

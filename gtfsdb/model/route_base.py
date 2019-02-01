@@ -104,14 +104,14 @@ class RouteBase(object):
             if ret_val and ret_val.startswith('MAX') and ret_val.endswith('Line'):
                 ret_val = " ".join(ret_val.split()[:-1])
             # special fix for Portland Streetcar
-            if 'Portland Streetcar' in ret_val and route.route_long_name and len(route.route_long_name) > 0:
-                ret_val = route.route_long_name.replace('Portland', '').strip()
+            if 'Portland Streetcar' in ret_val:
+                ret_val = ret_val.replace('Portland Streetcar', 'PSC').strip()
             # fix WES
             if ret_val and ret_val.startswith('WES '):
                 ret_val = "WES"
             # fix Portland Aerial Tram
             if ret_val and ret_val == 'Portland Aerial Tram':
-                ret_val = "Tram"
+                ret_val = "Aerial Tram"
         except Exception as e:
             log.warning(e)
 

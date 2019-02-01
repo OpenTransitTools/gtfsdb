@@ -231,7 +231,7 @@ class CurrentStops(Base, StopBase):
                 self.route_type = type.route_type
                 self.route_mode = type.otp_type
             elif type.is_different_mode(self.route_type):
-                if type.is_higher_priority(self.route_type):
+                if type.is_lower_priority(self.route_type):
                     self.route_type_other = self.route_type
                     self.route_type = type.route_type
                     self.route_mode = type.otp_type
