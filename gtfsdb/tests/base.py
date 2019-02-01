@@ -43,8 +43,8 @@ def load_pgsql(url, schema="current_test"):
      e) bin/test gtfsdb.tests.test_current
     """
     #import pdb; pdb.set_trace()
-    gtfs_file = get_test_file_uri('multi-date-feed.zip')
-    db = database_load(gtfs_file, url=url, schema=schema, is_geospatial=True, current_tables=True)
+    gtfs_uri = get_gtfs_file_uri('multi-date-feed.zip')
+    db = database_load(gtfs_uri, url=url, schema=schema, is_geospatial=True, current_tables=True)
     return db
 
 
