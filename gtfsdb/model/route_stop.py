@@ -1,13 +1,12 @@
 import sys
 import time
-import datetime
 
 from sqlalchemy import Column, Sequence
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Date, Integer, String
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 from .route_stop_base import RouteStopBase
 
@@ -64,8 +63,7 @@ class RouteStop(Base, RouteStopBase):
         """
         _is_active = False
         if self.start_date and self.end_date:
-            if date is None:
-                date = datetime.date.today()
+            date = util.check_date(date)
             if self.start_date <= date <= self.end_date:
                 _is_active = True
         return _is_active
@@ -86,12 +84,6 @@ class RouteStop(Base, RouteStopBase):
         returns boolean whether given stop id is active for a given date
         """
         ret_val = False
-
-        # step 1: default date
-        if date is None or not isinstance(date, datetime.date):
-            date = datetime.date.today()
-
-        # step 2: get RouteStop object
         rs = RouteStop.query_by_stop(session, stop_id, agency_id, date, 1)
         if rs and len(rs) > 0:
             ret_val = True
@@ -102,20 +94,20 @@ class RouteStop(Base, RouteStopBase):
         """
         to filter active routes, just provide a date to the above unique_routes_at_stop method
         """
-        # make sure date is not null...
-        if date is None or not isinstance(date, datetime.date):
-            date = datetime.date.today()
-        return cls.unique_routes_at_stop(session, stop_id, agency_id, date, route_name_filter)
+        ret_val = []
+        routes = cls.unique_routes_at_stop(session, stop_id, agency_id, date, route_name_filter)
+        for r in routes:
+            if r.is_active(date):
+                ret_val.append(r)
+        return ret_val
 
     @classmethod
     def query_active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
         """
         returns list of routes that are seen as 'active' based on dates and filters
         """
-
         # step 1: default date
-        if date is None or not isinstance(date, datetime.date):
-            date = datetime.date.today()
+        date = util.check_date(date)
 
         # step 2a: query all route stops by route (and maybe direction and agency
         q = session.query(RouteStop).filter(RouteStop.route_id == route_id)
@@ -269,7 +261,6 @@ class RouteStop(Base, RouteStopBase):
 
         :return hash table with stop_id as key, and tuple of (stop_id, start_date, end_date) for all route stops
         """
-        # import pdb; pdb.set_trace()
         ret_val = {}
 
         # step 1: query the route/stop start and end dates, based on stop time table
@@ -375,7 +366,6 @@ class CurrentRouteStops(Base, RouteStopBase):
         try:
             session.query(CurrentRouteStops).delete()
 
-            # import pdb; pdb.set_trace()
             rs_list = session.query(RouteStop).all()
             for rs in rs_list:
                 if rs.is_active():

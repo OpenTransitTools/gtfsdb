@@ -65,12 +65,14 @@ def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=N
     """
     utility function to parse a request object for something that looks like a date object...
     """
-    if isinstance(in_date, datetime.date) or isinstance(in_date, datetime.datetime):
+    if def_val is None:
+        def_val = datetime.date.today()
+
+    if in_date is None:
+        ret_val = def_val
+    elif isinstance(in_date, datetime.date) or isinstance(in_date, datetime.datetime):
         ret_val = in_date
     else:
-        if def_val is None:
-            def_val = datetime.date.today()
-
         ret_val = def_val
         for fmt in fmt_list:
             try:

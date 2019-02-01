@@ -1,4 +1,3 @@
-import datetime
 from collections import defaultdict
 
 from sqlalchemy import Column, Integer, Numeric, String
@@ -133,12 +132,11 @@ class Stop(Base, StopBase):
                I used to call this multiple times via route_stop to make sure each stop was active ... that
                was really bad performance wise.
         """
-        _is_active = False
-        if date is None:
-            date = datetime.date.today()
+        from gtfsdb.model.stop_time import StopTime
 
         # import pdb; pdb.set_trace()
-        from gtfsdb.model.stop_time import StopTime
+        _is_active = False
+        date = util.check_date(date)
         st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
         if st and len(st) > 0:
             _is_active = True

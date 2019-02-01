@@ -1,4 +1,3 @@
-import datetime
 import time
 
 from gtfsdb import config, util

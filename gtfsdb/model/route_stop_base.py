@@ -1,3 +1,4 @@
+from gtfsdb import util
 import logging
 log = logging.getLogger(__name__)
 
@@ -18,7 +19,6 @@ class RouteStopBase(object):
         if blocks:
             for b in blocks:
                 if b.is_arrival():
-                    # import pdb; pdb.set_trace()
                     _is_arrival = True
                     break
         return _is_arrival
@@ -80,6 +80,7 @@ class RouteStopBase(object):
 
         # step 2: filter based on date
         if date:
+            date = util.check_date(date)
             q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
 
         # step 3: sort the results based on order column
@@ -106,14 +107,16 @@ class RouteStopBase(object):
 
         route_stops = cls.query_by_stop(session, stop_id, agency_id, date, sort=True)
         for rs in route_stops:
-            # step 1: filter(s) check
+            # step 1: filter(s) check against hashtable
             if rs.route_id in route_ids:
                 continue
             if route_name_filter and rs.route.route_name in route_names:
                 continue
+
+            # step 2: add route attributes to cache hash-tables for later filtering (e.g. see filters above)
             route_ids.append(rs.route_id)
             route_names.append(rs.route.route_name)
 
-            # step 2: append route object to results
+            # step 3: this route is unique, so append route object to results
             ret_val.append(rs.route)
         return ret_val
