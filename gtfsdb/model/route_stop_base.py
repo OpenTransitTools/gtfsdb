@@ -82,13 +82,13 @@ class RouteStopBase(object):
         if date:
             q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
 
-        # step 3: limit the number of objects returned by query
-        if count:
-            q = q.limit(count)
-
-        # step 4: sort the results based on order column
+        # step 3: sort the results based on order column
         if sort:
             q = q.order_by(RouteStop.order)
+
+        # step 4: limit the number of objects returned by query
+        if count:
+            q = q.limit(count)
 
         ret_val = q.all()
         return ret_val

@@ -46,6 +46,28 @@ class TestCurrent(unittest.TestCase):
         stops = CurrentStops.query_stops(self.db.session(), limit=1)
         self.assertTrue(len(stops) == 1)
 
+    def test_route_stops(self):
+        #import pdb; pdb.set_trace()
+
+        # DADAN has 2 routes active now
+        routes = CurrentRouteStops.unique_routes_at_stop(self.db.session(), stop_id="DADAN")
+        self.assertTrue(len(routes) == 2)
+        self.assertTrue(routes[0].route_id in ('NEW', 'ALWAYS'))
+        self.assertTrue(routes[1].route_id in ('NEW', 'ALWAYS'))
+
+        # DADAN has 3 routes total ... RouteStop isn't filtering current stops, so will show older inactive route
+        routes = RouteStop.unique_routes_at_stop(self.db.session(), stop_id="DADAN")
+        self.assertTrue(len(routes) == 3)
+
+        # OLD is not active, so CurrentStops should not have OLD as stop in the current route stop table
+        routes = CurrentRouteStops.unique_routes_at_stop(self.db.session(), stop_id="OLD")
+        self.assertTrue(len(routes) == 0)
+
+        # although OLD is not active, RouteStop should show this route stop, since it's not filtering for is_active
+        routes = RouteStop.unique_routes_at_stop(self.db.session(), stop_id="OLD")
+        self.assertTrue(len(routes) == 1)
+        self.assertTrue(routes[0].route_id == 'ALWAYS')
+
     def test_stops_point(self):
         if self.DO_PG:
             point = util.Point(lat=36.915, lon=-116.762, srid="4326")

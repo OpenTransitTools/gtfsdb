@@ -345,7 +345,7 @@ class CurrentRouteStops(Base, RouteStopBase):
         self.order = route_stop.order
 
     @classmethod
-    def query_by_stop(cls, session, stop_id, agency_id=None, count=None, sort=False):
+    def query_by_stop(cls, session, stop_id, agency_id=None, date=None, count=None, sort=False):
         """
         get all route stop records by looking for a given stop_id.
         further filtering can be had by providing an active date and agency id
@@ -355,13 +355,13 @@ class CurrentRouteStops(Base, RouteStopBase):
         if agency_id is not None:
             q = q.filter(RouteStop.agency_id == agency_id)
 
-        # step 2: limit the number of objects returned by query
-        if count:
-            q = q.limit(count)
-
-        # step 4: sort the results based on order column
+        # step 2: sort the results based on order column
         if sort:
             q = q.order_by(CurrentRouteStops.order)
+
+        # step 3: limit the number of objects returned by query
+        if count:
+            q = q.limit(count)
 
         ret_val = q.all()
         return ret_val
