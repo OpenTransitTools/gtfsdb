@@ -106,6 +106,8 @@ class RouteStop(Base, RouteStopBase):
         """
         returns list of routes that are seen as 'active' based on dates and filters
         """
+        # import pdb; pdb.set_trace()
+
         # step 1: default date
         date = util.check_date(date)
 
@@ -114,7 +116,9 @@ class RouteStop(Base, RouteStopBase):
         if direction_id is not None:
             q = q.filter(RouteStop.direction_id == direction_id)
         if agency_id is not None:
-            q = q.filter(RouteStop.agency_id == agency_id)
+            pass
+            # TODO ... agency_id not in RouteStop -- should this even be here?
+            # q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2b: filter based on date
         q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
@@ -344,7 +348,9 @@ class CurrentRouteStops(Base, RouteStopBase):
         # step 1: query stop id
         q = session.query(CurrentRouteStops).filter(CurrentRouteStops.stop_id == stop_id)
         if agency_id is not None:
-            q = q.filter(RouteStop.agency_id == agency_id)
+            pass
+            # TODO ... agency_id not in RouteStop -- should this even be here?
+            # q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2: sort the results based on order column
         if sort:
