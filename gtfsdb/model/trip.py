@@ -62,6 +62,12 @@ class Trip(Base):
                          "non-public, and thus their stop time records didn't make it into the gtfs)"
                          .format(t.trip_id, t.trip_len))
 
+    @classmethod
+    def query_trip(cls, session, trip_id):
+        """ return a trip via trip_id """
+        ret_val = session.query(Trip).filter(Trip.trip_id==trip_id).one()
+        return ret_val
+
     @property
     def start_stop(self):
         return self.stop_times[0].stop
