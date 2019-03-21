@@ -21,7 +21,7 @@ install_requires = [
 
 setup(
     name='gtfsdb',
-    version='0.4.2',
+    version='0.5.0',
     description='GTFS Database',
     long_description=open('README.rst').read(),
     keywords='GTFS',
@@ -47,6 +47,6 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ),
 )
