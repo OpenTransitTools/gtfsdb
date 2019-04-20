@@ -49,6 +49,13 @@ class _Base(object):
         cls.__table__.schema = schema
 
     @classmethod
+    def get_schema(cls, def_val=None):
+        ret_val = def_val
+        if hasattr(cls, '__table__') and cls.__table__.schema:
+            ret_val = cls.__table__.schema
+        return ret_val
+
+    @classmethod
     def make_geom_lazy(cls):
         from sqlalchemy.orm import deferred
         try:

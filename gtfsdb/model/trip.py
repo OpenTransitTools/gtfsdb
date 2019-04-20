@@ -63,8 +63,10 @@ class Trip(Base):
                          .format(t.trip_id, t.trip_len))
 
     @classmethod
-    def query_trip(cls, session, trip_id):
+    def query_trip(cls, session, trip_id, schema=None):
         """ return a trip via trip_id """
+        if schema:
+            Trip.set_schema(schema)
         ret_val = session.query(Trip).filter(Trip.trip_id==trip_id).one()
         return ret_val
 
