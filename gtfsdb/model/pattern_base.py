@@ -28,7 +28,7 @@ class PatternBase(object):
         self.geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
 
     @classmethod
-    def query_orm_for_pattern(cls, session, pattern_id, agency=None):
+    def get_geometry(cls, session, pattern_id, agency=None):
         """
         simple utility for querying a stop from gtfsdb
         """
@@ -44,7 +44,7 @@ class PatternBase(object):
         return ret_val
 
     @classmethod
-    def query_pattern_and_encode(cls, session, pattern_id, agency=None):
+    def get_geometry_encoded(cls, session, pattern_id, agency=None):
         ret_val = cls.query_orm_for_pattern(session, pattern_id, agency)
         # TODO encode using mapbox or something...
         return ret_val
