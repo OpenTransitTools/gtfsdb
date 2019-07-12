@@ -29,7 +29,7 @@ class PatternBase(object):
         """
         ret_val = None
         try:
-            log.info("query Pattern for {}".format(pattern_id_id))
+            log.info("query Pattern for {}".format(pattern_id))
             q = session.query(cls)
             q = q.filter(cls.shape_id == pattern_id)
             # TODO q.filter(cls.agency_id == agency_id)
