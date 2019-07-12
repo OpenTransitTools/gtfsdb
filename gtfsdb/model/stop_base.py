@@ -36,14 +36,14 @@ class StopBase(object):
     @classmethod
     def query_orm_for_stop(cls, session, stop_id, detailed=False, agency=None):
         """
-        simple utility for quering a stop from gtfsdb
+        simple utility for querying a stop from gtfsdb
         """
         ret_val = None
         try:
             log.info("query Stop for {}".format(stop_id))
             q = session.query(cls)
             q = q.filter(cls.stop_id == stop_id)
-            # TODO q.filter(Stop.agency_id == agency_id)
+            # TODO q.filter(cls.agency_id == agency_id)
             if detailed:
                 try:
                     q = q.options(joinedload("stop_features"))

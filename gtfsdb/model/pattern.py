@@ -1,6 +1,5 @@
 import time
 
-from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
@@ -8,6 +7,7 @@ from sqlalchemy.sql import func
 from gtfsdb import config
 from gtfsdb.model.base import Base
 from gtfsdb.model.shape import Shape
+from gtfsdb.model.pattern_base import PatternBase
 
 import logging
 log = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 __all__ = ['Pattern']
 
 
-class Pattern(Base):
+class Pattern(Base, PatternBase):
     datasource = config.DATASOURCE_DERIVED
 
     __tablename__ = 'patterns'
@@ -35,15 +35,6 @@ class Pattern(Base):
         primaryjoin='Pattern.shape_id==Shape.shape_id',
         foreign_keys='(Shape.shape_id)',
         uselist=True, viewonly=True)
-
-    @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            cls.geom = deferred(Column(Geometry(geometry_type='LINESTRING', srid=config.SRID)))
-
-    def geom_from_shape(self, points):
-        coords = ['{0} {1}'.format(r.shape_pt_lon, r.shape_pt_lat) for r in points]
-        self.geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
 
     @classmethod
     def load(cls, db, **kwargs):
