@@ -136,7 +136,7 @@ class Route(Base, RouteBase):
     @classmethod
     def load_geoms(cls, db):
         """ load derived geometries, currently only written for PostgreSQL """
-        from gtfsdb.model.shape import Pattern
+        from gtfsdb.model.pattern import Pattern
         from gtfsdb.model.trip import Trip
 
         if db.is_geospatial and db.is_postgresql:

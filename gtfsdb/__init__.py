@@ -9,6 +9,7 @@ from gtfsdb.model.frequency import Frequency  # noqa
 from gtfsdb.model.route import *  # noqa
 from gtfsdb.model.route_stop import *  # noqa
 from gtfsdb.model.shape import *  # noqa
+from gtfsdb.model.pattern import *  # noqa
 from gtfsdb.model.stop import *  # noqa
 from gtfsdb.model.stop_feature import *  # noqa
 from gtfsdb.model.stop_time import StopTime  # noqa
