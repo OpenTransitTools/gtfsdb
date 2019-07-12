@@ -1,5 +1,3 @@
-import time
-
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import deferred, relationship
@@ -8,9 +6,6 @@ from gtfsdb import config
 
 import logging
 log = logging.getLogger(__name__)
-
-
-__all__ = ['Pattern']
 
 
 class PatternBase(object):

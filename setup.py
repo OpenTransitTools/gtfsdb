@@ -14,6 +14,7 @@ extras_require = dict(
 )
 
 install_requires = [
+    'polyline',
     'geoalchemy2',
     'sqlalchemy',
     'psycopg2',
