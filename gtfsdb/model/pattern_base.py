@@ -2,6 +2,9 @@ from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import deferred, relationship
 
+from sqlalchemy.sql import func
+import polyline
+
 from gtfsdb import config
 
 import logging
@@ -40,6 +43,21 @@ class PatternBase(object):
 
     @classmethod
     def get_geometry_encoded(cls, session, pattern_id, agency=None):
-        ret_val = cls.query_orm_for_pattern(session, pattern_id, agency)
-        # TODO encode using mapbox or something...
+        """
+        :returns a dict with 2 fields ... google encoded points and length
+        """
+        ret_val = {
+            'points': None,
+            'length': 0
+        }
+
+        try:
+            #import pdb; pdb.set_trace()
+            # session.query(pat.geom.st_asgeojson()).all()
+            pat = cls.get_geometry(session, pattern_id, agency)
+            points = func.st_collect(pat.geom)
+            ret_val['points'] = polyline.encode(points)
+            ret_val['length'] = func.st_npoints(pat.geom)
+        except Exception as e:
+            log.info(e)
         return ret_val
