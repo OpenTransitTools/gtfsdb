@@ -58,5 +58,4 @@ class Pattern(Base, PatternBase):
         session.commit()
         session.close()
         processing_time = time.time() - start_time
-        log.debug('{0}.load ({1:.0f} seconds)'.format(
-            cls.__name__, processing_time))
+        log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, processing_time))

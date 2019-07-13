@@ -1,9 +1,7 @@
 from geoalchemy2 import Geometry
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import deferred, relationship
-
 from sqlalchemy.sql import func
-import polyline
 
 from gtfsdb import config
 
@@ -26,7 +24,7 @@ class PatternBase(object):
         self.geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
 
     @classmethod
-    def get_geometry(cls, session, pattern_id, agency=None):
+    def query_pattern(cls, session, pattern_id, agency=None):
         """
         simple utility for querying a stop from gtfsdb
         """
@@ -42,6 +40,13 @@ class PatternBase(object):
         return ret_val
 
     @classmethod
+    def get_geometry_geojson(cls, session, pattern_id, agency=None):
+        """
+        :returns a geojson object
+        """
+        return "TODO"
+
+    @classmethod
     def get_geometry_encoded(cls, session, pattern_id, agency=None):
         """
         :returns a dict with 2 fields ... google encoded points and length
@@ -53,11 +58,11 @@ class PatternBase(object):
 
         try:
             #import pdb; pdb.set_trace()
-            # session.query(pat.geom.st_asgeojson()).all()
-            pat = cls.get_geometry(session, pattern_id, agency)
-            points = func.st_collect(pat.geom)
-            ret_val['points'] = polyline.encode(points)
-            ret_val['length'] = func.st_npoints(pat.geom)
+            pattern = cls.query_pattern(session, pattern_id, agency)
+            points = session.query(func.st_asencodedpolyline(pattern.geom)).one()
+            length = session.query(func.st_npoints(pattern.geom)).one()
+            ret_val['length'] = length[0]
+            ret_val['points'] = points[0]
         except Exception as e:
             log.info(e)
         return ret_val
