@@ -42,9 +42,16 @@ class PatternBase(object):
     @classmethod
     def get_geometry_geojson(cls, session, pattern_id, agency=None):
         """
-        :returns a geojson object
+        :returns a geojson object for the pattern geometry (should be of type:LineString)
         """
-        return "TODO"
+        try:
+            #import pdb; pdb.set_trace()
+            pattern = cls.query_pattern(session, pattern_id, agency)
+            dblist = session.query(func.st_asgeojson(pattern.geom)).one()
+            ret_val = eval(dblist[0]) # query result comes back as list with one 'string' entry -- eval converts to dict
+        except Exception as e:
+            log.info(e)
+        return ret_val
 
     @classmethod
     def get_geometry_encoded(cls, session, pattern_id, agency=None):
