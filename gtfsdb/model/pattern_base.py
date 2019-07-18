@@ -44,6 +44,7 @@ class PatternBase(object):
         """
         :returns a geojson object for the pattern geometry (should be of type:LineString)
         """
+        ret_val = None
         try:
             #import pdb; pdb.set_trace()
             pattern = cls.query_pattern(session, pattern_id, agency)
