@@ -16,5 +16,5 @@ class StopFeature(Base):
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     stop_id = Column(String(255), index=True, nullable=False)
-    feature_type = Column(String(50), index=True, nullable=False)
+    feature_type = Column(String(50))
     feature_name = Column(String(255))
