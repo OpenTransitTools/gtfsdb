@@ -7,6 +7,13 @@ import logging
 log = logging.getLogger(__name__)
 
 
+# python2 & python3 compat - 'long' is a py2 thing, and undefined in py3 .. so long=int
+try:
+    long = long
+except:
+    long = int
+
+
 def get_all_subclasses(cls):
     """
     :see https://stackoverflow.com/questions/3862310/how-to-find-all-the-subclasses-of-a-class-given-its-name
