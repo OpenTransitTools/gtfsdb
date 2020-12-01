@@ -58,9 +58,8 @@ class Trip(Base):
         trips = db.session.query(Trip).all()
         for t in trips:
             if not t.is_valid:
-                log.warn("invalid trip: {0} only has {1} stop_time record (i.e., maybe the stops are coded as "
-                         "non-public, and thus their stop time records didn't make it into the gtfs)"
-                         .format(t.trip_id, t.trip_len))
+                log.warning("invalid trip: {0} only has {1} stop_time record (i.e., maybe the stops are coded as "
+                  "non-public, and thus their stop time records didn't make it into the gtfs)".format(t.trip_id, t.trip_len))
 
     @classmethod
     def query_trip(cls, session, trip_id, schema=None):
