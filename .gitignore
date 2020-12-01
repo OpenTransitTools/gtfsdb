@@ -13,6 +13,7 @@ COMMIT_EDITMSG
 .idea
 *.iml
 .DS_Store
+**/tests/*feed
 
 # C extensions
 *.so

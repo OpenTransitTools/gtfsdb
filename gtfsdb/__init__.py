@@ -10,6 +10,7 @@ from gtfsdb.model.route import *  # noqa
 from gtfsdb.model.route_stop import *  # noqa
 from gtfsdb.model.shape import *  # noqa
 from gtfsdb.model.pattern import *  # noqa
+from gtfsdb.model.pattern_base import *  # noqa
 from gtfsdb.model.stop import *  # noqa
 from gtfsdb.model.stop_feature import *  # noqa
 from gtfsdb.model.stop_time import StopTime  # noqa
@@ -33,6 +34,7 @@ SORTED_CLASS_NAMES = [
     Transfer.__name__,
     Shape.__name__,
     Pattern.__name__,
+    PatternBase.__name__,
     Trip.__name__,
     StopTime.__name__,
     RouteStop.__name__,
