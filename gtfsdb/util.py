@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import datetime
 import tempfile
 
@@ -92,6 +93,25 @@ def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=N
     return ret_val
 
 
+class UTF8Recoder(object):
+    """Iterator that reads an encoded stream and encodes the input to UTF-8"""
+    def __init__(self, f, encoding):
+        import codecs
+        self.reader = codecs.getreader(encoding)(f)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if sys.version_info >= (3, 0):
+            return next(self.reader)
+        else:
+            return self.reader.next().encode('utf-8')
+
+    def __next__(self):
+        return self.next()
+
+
 class Point(object):
     is_valid = False
 
@@ -153,20 +173,42 @@ class BBox(object):
         return geo
 
 
-class UTF8Recoder(object):
-    """Iterator that reads an encoded stream and encodes the input to UTF-8"""
-    def __init__(self, f, encoding):
-        import codecs
-        self.reader = codecs.getreader(encoding)(f)
+def distance_km(lat1, lon1, lat2, lon2):
+    """
+    return distance between two points in km using haversine
+      http://en.wikipedia.org/wiki/Haversine_formula
+      http://www.platoscave.net/blog/2009/oct/5/calculate-distance-latitude-longitude-python/
+      Author: Wayne Dyck
+    """
+    ret_val = 0
+    radius = 6371 # km
+    lat1 = float(lat1)
+    lon1 = float(lon1)
+    lat2 = float(lat2)
+    lon2 = float(lon2)
 
-    def __iter__(self):
-        return self
+    dlat = math.radians(lat2-lat1)
+    dlon = math.radians(lon2-lon1)
 
-    def next(self):
-        if sys.version_info >= (3, 0):
-            return next(self.reader)
-        else:
-            return self.reader.next().encode('utf-8')
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
+        * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    ret_val = radius * c
 
-    def __next__(self):
-        return self.next()
+    return ret_val
+
+
+def distance_mi(lat1, lon1, lat2, lon2):
+    """
+    return distance between two points in miles
+    """
+    km = distance_km(lat1, lon1, lat2, lon2)
+    return km * 0.621371192
+
+
+def distance_ft(lat1, lon1, lat2, lon2):
+    """
+    return distance between two points in feet
+    """
+    mi = distance_mi(lat1, lon1, lat2, lon2)
+    return mi * 5280

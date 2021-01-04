@@ -155,6 +155,14 @@ class TestFareRule(unittest.TestCase, BasicModelTests):
 class TestShape(unittest.TestCase, BasicModelTests):
     model = Shape
 
+    def test_shape_pt_dist(self):
+        """ the large-sample-feed.zip lacks the optional 'shape_dist_traveled' attribute, so provide it post-process """
+        num = -0.1
+        for s in self.db.session.query(self.model).limit(5):
+            self.assertTrue(s.shape_dist_traveled > num)
+            num += 1.0
+
 
 class TestTransfer(unittest.TestCase, BasicModelTests):
     model = Transfer
+

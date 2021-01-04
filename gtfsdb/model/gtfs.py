@@ -18,6 +18,8 @@ log = logging.getLogger(__name__)
 class GTFS(object):
 
     def __init__(self, filename):
+        # import pdb; pdb.set_trace()
+        # TODO: replace old/clunky urlretrieve() with requests.get
         self.file = filename
         try:
             self.local_file = urlretrieve(filename)[0]
