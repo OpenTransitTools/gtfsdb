@@ -131,6 +131,13 @@ class TestStop(unittest.TestCase, BasicModelTests):
 class TestStopTimes(unittest.TestCase, BasicModelTests):
     model = StopTime
 
+    def test_shape_pt_dist(self):
+        """ the large-sample-feed.zip lacks the optional 'shape_dist_traveled' attribute, so provide it post-process """
+        num = -0.1
+        for s in self.db.session.query(StopTime).filter(StopTime.trip_id == '4383758').all():
+            self.assertTrue(s.shape_dist_traveled > num)
+            num += 1.0
+
 
 class TestAgency(unittest.TestCase, BasicModelTests):
     model = Agency
