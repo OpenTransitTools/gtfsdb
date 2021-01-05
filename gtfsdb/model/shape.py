@@ -36,9 +36,18 @@ class Shape(Base):
     @classmethod
     def post_process(cls, db, **kwargs):
         """
-        will update the current 'view' of this data
+        routines to run after db is loaded
         """
-        log.info("Shape.post_process")
+        log.debug('{0}.post_process'.format(cls.__name__))
+        cls.populate_shape_dist_traveled(db)
+
+
+    @classmethod
+    def populate_shape_dist_traveled(cls, db):
+        """
+        populate Shape.shape_pt_sequence where ever it is missing
+        TODO: assumes feet as the measure ... should make this configurable
+        """
         session = db.session()
         try:
             shapes = session.query(Shape).order_by(Shape.shape_id, Shape.shape_pt_sequence).all()
@@ -59,7 +68,7 @@ class Shape(Base):
                     # import pdb; pdb.set_trace()
                     if s.shape_dist_traveled is None:
                         msg = "calc dist {}: {},{} to {},{}".format(s.shape_pt_sequence, prev_lat, prev_lon, s.shape_pt_lat, s.shape_pt_lon)
-                        log.debug(msg)
+                        #log.debug(msg)
                         distance += util.distance_ft(prev_lat, prev_lon, s.shape_pt_lat, s.shape_pt_lon)
                         s.shape_dist_traveled = distance
 

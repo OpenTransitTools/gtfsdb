@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from gtfsdb import config
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 from sqlalchemy import Column
 from sqlalchemy.orm import joinedload_all, relationship
@@ -102,8 +102,51 @@ class StopTime(Base):
     @classmethod
     def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
+        cls.populate_shape_dist_traveled(db)
         # cls.null_out_last_stop_departures(db) ## commented out due to other processes
-        pass
+
+    @classmethod
+    def populate_shape_dist_traveled(cls, db):
+        """
+        populate StopTime.shape_dist_travelled where ever it is missing
+        TODO: assumes feet as the measure ... should make this configurable
+        """
+        session = db.session()
+        try:
+            stop_times = session.query(StopTime).order_by(StopTime.trip_id, StopTime.stop_sequence).all()
+            if stop_times:
+                trip_id = "-111"
+                prev_lat = prev_lon = None
+                distance = 0.0
+                for s in stop_times:
+                    # step 1: on first iteration or shape change, goto loop again (e.g., need 2 coords to calc distance)
+                    if prev_lat is None or trip_id != s.trip_id:
+                        prev_lat = s.stop.stop_lat
+                        prev_lon = s.stop.stop_lon
+                        trip_id = s.trip_id
+                        distance = s.shape_dist_traveled = 0.0
+                        continue
+
+                    # step 2: now that we have 2 coords, we can (if missing) calculate the travel distannce
+                    # import pdb; pdb.set_trace()
+                    if s.shape_dist_traveled is None:
+                        #msg = "calc dist {}: {},{} to {},{}".format(s.shape_pt_sequence, prev_lat, prev_lon, s.shape_pt_lat, s.shape_pt_lon)
+                        #log.debug(msg)
+                        distance += util.distance_ft(prev_lat, prev_lon, s.stop.stop_lat, s.stop.stop_lon)
+                        s.shape_dist_traveled = distance
+
+                    # step 3 save off these coords (and distance) for next iteration
+                    prev_lat = s.stop.stop_lat
+                    prev_lon = s.stop.stop_lon
+                    distance = s.shape_dist_traveled
+        except Exception as e:
+            log.warning(e)
+            session.rollback()
+        finally:
+            session.commit()
+            session.flush()
+            session.close()
+
 
     @classmethod
     def null_out_last_stop_departures(cls, db):
