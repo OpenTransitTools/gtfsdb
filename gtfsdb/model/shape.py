@@ -55,6 +55,7 @@ class Shape(Base):
                 shape_id = "-111"
                 prev_lat = prev_lon = None
                 distance = 0.0
+                count = 0
                 for s in shapes:
                     # step 1: on first iteration or shape change, goto loop again (e.g., need 2 coords to calc distance)
                     if prev_lat is None or shape_id != s.shape_id:
@@ -71,11 +72,19 @@ class Shape(Base):
                         #log.debug(msg)
                         distance += util.distance_ft(prev_lat, prev_lon, s.shape_pt_lat, s.shape_pt_lon)
                         s.shape_dist_traveled = distance
+                        count += 1
 
                     # step 3 save off these coords (and distance) for next iteration
                     prev_lat = s.shape_pt_lat
                     prev_lon = s.shape_pt_lon
                     distance = s.shape_dist_traveled
+
+                    # step 4 persist every now and then not to build a big buffer
+                    if count >= 10000:
+                        session.commit()
+                        session.flush()
+                        count = 0
+
         except Exception as e:
             log.warning(e)
             session.rollback()
