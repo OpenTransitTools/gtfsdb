@@ -24,6 +24,36 @@ class Shape(Base):
     shape_dist_traveled = Column(Numeric(20, 10))
 
     @classmethod
+    def get_sequence_from_dist(cls, dist, shapes, find_nearest=True, max_nearest=111.111, def_val=-1):
+        """
+        find the sequence based on
+        """
+        ret_val = None
+        nearest_seq = def_val
+        nearest_dist = max_nearest
+
+        # loop thru shape points
+        for s in shapes:
+            # exact hit will stop the loop
+            if dist == s.shape_dist_traveled:
+                ret_val = s.shape_pt_sequence
+                break
+            # a fuzzy nearest is also an option
+            if find_nearest:
+                d = abs(dist - s.shape_dist_traveled)
+                if d < nearest_dist:
+                    nearest_dist = d
+                    nearest_seq = s.shape_pt_sequence
+
+        # assignment rules below kick in when no exact matches happens above
+        if ret_val is None:
+            ret_val = def_val
+            if find_nearest:
+                ret_val = nearest_seq
+
+        return ret_val
+
+    @classmethod
     def add_geometry_column(cls):
         if not hasattr(cls, 'geom'):
             cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
@@ -40,7 +70,6 @@ class Shape(Base):
         """
         log.debug('{0}.post_process'.format(cls.__name__))
         cls.populate_shape_dist_traveled(db)
-
 
     @classmethod
     def populate_shape_dist_traveled(cls, db):

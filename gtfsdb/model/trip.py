@@ -34,6 +34,12 @@ class Trip(Base):
         foreign_keys='(Trip.shape_id)',
         uselist=False, viewonly=True)
 
+    shapes = relationship(
+        'Shape',
+        primaryjoin='Trip.shape_id==Shape.shape_id',
+        foreign_keys='(Trip.shape_id)',
+        uselist=True, viewonly=True)
+
     route = relationship(
         'Route',
         primaryjoin='Trip.route_id==Route.route_id',
