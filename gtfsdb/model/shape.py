@@ -54,6 +54,19 @@ class Shape(Base):
         return ret_val
 
     @classmethod
+    def get_sequence_from_coord(cls, lat, lon, shapes, def_val=-1):
+        """
+        find the sequence based on lat / lon coordinate
+        """
+        ret_val = def_val
+        for s in shapes:
+            # exact hit will stop the loop
+            if lat == float(s.shape_pt_lat) and lon == float(s.shape_pt_lon):
+                ret_val = s.shape_pt_sequence
+                break
+        return ret_val
+
+    @classmethod
     def add_geometry_column(cls):
         if not hasattr(cls, 'geom'):
             cls.geom = Column(Geometry(geometry_type='POINT', srid=config.SRID))
