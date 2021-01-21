@@ -33,17 +33,17 @@ Install and use via the gtfsdb source tree:
 
 1. Install Python 3.x (or 2.7)
 
-1.  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
+2.  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
 
-1. (if a postgres user, then `pip install psycopg2-binary`)
+3. (if a postgres user, then `pip install psycopg2-binary`)
 
-1. git clone https://github.com/OpenTransitTools/gtfsdb.git
+4. git clone https://github.com/OpenTransitTools/gtfsdb.git
 
-1. cd gtfsdb
+5. cd gtfsdb
 
-1. buildout install prod -- NOTE: if you're using postgres, do a 'buildout install prod postgresql'
+6. buildout install prod -- NOTE: if you're using postgres, do a 'buildout install prod postgresql'
 
-1. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
 
    examples:
    
@@ -53,7 +53,7 @@ Install and use via the gtfsdb source tree:
 
    NOTE: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqllite), will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
 
-1. view db ( example: https://sqliteonline.com )
+8. view db ( example: https://sqliteonline.com )
 
 The best way to get gtfsbd up and running is via the 'zc.buildout' tool.  Highly recommended to first install
 buildout (e.g., pip install zc.buildout) before doing much of anything else.
@@ -64,24 +64,24 @@ will relieve gtfsdb from re-installing locally as part of the build.  And if aft
 
 Install Steps (on Windows):
 ===========================
-1. Recommend having a 'real' db installed - docs and examples assume Postgres/PostGIS installed
+0. Recommend having a 'real' db installed - docs and examples assume Postgres/PostGIS installed
    http://www.postgresql.org/download/windows
    http://postgis.refractions.net/download/windows/
 
 1. Install Python 3.x https://www.python.org/downloads/release/python-391 or Python2.7 https://www.python.org/downloads/release/python-2718
 
-1. `pip install zc.buildout`
+2. `pip install zc.buildout`
 
-1. `git clone https://github.com/OpenTransitTools/gtfsdb.git`
+3. `git clone https://github.com/OpenTransitTools/gtfsdb.git`
 
-1. `cd gtfsdb`
+4. `cd gtfsdb`
 
-1. `buildout`
+5. `buildout`
 
-1. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+6. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
    example: `bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip`
 
-1. view db ( example: https://sqliteonline.com )
+7. view db ( example: https://sqliteonline.com )
 
 Example Query:
 ==============
