@@ -35,7 +35,7 @@ Install from source via github (if you want the latest code) :
 
 2.  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
 
-3. (`pip install psycopg2-binary` if a postgres user)
+3. (optinal step for **postgres users**: 'pip install psycopg2-binary')
 
 4. git clone https://github.com/OpenTransitTools/gtfsdb.git
 
