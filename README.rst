@@ -31,7 +31,8 @@ drudgery, and give developers a starting point beyond the first step of dealing 
 Install and use via the gtfsdb source tree:
 ==========================================
 
-1. Install Python 2.7 (or 3.x), easy_install (https://pypi.python.org/pypi/setuptools) and zc.buildout (https://pypi.python.org/pypi/zc.buildout/2.5.2) on your system...
+1. Install Python 3.x (or 2.7)
+1  pip install zc.buildout - https://pypi.org/project/zc.buildout
 1. git clone https://github.com/OpenTransitTools/gtfsdb.git
 1. cd gtfsdb
 1. buildout install prod -- NOTE: if you're using postgres, do a 'buildout install prod postgresql'
@@ -41,39 +42,34 @@ Install and use via the gtfsdb source tree:
    - bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
    - bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432 --is_geospatial http://developer.trimet.org/schedule/gtfs.zip  
    NOTE: using the `is_geospatial` arg will take much longer to load...
+1. view db ( example: https://sqliteonline.com )
 
+The best way to get gtfsbd up and running is via the 'zc.buildout' tool.  Highly recommended to first install
+buildout (e.g., pip install zc.buildout) before doing anything else.
 
-The best way to get gtfsbd up and running is via the python 'buildout' and 'easy_install' tools.
-Highly recommended to first install easy_install (setup tools) and buildout (e.g., easy_install zc.buildout)
-before doing anything else.
-
-Postgres users, gtfsdb requires the psycopg2 database driver. If you are on linux / mac, buildout will
-install the necessary dependencies (or re-use whatever you have in your system site-lib).
-If you are on windows, you most likely have to find and install a pre-compiled version (see below).
-
+Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing that via `pip install psychopg2-binary`
+will relieve gtfsdb from re-installing locally as part of the build.
 
 Install Steps (on Windows):
 ===========================
-    0. Have a db - docs and examples assume Postgres/PostGIS installed
-       http://www.postgresql.org/download/windows
-       http://postgis.refractions.net/download/windows/
+1. Recommend having a 'real' db installed - docs and examples assume Postgres/PostGIS installed
+   http://www.postgresql.org/download/windows
+   http://postgis.refractions.net/download/windows/
 
-    1. Python2.7 - http://www.python.org/download/releases/2.7.6/ (python-2.7.6.msi)
-       NOTE: see this for setting env variables correctly: https://docs.python.org/3/using/windows.html#excursus-setting-environment-variables
+1. Install Python 3.x https://www.python.org/downloads/release/python-391 or Python2.7 https://www.python.org/downloads/release/python-2718
 
-    2a. Install Setup Tools (easy_install) https://pypi.python.org/pypi/setuptools#windows-8-powershell
-    2b. easy_install zc.buildout
+1. `pip install zc.buildout`
 
-    3. Install Psygopg2 (from binary):  http://www.stickpeople.com/projects/python/win-psycopg/
+1. `git clone https://github.com/OpenTransitTools/gtfsdb.git`
 
-    4. Check out gtfsdb from trunk with Git - see: git clone https://github.com/OpenTransitTools/gtfsdb.git
+1. `cd gtfsdb`
 
-    5. cd top level of gtfsdb tree
-    
-    6. buildout install prod
+1. `buildout`
 
-    7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+1. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+   example: `bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip`
 
+1. view db ( example: https://sqliteonline.com )
 
 Example Query:
 ==============
@@ -84,7 +80,6 @@ from trips t, stop_times st
 where t.route_id = '1'
 and t.trip_id = st.trip_id
 and st.stop_sequence = 1
-
 
 -- get agency name and number of routes 
 select a.agency_name, a.agency_id, count(r.route_id)
