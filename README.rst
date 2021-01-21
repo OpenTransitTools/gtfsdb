@@ -25,17 +25,17 @@ gtfsdb project comes from the fact that a lot of developers start out a GTFS-rel
 to read GTFS data (whether that's an in-memory loader, a database loader, etc...);  GTFSDB can hopefully reduce the need for such
 drudgery, and give developers a starting point beyond the first step of dealing with GTFS in .csv file format.
 
-(Pretty old stuff) available on pypi: https://pypi.python.org/pypi/gtfsdb
+(Slightly out-of-date version) available on pypi: https://pypi.python.org/pypi/gtfsdb
 
 
-Install and use via the gtfsdb source tree:
+Install from source via github (if you want the latest code) :
 ==========================================
 
 1. Install Python 3.x https://www.python.org/downloads/ (code also runs on 2.7 if you are stuck on that version)
 
 2.  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
 
-3. (if a postgres user, then `pip install psycopg2-binary`)
+3. (`pip install psycopg2-binary` if a postgres user)
 
 4. git clone https://github.com/OpenTransitTools/gtfsdb.git
 
@@ -59,29 +59,9 @@ The best way to get gtfsbd up and running is via the 'zc.buildout' tool.  Highly
 buildout (e.g., pip install zc.buildout) before doing much of anything else.
 
 Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing that via `pip install psychopg2-binary`
-will relieve gtfsdb from re-installing locally as part of the build.  And if after the fact, you see exceptions saying
-"ImportError: No module named psycopg2", then `pip install psychopg2-binary` should fix that...
+will relieve gtfsdb from re-installing locally as part of the build.  And if after the fact, you see *exceptions* mentioning
+**"ImportError: No module named psycopg2"**, then 'pip install psychopg2-binary' should fix that up quick...
 
-Install Steps (on Windows):
-===========================
-0. Recommend having a 'real' db installed - docs and examples assume Postgres/PostGIS installed
-   http://www.postgresql.org/download/windows
-   http://postgis.refractions.net/download/windows/
-
-1. Install Python 3.x https://www.python.org/downloads/  (will run on Python 2.7 if need be)
-
-2. `pip install zc.buildout`
-
-3. `git clone https://github.com/OpenTransitTools/gtfsdb.git`
-
-4. `cd gtfsdb`
-
-5. `buildout`
-
-6. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
-   example: `bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip`
-
-7. view db ( example: https://sqliteonline.com )
 
 Example Query:
 ==============
