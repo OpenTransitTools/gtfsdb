@@ -32,7 +32,8 @@ Install and use via the gtfsdb source tree:
 ==========================================
 
 1. Install Python 3.x (or 2.7)
-1  pip install zc.buildout - https://pypi.org/project/zc.buildout
+1  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
+1. (if a postgres user, then `pip install psycopg2-binary`)
 1. git clone https://github.com/OpenTransitTools/gtfsdb.git
 1. cd gtfsdb
 1. buildout install prod -- NOTE: if you're using postgres, do a 'buildout install prod postgresql'
@@ -41,14 +42,16 @@ Install and use via the gtfsdb source tree:
    - bin/gtfsdb-load --database_url sqlite:///gtfs.db gtfsdb/tests/large-sample-feed.zip
    - bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
    - bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432 --is_geospatial http://developer.trimet.org/schedule/gtfs.zip  
-   NOTE: using the `is_geospatial` arg will take much longer to load...
+   NOTE: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqllite),
+         will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
 1. view db ( example: https://sqliteonline.com )
 
 The best way to get gtfsbd up and running is via the 'zc.buildout' tool.  Highly recommended to first install
-buildout (e.g., pip install zc.buildout) before doing anything else.
+buildout (e.g., pip install zc.buildout) before doing much of anything else.
 
 Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing that via `pip install psychopg2-binary`
-will relieve gtfsdb from re-installing locally as part of the build.
+will relieve gtfsdb from re-installing locally as part of the build.  And if after the fact, you see exceptions saying
+"ImportError: No module named psycopg2", then `pip install psychopg2-binary` should fix that...
 
 Install Steps (on Windows):
 ===========================
