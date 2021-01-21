@@ -31,7 +31,7 @@ drudgery, and give developers a starting point beyond the first step of dealing 
 Install and use via the gtfsdb source tree:
 ==========================================
 
-1. Install Python 3.x (or 2.7)
+1. Install Python 3.x https://www.python.org/downloads/ (code also runs on 2.7 if you are stuck on that version)
 
 2.  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
 
@@ -68,7 +68,7 @@ Install Steps (on Windows):
    http://www.postgresql.org/download/windows
    http://postgis.refractions.net/download/windows/
 
-1. Install Python 3.x https://www.python.org/downloads/release/python-391 or Python2.7 https://www.python.org/downloads/release/python-2718
+1. Install Python 3.x https://www.python.org/downloads/  (will run on Python 2.7 if need be)
 
 2. `pip install zc.buildout`
 
