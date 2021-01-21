@@ -132,9 +132,6 @@ class Database(object):
     def url(self, val):
         self._url = val
         self.engine = create_engine(val)
-        if self.is_sqlite:
-            import sqlite3
-            sqlite3.register_adapter(str, lambda s: s.decode('utf8'))
         session_factory = sessionmaker(self.engine)
         self.session = scoped_session(session_factory)
 
