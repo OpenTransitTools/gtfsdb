@@ -3,7 +3,7 @@ import sys
 
 
 oracle_extras = ['cx_oracle>=5.1']
-postgresql_extras = ['psycopg2>=2.4.2']
+postgresql_extras = ['psycopg2-binary']
 # dev_extras = oracle_extras + postgresql_extras
 dev_extras = []
 
@@ -16,7 +16,6 @@ extras_require = dict(
 install_requires = [
     'geoalchemy2',
     'sqlalchemy',
-    'psycopg2',
 ]
 
 setup(

@@ -25,68 +25,57 @@ gtfsdb project comes from the fact that a lot of developers start out a GTFS-rel
 to read GTFS data (whether that's an in-memory loader, a database loader, etc...);  GTFSDB can hopefully reduce the need for such
 drudgery, and give developers a starting point beyond the first step of dealing with GTFS in .csv file format.
 
-(Pretty old stuff) available on pypi: https://pypi.python.org/pypi/gtfsdb
+(Slightly out-of-date version) available on pypi: https://pypi.python.org/pypi/gtfsdb
 
 
-Install and use via the gtfsdb source tree:
+Install from source via github (if you want the latest code) :
 ==========================================
 
-1. Install Python 2.7 (or 3.x), easy_install (https://pypi.python.org/pypi/setuptools) and zc.buildout (https://pypi.python.org/pypi/zc.buildout/2.5.2) on your system...
-1. git clone https://github.com/OpenTransitTools/gtfsdb.git
-1. cd gtfsdb
-1. buildout install prod -- NOTE: if you're using postgres, do a 'buildout install prod postgresql'
-1. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+1. Install Python 3.x https://www.python.org/downloads/ (code also runs on 2.7 if you are stuck on that version)
+
+2.  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
+
+3. (optinal step for **postgres users**: 'pip install psycopg2-binary')
+
+4. git clone https://github.com/OpenTransitTools/gtfsdb.git
+
+5. cd gtfsdb
+
+6. buildout install prod -- NOTE: if you're using postgres, do a 'buildout install prod postgresql'
+
+7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+
    examples:
+   
    - bin/gtfsdb-load --database_url sqlite:///gtfs.db gtfsdb/tests/large-sample-feed.zip
    - bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
    - bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432 --is_geospatial http://developer.trimet.org/schedule/gtfs.zip  
-   NOTE: using the `is_geospatial` arg will take much longer to load...
 
+   NOTE: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqllite), will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
 
-The best way to get gtfsbd up and running is via the python 'buildout' and 'easy_install' tools.
-Highly recommended to first install easy_install (setup tools) and buildout (e.g., easy_install zc.buildout)
-before doing anything else.
+8. view db ( example: https://sqliteonline.com )
 
-Postgres users, gtfsdb requires the psycopg2 database driver. If you are on linux / mac, buildout will
-install the necessary dependencies (or re-use whatever you have in your system site-lib).
-If you are on windows, you most likely have to find and install a pre-compiled version (see below).
+The best way to get gtfsbd up and running is via the 'zc.buildout' tool.  Highly recommended to first install
+buildout (e.g., pip install zc.buildout) before doing much of anything else.
 
-
-Install Steps (on Windows):
-===========================
-    0. Have a db - docs and examples assume Postgres/PostGIS installed
-       http://www.postgresql.org/download/windows
-       http://postgis.refractions.net/download/windows/
-
-    1. Python2.7 - http://www.python.org/download/releases/2.7.6/ (python-2.7.6.msi)
-       NOTE: see this for setting env variables correctly: https://docs.python.org/3/using/windows.html#excursus-setting-environment-variables
-
-    2a. Install Setup Tools (easy_install) https://pypi.python.org/pypi/setuptools#windows-8-powershell
-    2b. easy_install zc.buildout
-
-    3. Install Psygopg2 (from binary):  http://www.stickpeople.com/projects/python/win-psycopg/
-
-    4. Check out gtfsdb from trunk with Git - see: git clone https://github.com/OpenTransitTools/gtfsdb.git
-
-    5. cd top level of gtfsdb tree
-    
-    6. buildout install prod
-
-    7. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
+Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing that via `pip install psychopg2-binary`
+will relieve gtfsdb from re-installing locally as part of the build.  And if after the fact, you see *exceptions* mentioning
+**"ImportError: No module named psycopg2"**, then 'pip install psychopg2-binary' should fix that up quick...
 
 
 Example Query:
 ==============
 
 -- get first stop time of each trip for route_id 1
+
 select *
 from trips t, stop_times st
 where t.route_id = '1'
 and t.trip_id = st.trip_id
 and st.stop_sequence = 1
 
+-- get agency name and number of routes
 
--- get agency name and number of routes 
 select a.agency_name, a.agency_id, count(r.route_id)
 from routes r, agency a
 where r.agency_id = a.agency_id
