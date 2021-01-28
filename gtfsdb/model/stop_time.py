@@ -46,6 +46,16 @@ class StopTime(Base):
             if 'arrival_time' in kwargs:   # but I'm wondering if this is now going to set all stop times to timepoint=1=True ???
                 self.timepoint = 1
 
+    @classmethod
+    def post_make_record(cls, row):
+        # import pdb; pdb.set_trace()
+
+        # step 1: check that times are HH:MM:SS (append zero if just H:MM:SS)
+        if 'arrival_time' in row: row['arrival_time'] = util.fix_time_string(row['arrival_time'])
+        if 'departure_time' in row: row['departure_time'] = util.fix_time_string(row['departure_time'])
+
+        return row
+
     def get_headsign(self):
         """
         get the headsign at this stop ... rule is that if stop is empty, use trip headsign

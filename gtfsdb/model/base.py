@@ -225,9 +225,17 @@ class _Base(object):
             except Exception as e:
                 log.warning(e)
 
-        """if this is a geospatially enabled database, add a geom"""
+        """ if this is a geospatially enabled database, add a geom """
         if hasattr(cls, 'geom') and hasattr(cls, 'add_geom_to_dict'):
             cls.add_geom_to_dict(row)
+
+        """ post make_record gives the calling class a chance to fix things up prior to being sent down to database """
+        row = cls.post_make_record(row)
+        return row
+
+    @classmethod
+    def post_make_record(cls, row):
+        """ Base does nothing, but a derived class now has a chance to clean up the record prior to db commit """
         return row
 
 

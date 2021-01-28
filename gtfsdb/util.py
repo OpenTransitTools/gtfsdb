@@ -95,6 +95,14 @@ def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=N
     return ret_val
 
 
+def fix_time_string(ts):
+    """ check that string time is HH:MM:SS (append zero if just H:MM:SS) """
+    ret_val = ts
+    if ts and type(ts) == str and ts[1] == ":":
+        ret_val = "0{0}".format(ts)
+    return ret_val
+
+
 class UTF8Recoder(object):
     """Iterator that reads an encoded stream and encodes the input to UTF-8"""
     def __init__(self, f, encoding):
