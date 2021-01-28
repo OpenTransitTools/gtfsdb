@@ -4,6 +4,8 @@ import math
 import datetime
 import tempfile
 
+from gtfsdb import config
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -212,3 +214,24 @@ def distance_ft(lat1, lon1, lat2, lon2):
     """
     mi = distance_mi(lat1, lon1, lat2, lon2)
     return mi * 5280
+
+
+def make_coord_from_point(lon, lat):
+    return '{0} {1}'.format(lon, lat)
+
+
+def make_linestring_from_point_array(coords, srid=config.SRID):
+    return 'SRID={0};LINESTRING({1})'.format(srid, ','.join(coords))
+
+
+def make_linestring_from_two_points(lon1, lat1, lon2, lat2, srid=config.SRID):
+    coords = []
+    coords.append(make_coord_from_point(lon1, lat1))
+    coords.append(make_coord_from_point(lon2, lat2))
+    ls = make_linestring_from_point_array(coords, srid)
+    return ls
+
+
+def make_linestring_from_two_stops(stop1, stop2, srid=config.SRID):
+    ls = make_linestring_from_two_points(stop1.stop_lon, stop1.stop_lat, stop2.stop_lon, stop2.stop_lat, srid)
+    return ls

@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
 
-from gtfsdb import config
+from gtfsdb import config, util
 
 import logging
 log = logging.getLogger(__name__)
@@ -13,15 +13,25 @@ class PatternBase(object):
     """
     provides a generic set of pattern query routines, etc...
     """
-
     @classmethod
     def add_geometry_column(cls):
         if not hasattr(cls, 'geom'):
             cls.geom = deferred(Column(Geometry(geometry_type='LINESTRING', srid=config.SRID)))
 
     def geom_from_shape(self, points):
-        coords = ['{0} {1}'.format(r.shape_pt_lon, r.shape_pt_lat) for r in points]
-        self.geom = 'SRID={0};LINESTRING({1})'.format(config.SRID, ','.join(coords))
+        """
+        builds a linestring geometry for the shape from an array of points
+        :return: will return True if there are 2+ points, and False when less than 2 points (not a line)
+        """
+        coords = [util.make_coord_from_point(r.shape_pt_lon, r.shape_pt_lat) for r in points]
+        self.geom = util.make_linestring_from_point_array(coords)
+
+        # test and warn if trying to create a pattern (line) of less than 1 coord
+        ret_val = True
+        if len(coords) < 2:
+            log.warning("a 'linestring' needs 2+ points ({0}); expect a postgis error unless fixed".format(coords))
+            ret_val = False
+        return ret_val
 
     @classmethod
     def query_pattern(cls, session, pattern_id, agency=None):
