@@ -66,8 +66,9 @@ will relieve gtfsdb from re-installing locally as part of the build.  And if aft
 Usage with Docker
 =================
 
-1. Build the image with `docker build -t gtfsdb .`.
-2. Run it with `docker run gtfsdb --database_url <db url>  <gtfs file | url>`.
+1. Build the image with :code:`docker build -t gtfsdb .`.
+2. Run it with
+   :code:`docker run gtfsdb --database_url <db url>  <gtfs file | url>`.
    The entrypoint command is `bin/gtfsdb-load` so the arguments will be passed
    to it.
 
