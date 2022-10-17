@@ -43,7 +43,7 @@ Install from source via github (if you want the latest code) :
 
    * bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432 --is_geospatial http://developer.trimet.org/schedule/gtfs.zip
 
-   .. note:: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqllite), will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
+     .. note:: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqllite), will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
 
 #. view db ( example: https://sqliteonline.com )
 
@@ -52,7 +52,7 @@ buildout (e.g., pip install zc.buildout) before doing much of anything else.
 
 Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing that via `pip install psychopg2-binary` will relieve gtfsdb from re-installing locally as part of the build.  And if after the fact, you see *exceptions* mentioning
 
-.. note:: **"ImportError: No module named psycopg2"**, then 'pip install psychopg2-binary' should fix that up quick...
+.. note:: if you get the message "ImportError: No module named psycopg2", then 'pip install psychopg2-binary' should fix things. (Assumes you have postgres also installed on the machine you're trying to use the pg driver).
 
 
 Usage with Docker
@@ -60,8 +60,10 @@ Usage with Docker
 
 #. Build the image with `docker build -t gtfsdb .`
 #. Run it with:
+
    .. code-block:: bash
-      docker run gtfsdb --database_url <db url>  <gtfs file | url>
+
+   docker run gtfsdb --database_url <db url>  <gtfs file | url>
    
    .. note:: The entrypoint command is `bin/gtfsdb-load` so the arguments will be passed to it.
 
@@ -70,6 +72,7 @@ Example Queries:
 ************
 
 * get first stop time of each trip for route_id 1
+
   .. code-block:: sql
 
      select *
