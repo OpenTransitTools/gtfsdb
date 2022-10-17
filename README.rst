@@ -9,7 +9,7 @@ GTFSDB
 
 
 Supported Databases
-************
+*******************
 
 * PostgreSQL (PostGIS for Geo tables) - preferred
 * Oracle - tested
@@ -18,7 +18,7 @@ Supported Databases
 
 
 GTFS (General Transit Feed Specification) Database
-************
+**************************************************
 
 Python code that will load GTFS data into a relational database, and SQLAlchemy ORM bindings to the GTFS tables in the gtfsdb. The gtfsdb project's focus is on making GTFS data available in a programmatic context for software developers. The need for the gtfsdb project comes from the fact that a lot of developers start out a GTFS-related effort by first building some amount of code to read GTFS data (whether that's an in-memory loader, a database loader, etc...);  GTFSDB can hopefully reduce the need for such drudgery, and give developers a starting point beyond the first step of dealing with GTFS in .csv file format.
 
@@ -26,7 +26,7 @@ Available on pypi: https://pypi.python.org/pypi/gtfsdb
 
 
 Install from source via github (if you want the latest code) :
-************
+**************************************************************
 
 #. Install Python 3.x https://www.python.org/downloads/ (code also runs on 2.7 if you are stuck on that version)
 #.  `pip install zc.buildout` - https://pypi.org/project/zc.buildout
@@ -55,21 +55,21 @@ Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing
 .. note:: if you get the message "ImportError: No module named psycopg2", then 'pip install psychopg2-binary' should fix things. (Assumes you have postgres also installed on the machine you're trying to use the pg driver).
 
 
-Usage with Docker
-************
+Usage with Docker:
+******************
 
 #. Build the image with `docker build -t gtfsdb .`
 #. Run it with:
 
-   .. code-block:: bash
+  .. code-block:: bash
 
-   docker run gtfsdb --database_url <db url>  <gtfs file | url>
-   
-   .. note:: The entrypoint command is `bin/gtfsdb-load` so the arguments will be passed to it.
+     docker run gtfsdb --database_url <db url>  <gtfs file | url>
+
+  .. note:: The entrypoint command is `bin/gtfsdb-load` so the arguments will be passed to it.
 
 
 Example Queries:
-************
+****************
 
 * get first stop time of each trip for route_id 1
 
