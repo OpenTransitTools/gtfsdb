@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
+from sqlalchemy.orm import joinedload, object_session, relationship
 
 from gtfsdb import config, util
 from gtfsdb.model.base import Base
@@ -82,7 +82,7 @@ class Stop(Base, StopBase):
             session = object_session(self)
             log.info("QUERY StopTime")
             q = session.query(StopTime)
-            q = q.options(joinedload_all('trip.route'))
+            q = q.options(joinedload('trip').joinedload('route'))
             q = q.filter_by(stop_id=self.stop_id)
             for r in q:
                 headsign = r.stop_headsign or r.trip.trip_headsign

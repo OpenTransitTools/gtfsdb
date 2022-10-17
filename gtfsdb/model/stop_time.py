@@ -4,7 +4,7 @@ import logging
 from gtfsdb import config, util
 from gtfsdb.model.base import Base
 from sqlalchemy import Column
-from sqlalchemy.orm import joinedload_all, relationship
+from sqlalchemy.orm import joinedload, relationship
 from sqlalchemy.sql.expression import func
 from sqlalchemy.types import SmallInteger, Integer, Numeric, String
 
@@ -237,7 +237,7 @@ class StopTime(Base):
             q = q.filter(StopTime.trip.has(Trip.route_id == route_id))
 
         # step 3: options to speed up /q
-        q = q.options(joinedload_all('trip'))
+        q = q.options(joinedload('trip'))
 
         # step 4: order the stop times
         if limit is None or limit > 1:
