@@ -36,10 +36,14 @@ Install from source via github (if you want the latest code) :
 #. buildout install prod -- NOTE: if you're using postgres, do a 'buildout install prod postgresql'
 #. bin/gtfsdb-load --database_url <db url>  <gtfs file | url>
 #. examples:
+
    * bin/gtfsdb-load --database_url sqlite:///gtfs.db gtfsdb/tests/large-sample-feed.zip
+
    * bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
+
    * bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432 --is_geospatial http://developer.trimet.org/schedule/gtfs.zip
-     .. note:: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqllite), will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
+
+   .. note:: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqllite), will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
 
 #. view db ( example: https://sqliteonline.com )
 
@@ -47,7 +51,8 @@ The best way to get gtfsbd up and running is via the 'zc.buildout' tool.  Highly
 buildout (e.g., pip install zc.buildout) before doing much of anything else.
 
 Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing that via `pip install psychopg2-binary` will relieve gtfsdb from re-installing locally as part of the build.  And if after the fact, you see *exceptions* mentioning
-**"ImportError: No module named psycopg2"**, then 'pip install psychopg2-binary' should fix that up quick...
+
+.. note:: **"ImportError: No module named psycopg2"**, then 'pip install psychopg2-binary' should fix that up quick...
 
 
 Usage with Docker
@@ -55,7 +60,7 @@ Usage with Docker
 
 #. Build the image with `docker build -t gtfsdb .`
 #. Run it with:
-   .. code-block::
+   .. code-block:: bash
       docker run gtfsdb --database_url <db url>  <gtfs file | url>
    
    .. note:: The entrypoint command is `bin/gtfsdb-load` so the arguments will be passed to it.
@@ -65,17 +70,20 @@ Example Queries:
 ************
 
 * get first stop time of each trip for route_id 1
-   .. code-block::
-      select *
-      from trips t, stop_times st
-      where t.route_id = '1'
-      and t.trip_id = st.trip_id
-      and st.stop_sequence = 1
+  .. code-block:: sql
+
+     select *
+     from trips t, stop_times st
+     where t.route_id = '1'
+     and t.trip_id = st.trip_id
+     and st.stop_sequence = 1
 
 * get agency name and number of routes
-   .. code-block::
-      select a.agency_name, a.agency_id, count(r.route_id)
-      from routes r, agency a
-      where r.agency_id = a.agency_id
-      group by a.agency_id, a.agency_name
-      order by 3 desc
+
+  .. code-block:: sql
+
+     select a.agency_name, a.agency_id, count(r.route_id)
+     from routes r, agency a
+     where r.agency_id = a.agency_id
+     group by a.agency_id, a.agency_name
+     order by 3 desc
