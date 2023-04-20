@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Numeric, String
-from sqlalchemy.orm import joinedload, joinedload_all, object_session, relationship
+from sqlalchemy.orm import joinedload, object_session
 
 from gtfsdb import config
 from gtfsdb.util import BBox, Point

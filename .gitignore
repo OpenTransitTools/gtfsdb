@@ -12,6 +12,7 @@ COMMIT_EDITMSG
 #*
 .idea
 *.iml
+gtfs.zip
 .DS_Store
 **/tests/*feed
 

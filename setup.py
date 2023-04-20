@@ -20,7 +20,7 @@ install_requires = [
 
 setup(
     name='gtfsdb',
-    version='0.5.0',
+    version='0.6.0',
     description='GTFS Database',
     long_description=open('README.rst').read(),
     keywords='GTFS',
@@ -40,10 +40,10 @@ setup(
         ]
     },
     classifiers=(
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Mozilla-derived (MPL)',
+        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.7',
