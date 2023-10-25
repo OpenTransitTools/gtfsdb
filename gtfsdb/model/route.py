@@ -7,7 +7,7 @@ from .route_base import RouteBase
 from sqlalchemy import Column
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy.sql import func
-from sqlalchemy.types import Integer, String
+from sqlalchemy.types import Integer, String, Boolean
 
 import logging
 log = logging.getLogger(__name__)
@@ -19,6 +19,9 @@ class Route(Base, RouteBase):
 
     __tablename__ = 'routes'
 
+    reg_svc_color = "#7A99B1"
+    freq_svc_color = "#7A99B1"
+
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
     route_short_name = Column(String(255))
@@ -26,10 +29,12 @@ class Route(Base, RouteBase):
     route_desc = Column(String(1023))
     route_type = Column(Integer, index=True, nullable=False)
     route_url = Column(String(255))
-    route_color = Column(String(6))
-    route_text_color = Column(String(6))
+    route_color = Column(String(7), default=reg_svc_color)
+    alt_color = Column(String(7), default=reg_svc_color)
+    route_text_color = Column(String(7), default="#FFFFFF")
     route_sort_order = Column(Integer, index=True)
     min_headway_minutes = Column(Integer)  # Trillium extension.
+    is_frequent = Column(Boolean, default=False)
 
     agency = relationship(
         'Agency',
@@ -107,6 +112,10 @@ class Route(Base, RouteBase):
             pass
         return ret_val
 
+    def _calc_frequency(self):
+        # TODO: do better here...
+        self.is_frequent = len(self.trips) > 50
+
     @property
     def start_date(self):
         return self._get_start_end_dates[0]
@@ -134,7 +143,7 @@ class Route(Base, RouteBase):
             cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
 
     @classmethod
-    def load_geoms(cls, db):
+    def _load_geoms(cls, db, route_list):
         """ load derived geometries, currently only written for PostgreSQL """
         from gtfsdb.model.pattern import Pattern
         from gtfsdb.model.trip import Trip
@@ -142,8 +151,8 @@ class Route(Base, RouteBase):
         if db.is_geospatial and db.is_postgresql:
             start_time = time.time()
             session = db.session
-            routes = session.query(Route).all()
-            for route in routes:
+            route_list = session.query(Route).all()
+            for route in route_list:
                 s = func.st_collect(Pattern.geom)
                 s = func.st_multi(s)
                 s = func.st_astext(s).label('geom')
@@ -158,7 +167,7 @@ class Route(Base, RouteBase):
     @classmethod
     def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
-        cls.load_geoms(db)
+        cls._load_geoms(db, route_list)
 
 
 class CurrentRoutes(Base, RouteBase):
