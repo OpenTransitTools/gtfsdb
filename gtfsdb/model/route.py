@@ -20,7 +20,7 @@ class Route(Base, RouteBase):
     __tablename__ = 'routes'
 
     reg_svc_color = "#7A99B1"
-    freq_svc_color = "#7A99B1"
+    freq_svc_color = "#306095"
 
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
@@ -30,7 +30,7 @@ class Route(Base, RouteBase):
     route_type = Column(Integer, index=True, nullable=False)
     route_url = Column(String(255))
     route_color = Column(String(7), default=reg_svc_color)
-    alt_color = Column(String(7), default=reg_svc_color)
+    route_alt_color = Column(String(7), default=reg_svc_color)
     route_text_color = Column(String(7), default="#FFFFFF")
     route_sort_order = Column(Integer, index=True)
     min_headway_minutes = Column(Integer)  # Trillium extension.
@@ -112,10 +112,6 @@ class Route(Base, RouteBase):
             pass
         return ret_val
 
-    def _calc_frequency(self):
-        # TODO: do better here...
-        self.is_frequent = len(self.trips) > 50
-
     @property
     def start_date(self):
         return self._get_start_end_dates[0]
@@ -123,6 +119,22 @@ class Route(Base, RouteBase):
     @property
     def end_date(self):
         return self._get_start_end_dates[1]
+
+    def _calc_frequency(self):
+        # TODO: do better here...
+        self.is_frequent = len(self.trips) > 50
+
+    def _fix_colors(self):
+        # step 1: fix (add) a '#' to the route color
+        #if self.route_color[0] != '#': self.route_color = '#' + self.route_color
+        #if self.route_text_color[0] != '#': self.route_text_color = '#' + self.route_text_color
+
+        # step 2: figure out the alt colors
+        self.route_alt_color == self.route_color
+        if not self.is_bus or self.is_brt or self.is_frequent:
+            if self.route_color == self.reg_svc_color:
+                self.route_color == self.freq_svc_color
+                self.route_alt_color == self.freq_svc_color
 
     @property
     def _get_start_end_dates(self):
@@ -151,7 +163,6 @@ class Route(Base, RouteBase):
         if db.is_geospatial and db.is_postgresql:
             start_time = time.time()
             session = db.session
-            route_list = session.query(Route).all()
             for route in route_list:
                 s = func.st_collect(Pattern.geom)
                 s = func.st_multi(s)
@@ -167,7 +178,14 @@ class Route(Base, RouteBase):
     @classmethod
     def post_process(cls, db, **kwargs):
         log.debug('{0}.post_process'.format(cls.__name__))
+        session = db.session
+        route_list = session.query(Route).all()
         cls._load_geoms(db, route_list)
+        for route in route_list:
+            route._calc_frequency()
+            route._fix_colors()
+
+
 
 
 class CurrentRoutes(Base, RouteBase):

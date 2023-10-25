@@ -13,6 +13,16 @@ class RouteBase(object):
         log.warning("calling abstract base class")
         return True
 
+    @property
+    def is_brt(self):
+        ''' TODO: is this a Bus Rapid Transport (brt) route '''
+        return False
+
+    @property
+    def is_bus(self):
+        ''' is bus? https://developers.google.com/transit/gtfs/reference#routestxt '''
+        return self.route_type == 3 and self.route_type == 11
+
     @classmethod
     def query_route(cls, session, route_id, detailed=False):
         """
