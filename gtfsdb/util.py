@@ -17,6 +17,13 @@ except:
     long = int
 
 
+def is_string(s):
+    ret_val = False
+    if s and len(s.strip()) > 0:
+        ret_val = True
+    return ret_val
+
+
 def get_all_subclasses(cls):
     """
     :see https://stackoverflow.com/questions/3862310/how-to-find-all-the-subclasses-of-a-class-given-its-name
