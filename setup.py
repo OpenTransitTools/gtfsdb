@@ -15,7 +15,7 @@ extras_require = dict(
 
 install_requires = [
     'geoalchemy2',
-    'sqlalchemy',
+    'sqlalchemy == 1.4.49',
 ]
 
 setup(
