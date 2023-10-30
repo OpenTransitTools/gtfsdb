@@ -131,8 +131,10 @@ class Route(Base, RouteBase):
         if not util.is_string(self.route_text_color): self.route_text_color = self.default_text_color
 
         # step 1: fix (add) a '#' to the route color
-        if self.route_color[0] != '#': self.route_color = '#' + self.route_color
-        if self.route_text_color[0] != '#': self.route_text_color = '#' + self.route_text_color
+        if self.route_color[0] != '#':
+            self.route_color = '#' + self.route_color
+        if self.route_text_color[0] != '#':
+            self.route_text_color = '#' + self.route_text_color
 
         # step 2: figure out the alt colors
         self.route_alt_color = self.route_color
@@ -141,7 +143,7 @@ class Route(Base, RouteBase):
                 self.route_color = self.default_frequent_color
                 self.route_alt_color = self.default_frequent_color
 
-        #print(self.route_color)
+        #print(self.agency_id, self.route_id, self.route_color)
 
     @property
     def _get_start_end_dates(self):
@@ -184,7 +186,9 @@ class Route(Base, RouteBase):
 
     @classmethod
     def post_process(cls, db, **kwargs):
+        # import pdb; pdb.set_trace()
         log.debug('{0}.post_process'.format(cls.__name__))
+        start_time = time.time()
         session = db.session
 
         route_list = session.query(Route).all()
@@ -192,7 +196,11 @@ class Route(Base, RouteBase):
         for route in route_list:
             route._calc_frequency()
             route._fix_colors()
-
+            session.merge(route)
+        session.commit()
+        session.flush()
+        processing_time = time.time() - start_time
+        log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
 class CurrentRoutes(Base, RouteBase):
     """

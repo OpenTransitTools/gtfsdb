@@ -126,4 +126,3 @@ class RouteBase(object):
             log.warning(e)
 
         return ret_val
-
