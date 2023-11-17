@@ -47,7 +47,7 @@ Install from source via github (if you want the latest code) :
 
 #. view db ( example: https://sqliteonline.com )
 
-The best way to get gtfsbd up and running is via the 'zc.buildout' tool.  Highly recommended to first install
+The best way to get gtfsdb up and running is via the 'zc.buildout' tool.  Highly recommended to first install
 buildout (e.g., pip install zc.buildout) before doing much of anything else.
 
 Postgres users, gtfsdb requires the psycopg2-binary database driver.  Installing that via `pip install psychopg2-binary` will relieve gtfsdb from re-installing locally as part of the build.  And if after the fact, you see *exceptions* mentioning
