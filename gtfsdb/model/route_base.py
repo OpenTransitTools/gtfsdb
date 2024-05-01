@@ -1,3 +1,9 @@
+import time
+
+from sqlalchemy import Column
+from sqlalchemy.sql import func
+from sqlalchemy.orm import deferred
+
 from gtfsdb import util
 
 import logging
@@ -15,12 +21,12 @@ class RouteBase(object):
 
     @property
     def is_brt(self):
-        ''' TODO: is this a Bus Rapid Transport (brt) route '''
+        """ TODO: is this a Bus Rapid Transport (brt) route """
         return False
 
     @property
     def is_bus(self):
-        ''' is bus? https://developers.google.com/transit/gtfs/reference#routestxt '''
+        """ is bus? https://developers.google.com/transit/gtfs/reference#routestxt """
         return self.route_type == 3 and self.route_type == 11
 
     @classmethod
@@ -126,3 +132,30 @@ class RouteBase(object):
             log.warning(e)
 
         return ret_val
+
+    @classmethod
+    def add_geometry_column(cls):
+        if not hasattr(cls, 'geom'):
+            from geoalchemy2 import Geometry
+            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+
+    @classmethod
+    def _load_geoms(cls, db, route_list):
+        """ load derived geometries, currently only written for PostgreSQL """
+        from gtfsdb.model.pattern import Pattern
+        from gtfsdb.model.trip import Trip
+
+        if db.is_geospatial and db.is_postgresql:
+            start_time = time.time()
+            session = db.session
+            for route in route_list:
+                s = func.st_collect(Pattern.geom)
+                s = func.st_multi(s)
+                s = func.st_astext(s).label('geom')
+                q = session.query(s)
+                q = q.filter(Pattern.trips.any((Trip.route == route)))
+                route.geom = q.first().geom
+                session.merge(route)
+            session.commit()
+            processing_time = time.time() - start_time
+            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))

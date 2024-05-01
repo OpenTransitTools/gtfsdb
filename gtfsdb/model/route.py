@@ -5,7 +5,7 @@ from gtfsdb.model.base import Base
 from .route_base import RouteBase
 
 from sqlalchemy import Column
-from sqlalchemy.orm import deferred, relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import Integer, String, Boolean
 
@@ -156,33 +156,6 @@ class Route(Base, RouteBase):
             self.update_cached_data('_start_date')
 
         return self._start_date, self._end_date
-
-    @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            from geoalchemy2 import Geometry
-            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
-
-    @classmethod
-    def _load_geoms(cls, db, route_list):
-        """ load derived geometries, currently only written for PostgreSQL """
-        from gtfsdb.model.pattern import Pattern
-        from gtfsdb.model.trip import Trip
-
-        if db.is_geospatial and db.is_postgresql:
-            start_time = time.time()
-            session = db.session
-            for route in route_list:
-                s = func.st_collect(Pattern.geom)
-                s = func.st_multi(s)
-                s = func.st_astext(s).label('geom')
-                q = session.query(s)
-                q = q.filter(Pattern.trips.any((Trip.route == route)))
-                route.geom = q.first().geom
-                session.merge(route)
-            session.commit()
-            processing_time = time.time() - start_time
-            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
     @classmethod
     def post_process(cls, db, **kwargs):
