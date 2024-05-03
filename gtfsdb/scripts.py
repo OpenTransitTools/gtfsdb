@@ -91,7 +91,9 @@ def current_tables_load(**kwargs):
 
 
 def current_tables_cmdline():
-    kwargs = get_args('gtfsdb-current-load')[1]
+    # import pdb; pdb.set_trace()
+    args, kwargs = get_args('gtfsdb-current-load')
+    kwargs['date'] = args.file   # hack -- can send a date string via the gtfs 'file' cmdline param
     current_tables_load(**kwargs)
 
 

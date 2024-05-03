@@ -1,7 +1,7 @@
 import time
 
 from sqlalchemy import Column
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, and_
 from sqlalchemy.orm import deferred
 
 from gtfsdb import util
@@ -153,7 +153,10 @@ class RouteBase(object):
                 s = func.st_multi(s)
                 s = func.st_astext(s).label('geom')
                 q = session.query(s)
-                q = q.filter(Pattern.trips.any((Trip.route == route)))
+                if date:
+                    q = q.filter(Pattern.trips.any(and_(Trip.route == route, Trip.universal_calendar.any(date=date))))
+                else:
+                    q = q.filter(Pattern.trips.any((Trip.route == route)))
                 route.geom = q.first().geom
                 session.merge(route)
             session.commit()

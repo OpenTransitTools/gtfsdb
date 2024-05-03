@@ -251,7 +251,7 @@ class CurrentStops(Base, StopBase):
             session.query(CurrentStops).delete()
 
             # import pdb; pdb.set_trace()
-            for s in Stop.query_active_stops(session):
+            for s in Stop.query_active_stops(session, date=kwargs.get('date')):
                 c = CurrentStops(s, session)
                 session.add(c)
 

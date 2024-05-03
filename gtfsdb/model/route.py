@@ -258,9 +258,10 @@ class CurrentRoutes(Base, RouteBase):
                 cr_list.append(c)
                 session.add(c)
                 num_inserts += 1
-
-            #import pdb; pdb.set_trace()
-            cls._load_geoms(db, cr_list)
+            
+            # import pdb; pdb.set_trace()
+            date = util.check_date(kwargs.get('date'))
+            cls._load_geoms(db, cr_list, date)
 
             session.commit()
             session.flush()

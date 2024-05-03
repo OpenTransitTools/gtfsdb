@@ -374,7 +374,7 @@ class CurrentRouteStops(Base, RouteStopBase):
 
             rs_list = session.query(RouteStop).all()
             for rs in rs_list:
-                if rs.is_active():
+                if rs.is_active(date=kwargs.get('date')):
                     c = CurrentRouteStops(rs)
                     session.add(c)
 

@@ -98,7 +98,8 @@ def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=N
                     ret_val = d
                     break
             except Exception as e:
-                log.debug(e)
+                #log.debug(e)
+                pass
     return ret_val
 
 
