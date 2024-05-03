@@ -188,6 +188,10 @@ class CurrentStops(Base, StopBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
+    agency_id = Column(String(255))
+    agency_idz = Column(String(1023))
+    route_idz  = Column(String(1023))
+
     route_short_names = Column(String(1023))
     route_type = Column(Integer)
     route_type_other = Column(Integer)
@@ -221,25 +225,48 @@ class CurrentStops(Base, StopBase):
         if hasattr(stop, 'geom') and hasattr(self, 'geom'):
             self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
 
-        # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
-        # import pdb; pdb.set_trace()
         from .route_stop import CurrentRouteStops
         rs_list = CurrentRouteStops.query_route_short_names(session, stop, filter_active=True)
+        self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
+        self._set_route_info(rs_list)
+
+    def _set_route_info(self, rs_list):
+        agencyz = ""
+        routez  = ""
+
         for rs in rs_list:
-            type = rs.get('type')
-            if self.route_mode is None:
-                self.route_type = type.route_type
-                self.route_mode = type.otp_type
-            elif type.is_different_mode(self.route_type):
-                if type.is_lower_priority(self.route_type):
-                    self.route_type_other = self.route_type
+            # import pdb; pdb.set_trace()
+            try:
+                type = rs.get('type')
+                route = rs.get('route')
+
+                # capture agency and route id(s)
+                if self.agency_id is None:
+                    self.agency_id = route.agency_id
+                    agencyz = route.agency_id
+                    routez  = "{}::{}".format(route.agency_id, route.route_id)
+                else:
+                    routez  = "{};;{}::{}".format(routez, route.agency_id, route.route_id)
+                    if route.agency_id not in agencyz:
+                        agencyz = "{};;{}".format(agencyz, route.agency_id)
+
+                # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
+                if self.route_mode is None:
                     self.route_type = type.route_type
                     self.route_mode = type.otp_type
-                else:
-                    self.route_type_other = type.route_type
+                elif type.is_different_mode(self.route_type):
+                    if type.is_lower_priority(self.route_type):
+                        self.route_type_other = self.route_type
+                        self.route_type = type.route_type
+                        self.route_mode = type.otp_type
+                    else:
+                        self.route_type_other = type.route_type
+            except Exception as e:
+                log.warning(e)
 
-        # route short names
-        self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
+        # set additional attributes after looping thru routes above
+        self.agency_idz = agencyz
+        self.route_idz = routez
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -250,7 +277,7 @@ class CurrentStops(Base, StopBase):
         try:
             session.query(CurrentStops).delete()
 
-            # import pdb; pdb.set_trace()
+            
             for s in Stop.query_active_stops(session, date=kwargs.get('date')):
                 c = CurrentStops(s, session)
                 session.add(c)

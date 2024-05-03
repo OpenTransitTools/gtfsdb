@@ -45,7 +45,7 @@ class RouteStopBase(object):
         for r in routes:
             if filter_active and r.is_active() is False:
                 continue
-            sn = {'route_id': r.route_id, 'type': r.type, 'route_type': r.type.route_type, 'otp_type': r.type.otp_type, 'route_short_name': r.make_route_short_name(r)}
+            sn = {'route': r, 'route_id': r.route_id, 'type': r.type, 'route_type': r.type.route_type, 'otp_type': r.type.otp_type, 'route_short_name': r.make_route_short_name(r)}
             short_names.append(sn)
 
         return short_names
