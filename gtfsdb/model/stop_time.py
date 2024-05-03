@@ -226,7 +226,7 @@ class StopTime(Base):
             date = datetime.date.today()
 
         # step 1: get stop times based on date
-        log.debug("QUERY StopTime")
+        # log.debug("QUERY StopTime")
         q = session.query(StopTime)
         q = q.filter_by(stop_id=stop_id)
         q = q.filter(StopTime.departure_time is not None)

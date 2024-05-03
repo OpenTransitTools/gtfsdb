@@ -140,7 +140,7 @@ class RouteBase(object):
             cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
 
     @classmethod
-    def _load_geoms(cls, db, route_list):
+    def _load_geoms(cls, db, route_list, date=None):
         """ load derived geometries, currently only written for PostgreSQL """
         from gtfsdb.model.pattern import Pattern
         from gtfsdb.model.trip import Trip

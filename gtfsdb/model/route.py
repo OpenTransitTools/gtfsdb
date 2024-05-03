@@ -175,6 +175,7 @@ class Route(Base, RouteBase):
         processing_time = time.time() - start_time
         log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
+
 class CurrentRoutes(Base, RouteBase):
     """
     this table is (optionally) used as a view into the currently active routes
@@ -250,12 +251,16 @@ class CurrentRoutes(Base, RouteBase):
         try:
             session.query(CurrentRoutes).delete()
 
-            # import pdb; pdb.set_trace()
+            cr_list = []
             rte_list = Route.query_active_routes(session)
             for i, r in enumerate(rte_list):
                 c = CurrentRoutes(r, i+1)
+                cr_list.append(c)
                 session.add(c)
                 num_inserts += 1
+
+            #import pdb; pdb.set_trace()
+            cls._load_geoms(db, cr_list)
 
             session.commit()
             session.flush()
