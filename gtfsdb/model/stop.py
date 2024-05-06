@@ -180,12 +180,16 @@ class Stop(Base, StopBase):
 
     @classmethod
     def post_make_record(cls, row):
-        """ 
-        SMART (5/2024) has a stop record w/out a stop name, so let's fix that here
-        NOTE: this is a derived method to fix up record before committing the record
-        """
+        """  NOTE: this is a (derived from base.py) method to fix up stop records before committing the record to the db """
+
+        # SMART (5/2024) has a stop record w/out a stop name, so let's fix that here and prevent the 
         if row.get('stop_name') is None:
             row['stop_name'] = "Stop ID {}".format(row.get('stop_id'))
+            log.warning(row['stop_name'])
+
+        # seen a few feeeds w/out a stop_code -- fix that here
+        if row.get('stop_code') is None:
+            row['stop_code'] = row['stop_id']
 
         return row
 
