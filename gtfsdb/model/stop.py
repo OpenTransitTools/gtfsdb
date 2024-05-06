@@ -178,6 +178,17 @@ class Stop(Base, StopBase):
             ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val
 
+    @classmethod
+    def post_make_record(cls, row):
+        """ 
+        SMART (5/2024) has a stop record w/out a stop name, so let's fix that here
+        NOTE: this is a derived method to fix up record before committing the record
+        """
+        if row.get('stop_name') is None:
+            row['stop_name'] = "Stop ID {}".format(row.get('stop_id'))
+
+        return row
+
 
 class CurrentStops(Base, StopBase):
     """
