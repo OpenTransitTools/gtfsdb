@@ -247,14 +247,16 @@ class CurrentRoutes(Base, RouteBase):
           7. close transaction
         """
         session = db.session()
-        num_inserts = 0
+        SORT_ORDER_OFFSET = 1000001
+
+        num_inserts = 0        
         try:
             session.query(CurrentRoutes).delete()
 
             cr_list = []
             rte_list = Route.query_active_routes(session)
             for i, r in enumerate(rte_list):
-                c = CurrentRoutes(r, i+1)
+                c = CurrentRoutes(r, SORT_ORDER_OFFSET + i)
                 cr_list.append(c)
                 session.add(c)
                 num_inserts += 1
