@@ -1,5 +1,3 @@
-from pkg_resources import resource_filename  # @UnresolvedImport
-
 from gtfsdb import config, util
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
@@ -160,7 +158,7 @@ class _Base(object):
         if cls.datasource == config.DATASOURCE_GTFS:
             directory = kwargs.get('gtfs_directory')
         elif cls.datasource == config.DATASOURCE_LOOKUP:
-            directory = resource_filename('gtfsdb', 'data')
+            directory = util.get_resource_path('data')
 
         # step 3: load the file
         log.info("load {0}".format(cls.__name__))

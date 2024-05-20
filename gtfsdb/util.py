@@ -251,3 +251,12 @@ def make_linestring_from_two_points(lon1, lat1, lon2, lat2, srid=config.SRID):
 def make_linestring_from_two_stops(stop1, stop2, srid=config.SRID):
     ls = make_linestring_from_two_points(stop1.stop_lon, stop1.stop_lat, stop2.stop_lon, stop2.stop_lat, srid)
     return ls
+
+
+def get_module_dir():
+    return os.path.dirname(__file__)
+
+
+def get_resource_path(*args):
+    # import pdb; pdb.set_trace()
+    return os.path.join(get_module_dir(), *args)
