@@ -70,9 +70,14 @@ class Trip(Base):
     @classmethod
     def query_trip(cls, session, trip_id, schema=None):
         """ return a trip via trip_id """
-        if schema:
-            Trip.set_schema(schema)
-        ret_val = session.query(Trip).filter(Trip.trip_id==trip_id).one()
+        ret_val = None
+        try:
+            if schema:
+                Trip.set_schema(schema)
+            ret_val = session.query(Trip).filter(Trip.trip_id==trip_id).one()
+        except:
+            log.debug(session.query(Trip).filter(Trip.trip_id==trip_id))
+
         return ret_val
 
     @property
