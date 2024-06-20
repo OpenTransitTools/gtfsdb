@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
 
 import csv
+import json
 import datetime
 import os
 import sys
@@ -165,31 +166,39 @@ class _Base(object):
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
-            if sys.version_info >= (3, 0):
-                f = open(file_path, 'rb')
+            if 'geojson' in cls.filename:
+                log.debug('{}.load importing geojson data from {}'.format(cls.__name__, cls.filename))
+                #import pdb; pdb.set_trace()
+                with open(file_path) as f:
+                    data = json.load(f)
+                for g in data['features']:
+                    print(g)
             else:
-                f = open(file_path, 'r')
-            utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
-            reader = csv.DictReader(utf8_file)
-            reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
-            table = cls.__table__
-            try:
-                db.engine.execute(table.delete())
-            except:
-                log.debug("NOTE: couldn't delete this table")
+                if sys.version_info >= (3, 0):
+                    f = open(file_path, 'rb')
+                else:
+                    f = open(file_path, 'r')
+                utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
+                reader = csv.DictReader(utf8_file)
+                reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+                table = cls.__table__
+                try:
+                    db.engine.execute(table.delete())
+                except:
+                    log.debug("NOTE: couldn't delete this table")
 
-            i = 0
-            for row in reader:
-                records.append(cls.make_record(row))
-                i += 1
-                if i >= batch_size:
+                i = 0
+                for row in reader:
+                    records.append(cls.make_record(row))
+                    i += 1
+                    if i >= batch_size:
+                        db.engine.execute(table.insert(), records)
+                        sys.stdout.write('*')
+                        records = []
+                        i = 0
+                if len(records) > 0:
                     db.engine.execute(table.insert(), records)
-                    sys.stdout.write('*')
-                    records = []
-                    i = 0
-            if len(records) > 0:
-                db.engine.execute(table.insert(), records)
-            f.close()
+                f.close()
 
         # step 4: done...
         process_time = time.time() - start_time

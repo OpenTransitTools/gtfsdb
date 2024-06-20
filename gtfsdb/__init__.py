@@ -8,6 +8,7 @@ from gtfsdb.model.calendar import *  # noqa
 from gtfsdb.model.fare import *  # noqa
 from gtfsdb.model.feed_info import FeedInfo  # noqa
 from gtfsdb.model.frequency import Frequency  # noqa
+from gtfsdb.model.location import *  # noqa
 from gtfsdb.model.route import *  # noqa
 from gtfsdb.model.route_stop import *  # noqa
 from gtfsdb.model.shape import *  # noqa
@@ -41,6 +42,7 @@ SORTED_CLASS_NAMES = [
     Trip.__name__,
     StopTime.__name__,
     RouteStop.__name__,
+    Location.__name__,
     Frequency.__name__,
     FareAttribute.__name__,
     FareRule.__name__,

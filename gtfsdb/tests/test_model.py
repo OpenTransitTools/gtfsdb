@@ -173,3 +173,7 @@ class TestShape(unittest.TestCase, BasicModelTests):
 class TestTransfer(unittest.TestCase, BasicModelTests):
     model = Transfer
 
+
+class TestFlex(unittest.TestCase, BasicModelTests):
+    db = load_sqlite(gtfs_name='flex-feed.zip')
+    model = Route
