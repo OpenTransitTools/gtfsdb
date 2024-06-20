@@ -166,13 +166,21 @@ class _Base(object):
         records = []
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
+            table = cls.__table__
+            try:
+                db.engine.execute(table.delete())
+            except:
+                log.debug("NOTE: couldn't delete this table")
+
             if 'geojson' in cls.filename:
                 log.debug('{}.load importing geojson data from {}'.format(cls.__name__, cls.filename))
                 #import pdb; pdb.set_trace()
                 with open(file_path) as f:
                     data = json.load(f)
-                for g in data['features']:
-                    print(g)
+                    for row in data['features']:
+                        #import pdb; pdb.set_trace()
+                        rec = cls.make_record(row)
+                        db.engine.execute(table.insert(), rec)                    
             else:
                 if sys.version_info >= (3, 0):
                     f = open(file_path, 'rb')
@@ -181,12 +189,6 @@ class _Base(object):
                 utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
                 reader = csv.DictReader(utf8_file)
                 reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
-                table = cls.__table__
-                try:
-                    db.engine.execute(table.delete())
-                except:
-                    log.debug("NOTE: couldn't delete this table")
-
                 i = 0
                 for row in reader:
                     records.append(cls.make_record(row))
