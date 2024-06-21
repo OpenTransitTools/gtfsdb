@@ -78,6 +78,13 @@ def safe_get_any(obj, keys, def_val=None):
     return ret_val
 
 
+def safe_db_engine_load(db, table, records):
+    try:
+        db.engine.execute(table.insert(), records)
+    except Exception as e:
+        log.warning(e)
+
+
 def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=None):
     """
     utility function to parse a request object for something that looks like a date object...

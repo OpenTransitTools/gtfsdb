@@ -19,10 +19,6 @@ class Route(Base, RouteBase):
 
     __tablename__ = 'routes'
 
-    default_route_color = "#7A99B1"
-    default_frequent_color = "#306095"
-    default_text_color = "#FFFFFF"
-
     route_id = Column(String(255), primary_key=True, index=True, nullable=False)
     agency_id = Column(String(255), index=True, nullable=True)
     route_short_name = Column(String(255))
@@ -30,9 +26,9 @@ class Route(Base, RouteBase):
     route_desc = Column(String(1023))
     route_type = Column(Integer, index=True, nullable=False)
     route_url = Column(String(255))
-    route_color = Column(String(7), default=default_route_color)
-    route_alt_color = Column(String(7), default=default_route_color)
-    route_text_color = Column(String(7), default=default_text_color)
+    route_color = Column(String(7), default=config.default_route_color)
+    route_alt_color = Column(String(7), default=config.default_route_color)
+    route_text_color = Column(String(7), default=config.default_text_color)
     route_sort_order = Column(Integer, index=True)
     min_headway_minutes = Column(Integer)  # Trillium extension.
     is_frequent = Column(Boolean, default=False)

@@ -161,9 +161,8 @@ class _Base(object):
         elif cls.datasource == config.DATASOURCE_LOOKUP:
             directory = util.get_resource_path('data')
 
-        # step 3: load the file
-        log.info("load {0}".format(cls.__name__))
-        records = []
+        # step 3: load the file (.geojson or .csv)
+        log.info("load {}".format(cls.__name__))
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
             table = cls.__table__
@@ -178,7 +177,6 @@ class _Base(object):
                 with open(file_path) as f:
                     data = json.load(f)
                     for row in data['features']:
-                        #import pdb; pdb.set_trace()
                         rec = cls.make_record(row)
                         db.engine.execute(table.insert(), rec)                    
             else:
@@ -189,17 +187,18 @@ class _Base(object):
                 utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
                 reader = csv.DictReader(utf8_file)
                 reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+                records = []
                 i = 0
                 for row in reader:
                     records.append(cls.make_record(row))
                     i += 1
                     if i >= batch_size:
-                        db.engine.execute(table.insert(), records)
+                        util.safe_db_engine_load(db, table, records)
                         sys.stdout.write('*')
                         records = []
                         i = 0
                 if len(records) > 0:
-                    db.engine.execute(table.insert(), records)
+                    util.safe_db_engine_load(db, table, records)
                 f.close()
 
         # step 4: done...
