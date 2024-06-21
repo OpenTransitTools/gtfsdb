@@ -123,8 +123,8 @@ class Route(Base, RouteBase):
 
     def _fix_colors(self):
         # step 0: default colors
-        if not util.is_string(self.route_color): self.route_color = self.default_route_color
-        if not util.is_string(self.route_text_color): self.route_text_color = self.default_text_color
+        if not util.is_string(self.route_color): self.route_color = config.default_route_color
+        if not util.is_string(self.route_text_color): self.route_text_color = config.default_text_color
 
         # step 1: fix (add) a '#' to the route color
         if self.route_color[0] != '#':
@@ -135,9 +135,9 @@ class Route(Base, RouteBase):
         # step 2: figure out the alt colors
         self.route_alt_color = self.route_color
         if not self.is_bus or self.is_brt or self.is_frequent:
-            if self.route_color == self.default_route_color:
-                self.route_color = self.default_frequent_color
-                self.route_alt_color = self.default_frequent_color
+            if self.route_color == config.default_route_color:
+                self.route_color = config.default_frequent_color
+                self.route_alt_color = config.default_frequent_color
 
         #print(self.agency_id, self.route_id, self.route_color)
 
