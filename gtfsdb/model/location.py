@@ -22,7 +22,7 @@ class Location(Base):
     def add_geometry_column(cls):
         if not hasattr(cls, 'geom'):
             from geoalchemy2 import Geometry
-            cls.geom = deferred(Column(Geometry(srid=config.SRID)))
+            cls.geom = deferred(Column(Geometry('POLYGON', srid=config.SRID)))
 
     @classmethod
     def make_record(cls, row):
