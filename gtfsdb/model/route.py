@@ -23,6 +23,7 @@ class Route(Base, RouteBase):
     agency_id = Column(String(255), index=True, nullable=True)
     route_short_name = Column(String(255))
     route_long_name = Column(String(255))
+    route_label = Column(String(511))
     route_desc = Column(String(1023))
     route_type = Column(Integer, index=True, nullable=False)
     route_url = Column(String(255))
@@ -87,14 +88,18 @@ class Route(Base, RouteBase):
         build a route name out of long and short names...
         """
         if not self.is_cached_data_valid('_route_name'):
-            log.warning("query route name")
+            log.info("query route name")
             ret_val = self.route_long_name
-            if self.route_long_name and self.route_short_name:
+            if self.route_long_name and self.route_short_name and self.route_long_name != self.route_short_name:
                 ret_val = fmt.format(self=self)
             elif self.route_long_name is None:
                 ret_val = self.route_short_name
             self._route_name = ret_val
             self.update_cached_data('_route_name')
+
+        # add the route_name to db's route_label column so it's available by non-ORM clients (GeoServer)
+        if self.route_label is None:
+            self.route_label = self._route_name
 
         return self._route_name
 
@@ -163,6 +168,7 @@ class Route(Base, RouteBase):
         route_list = session.query(Route).all()
         cls._load_geoms(db, route_list)
         for route in route_list:
+            route.route_name  # populate route_label column
             route._calc_frequency()
             route._fix_colors()
             session.merge(route)
