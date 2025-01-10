@@ -6,6 +6,15 @@ from sqlalchemy.orm import deferred
 from gtfsdb import config
 from gtfsdb.model.base import Base
 
+"""
+TODO: below query unions all regions for an agency ... need to union by route instead
+
+drop table if exists sam.flex;
+CREATE TABLE sam.flex AS
+SELECT ST_UnaryUnion(ST_CollectionExtract(unnest(ST_ClusterIntersecting(geom)))) as geom
+FROM sam.locations;
+ALTER TABLE sam.flex ADD COLUMN id BIGSERIAL PRIMARY KEY;
+"""
 
 class Location(Base):
     datasource = config.DATASOURCE_GTFS
