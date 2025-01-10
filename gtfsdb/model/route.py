@@ -13,6 +13,18 @@ import logging
 log = logging.getLogger(__name__)
 
 
+"""
+TODO:
+service_type = LRT (MAX), HRT (WES), BUS, OWL?, SC, AT, etc...
+service_type = Column(String(7)) 
+ - add service_type enum w/another table
+ - add a scheme to customize things based on agency
+ - so customize/trimet.py and customize/ctran.py, etc...
+ - this would do route_type=1 + route_id=100/192 = service_type MAX, etc... per agency
+ - would also customize the route_label formatting per agency
+ - etc...
+"""
+
 class Route(Base, RouteBase):
     datasource = config.DATASOURCE_GTFS
     filename = 'routes.txt'
@@ -26,6 +38,7 @@ class Route(Base, RouteBase):
     route_label = Column(String(511))
     route_desc = Column(String(1023))
     route_type = Column(Integer, index=True, nullable=False)
+    service_type = Column(String(7))  # TODO: enum LRT, HRT, BUS, SC, AT, 
     route_url = Column(String(255))
     route_color = Column(String(7), default=config.default_route_color)
     route_alt_color = Column(String(7), default=config.default_route_color)
