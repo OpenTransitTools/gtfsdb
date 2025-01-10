@@ -14,14 +14,15 @@ log = logging.getLogger(__name__)
 
 
 """
-TODO:
-service_type = LRT (MAX), HRT (WES), BUS, OWL?, SC, AT, etc...
+TODO: 
+service_type = LRT (MAX), HRT (WES), BUS, OWL?, SC, AT, CC (Community Circ.) etc...
 service_type = Column(String(7)) 
  - add service_type enum w/another table
  - add a scheme to customize things based on agency
  - so customize/trimet.py and customize/ctran.py, etc...
  - this would do route_type=1 + route_id=100/192 = service_type MAX, etc... per agency
  - would also customize the route_label formatting per agency
+ - https://www.itsmarta.com/uploadedFiles/MARTA_101/Why_MARTA/ServiceTypesMatrix.pdf
  - etc...
 """
 
