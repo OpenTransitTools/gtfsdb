@@ -196,18 +196,19 @@ class Stop(Base, StopBase):
 
 class CurrentStops(Base, StopBase):
     """
-    this table is (optionally) used as a view into the currently active routes
-    it is pre-calculated to list routes that are currently running service
+    this table is (optionally) used as a view into the currently active stops
+    it is pre-calculated to list stops that are currently running service
     (GTFS can have multiple instances of the same route, with different aspects like name and direction)
+    TODO: this all needs a lot better documentation and description, etc... (both here and GS, etc...)
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
     agency_id = Column(String(255))
-    agency_idz = Column(String(1023))
-    route_idz  = Column(String(1023))
+    agency_idz = Column(String(1020))
+    route_idz  = Column(String(1020))
 
-    route_short_names = Column(String(1023))
+    route_short_names = Column(String(1020))
     route_type = Column(Integer)
     route_type_other = Column(Integer)
     route_mode = Column(String(255))
@@ -216,6 +217,11 @@ class CurrentStops(Base, StopBase):
     location_type = Column(Integer)
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
+    shared_stops = Column(String(1020))
+
+    # TODO: move to single colon and comma seps, ala OTP
+    # TODO: https://rtp.trimet.org/rtp/#/schedule/TRIMET:1607 (OTP uses feed_id:stop_id)
+    # TODO: shared stops feed_id:route_id:stop_id
 
     stop = relationship(
         Stop.__name__,
@@ -259,11 +265,11 @@ class CurrentStops(Base, StopBase):
                 if self.agency_id is None:
                     self.agency_id = route.agency_id
                     agencyz = route.agency_id
-                    routez  = "{}::{}".format(route.agency_id, route.route_id)
+                    routez  = "{}:{}".format(route.agency_id, route.route_id)
                 else:
-                    routez  = "{};;{}::{}".format(routez, route.agency_id, route.route_id)
+                    routez  = "{},{}:{}".format(routez, route.agency_id, route.route_id)
                     if route.agency_id not in agencyz:
-                        agencyz = "{};;{}".format(agencyz, route.agency_id)
+                        agencyz = "{},{}".format(agencyz, route.agency_id)
 
                 # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
                 if self.route_mode is None:
@@ -291,7 +297,6 @@ class CurrentStops(Base, StopBase):
         session = db.session()
         try:
             session.query(CurrentStops).delete()
-
             
             for s in Stop.query_active_stops(session, date=kwargs.get('date')):
                 c = CurrentStops(s, session)
