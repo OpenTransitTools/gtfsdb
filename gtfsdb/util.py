@@ -1,9 +1,10 @@
 import os
 import sys
+import csv
 import math
 import datetime
 import tempfile
-
+from sqlalchemy import text
 from gtfsdb import config
 
 import logging
@@ -82,6 +83,7 @@ def safe_db_engine_load(db, table, records):
     try:
         db.engine.execute(table.insert(), records)
     except Exception as e:
+        #import pdb; pdb.set_trace()
         log.warning(e)
 
 
@@ -267,3 +269,35 @@ def get_module_dir():
 def get_resource_path(*args):
     # import pdb; pdb.set_trace()
     return os.path.join(get_module_dir(), *args)
+
+
+def get_csv(csv_path, comment="#"):
+    """ read csv file, skipping any line that begins with a comment (default to '#') """
+    csv_data = []
+    with open(csv_path, 'r') as fp:
+        for c in csv.DictReader(filter(lambda row: row[0]!=comment, fp)):
+            csv_data.append(c)
+    return csv_data
+
+
+def to_dict_hash(dicts=[], attribute_name='id'):
+    """ take an array of dicts, and return a hash based on the value of one of the dict's attributes """
+    ret_val = {}
+    for f in dicts:
+        if ret_val.get(f.get(attribute_name)) is None:
+            ret_val[f.get('attribute_name')] = f
+    return ret_val
+
+
+def do_sql(db, sql, echo=False):
+    ret_val = None
+    try:
+        with db.engine.connect() as conn:
+            t = text(sql)
+            ret_val = conn.execute(t).fetchall()
+    except Exception as e:
+        if echo:
+            print(e)
+    return ret_val
+
+

@@ -34,7 +34,7 @@ class Location(Base):
             cls.geom = deferred(Column(Geometry('POLYGON', srid=config.SRID)))
 
     @classmethod
-    def make_record(cls, row):
+    def make_record(cls, row, **kwargs):
         # import pdb; pdb.set_trace()
         if row.get('geometry') and hasattr(cls, 'geom'):
             row['geom'] = json.dumps(row['geometry'])

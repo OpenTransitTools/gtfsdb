@@ -179,7 +179,7 @@ class Stop(Base, StopBase):
         return ret_val
 
     @classmethod
-    def post_make_record(cls, row):
+    def post_make_record(cls, row, **kwargs):
         """  NOTE: this is a (derived from base.py) method to fix up stop records before committing the record to the db """
 
         # SMART (5/2024) has a stop record w/out a stop name, so let's fix that here and prevent the 

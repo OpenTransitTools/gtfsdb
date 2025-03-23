@@ -177,7 +177,7 @@ class _Base(object):
                 with open(file_path) as f:
                     data = json.load(f)
                     for row in data['features']:
-                        rec = cls.make_record(row)
+                        rec = cls.make_record(row, **kwargs)
                         db.engine.execute(table.insert(), rec)                    
             else:
                 if sys.version_info >= (3, 0):
@@ -190,7 +190,7 @@ class _Base(object):
                 records = []
                 i = 0
                 for row in reader:
-                    records.append(cls.make_record(row))
+                    records.append(cls.make_record(row, **kwargs))
                     i += 1
                     if i >= batch_size:
                         util.safe_db_engine_load(db, table, records)
@@ -215,7 +215,7 @@ class _Base(object):
         pass
 
     @classmethod
-    def make_record(cls, row):
+    def make_record(cls, row, **kwargs):
         for k, v in row.copy().items():
             if isinstance(v, basestring):
                 row[k] = v.strip()
@@ -238,11 +238,11 @@ class _Base(object):
             cls.add_geom_to_dict(row)
 
         """ post make_record gives the calling class a chance to fix things up prior to being sent down to database """
-        row = cls.post_make_record(row)
+        row = cls.post_make_record(row, **kwargs)
         return row
 
     @classmethod
-    def post_make_record(cls, row):
+    def post_make_record(cls, row, **kwargs):
         """ Base does nothing, but a derived class now has a chance to clean up the record prior to db commit """
         return row
 

@@ -42,6 +42,8 @@ def get_args(prog_name='gtfsdb-load', do_parse=True):
     parser.add_argument('--is_geospatial', '-g', action='store_true',
                         default=config.DEFAULT_IS_GEOSPATIAL,
                         help='Database supports GEOSPATIAL functions')
+    parser.add_argument('--feed_id', '-f', default=None,
+                        help='GTFS Feed ID (often upper case version of schema name)')
     parser.add_argument('--schema', '-s', default=config.DEFAULT_SCHEMA,
                         help='Database SCHEMA name')
     parser.add_argument('--tables', choices=tables, default=None, nargs='*',
@@ -59,6 +61,10 @@ def get_args(prog_name='gtfsdb-load', do_parse=True):
     if do_parse:
         args = parser.parse_args()
         kwargs = make_kwargs(args)
+
+        # set the feed_id to the uppercase schema name by default
+        if kwargs.get('feed_id') is None and kwargs.get('schema') != config.DEFAULT_SCHEMA:
+            kwargs['feed_id'] = kwargs.get('schema').upper()
     else:
         args = parser
         kwargs = None

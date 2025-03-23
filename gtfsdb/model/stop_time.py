@@ -47,7 +47,7 @@ class StopTime(Base):
                 self.timepoint = 1
 
     @classmethod
-    def post_make_record(cls, row):
+    def post_make_record(cls, row, **kwargs):
         # import pdb; pdb.set_trace()
 
         # step 1: check that times are HH:MM:SS (append zero if just H:MM:SS)

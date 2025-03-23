@@ -37,6 +37,7 @@ setup(
             'gtfsdb-current-load = gtfsdb.scripts:current_tables_cmdline',
             'rs-test = gtfsdb.scripts:route_stop_load',
             'connect-tester = gtfsdb.scripts:db_connect_tester',
+            'db-post-process = gtfsdb.exe:db_post_process',
         ]
     },
     classifiers=(

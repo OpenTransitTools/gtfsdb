@@ -24,6 +24,7 @@ class Database(object):
             url = kwargs.get('database_url', config.DEFAULT_DATABASE_URL)
         self.url = url
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
+        self.feed_id = kwargs.get('feed_id', None)
         self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
 
         """Order list of class names, used for creating & populating tables"""

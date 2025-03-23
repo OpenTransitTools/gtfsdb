@@ -20,10 +20,20 @@ class Agency(Base):
     agency_phone = Column(String(50))
     agency_fare_url = Column(String(255))
     agency_email = Column(String(255))
+    feed_id = Column(String(255))  # optional field that's used in multiple apps, ala OTP
 
     def feed_agency_id(self):
         """
         return an feed_id:agency_id pair
-        use the schema name?
         """
+        return "{}:{}".format(self.feed_id, self.agency_id)
 
+    @classmethod
+    def post_make_record(cls, row, **kwargs):
+        try:
+            #import pdb; pdb.set_trace()
+            row['feed_id'] = kwargs['feed_id']
+        except:
+            pass
+        return row
+        
