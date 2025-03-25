@@ -8,6 +8,7 @@ import logging
 log = logging.getLogger(__name__)
 
 #this_module_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+# https://maps.trimet.org/ti/index/patterns/trip/TRIMET:14389120/geometry/geojson
 
 
 def shared_stops_parser(stops_csv_file, db, cmp="TRIMET"):
@@ -21,8 +22,10 @@ def shared_stops_parser(stops_csv_file, db, cmp="TRIMET"):
     tm = 'TRIMET:TRIMET'
 
     def nearest(feed_id, cmp, stop_id, dist):
+        #sql = "select * from {}.current_stops r where st_dwithin(r.geom, (select t.geom from {}.stops t where stop_id = '{}'), {})".format(feed_id, cmp, stop_id, dist)
         sql = "select * from {}.stops r where st_dwithin(r.geom, (select t.geom from {}.stops t where stop_id = '{}'), {})".format(feed_id, cmp, stop_id, dist)
         return do_sql(db, sql)
+        #return []
 
     stop_dict = get_csv(stops_csv_file)
     for s in stop_dict:
@@ -39,6 +42,8 @@ def shared_stops_parser(stops_csv_file, db, cmp="TRIMET"):
                         result = nearest(feed_id, cmp, stop_id, 0.00055)
                 
             if not result or len(result) > 1:
+                #import pdb; pdb.set_trace()
+                #other_stop_id = result[0]
                 print("{}:{} = {}".format(feed_id, stop_id, result))
 
         faid = "{}:{}".format(feed_id, stop_id)
