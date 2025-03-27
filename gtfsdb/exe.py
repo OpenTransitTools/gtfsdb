@@ -7,6 +7,16 @@ from .util import get_csv, do_sql
 import logging
 log = logging.getLogger(__name__)
 
+
+NOT_FOUND = "not found"
+INCHES_AWAY = "inches away"
+FEET_AWAY = "feet away"
+YARDS_AWAY = "yards away"
+BLOCKS_AWAY = "blocks away"
+
+IGNORE_AGENCIES = ['CANBY', 'CCRIDER', 'CAT', 'YAMHILL']
+
+
 #this_module_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 # https://maps.trimet.org/ti/index/patterns/trip/TRIMET:14389120/geometry/geojson
 
@@ -14,6 +24,10 @@ def nearest(db, feed_id, stop_id, dist, src_feed_id, table="STOPS"):
     sql = "select * from {}.{} stop where st_dwithin(stop.geom, (select t.geom from {}.stops t where stop_id = '{}'), {})".format(feed_id, table, src_feed_id, stop_id, dist)
     #print(sql)
     return do_sql(db, sql)
+
+
+def mk_feed_stop(feed_id, stop_id):
+    return "{}:{}".format(feed_id, stop_id)
 
 
 def mk_feed_rec(feed_id, stop_id, agency_id="?"):
@@ -30,7 +44,7 @@ def is_already_seen(fs):
     return ret_val
         
 
-def get_nearest_record(db, feed_id, stop_id, dist, dist_desc, src_feed_id):
+def get_nearest_record(db, feed_id, stop_id, dist, dist_desc, src_feed_id, ignore_seen_filter=False):
     ret_val = None
 
     from_current_stops = False
@@ -54,7 +68,7 @@ def get_nearest_record(db, feed_id, stop_id, dist, dist_desc, src_feed_id):
             elif from_current_stops:
                 rec = mk_feed_rec(feed_id, r[7], r[0])
 
-            if rec and not is_already_seen(rec):
+            if rec and (ignore_seen_filter or not is_already_seen(rec)):
                 share.append(rec)
 
         if share:
@@ -69,10 +83,6 @@ def get_nearest_record(db, feed_id, stop_id, dist, dist_desc, src_feed_id):
     return ret_val
 
 
-def append_result(result_hash, new_rec):
-    pass
-
-
 def shared_stops_parser(stops_csv_file, db, src_feed_id="TRIMET"):
     """
     simple shared stops read
@@ -80,76 +90,67 @@ def shared_stops_parser(stops_csv_file, db, src_feed_id="TRIMET"):
     format:  feed_id:agency_id:stop_id,...
     example: "TRIMET:TRIMET:7646,CTRAN:C-TRAN:5555,RIDECONNECTION:133:876575"
     """
-    ret_val = {}
+    ret_val = {
+        'src': [],
+        NOT_FOUND: [],
+        INCHES_AWAY: [],
+        FEET_AWAY: [],
+        YARDS_AWAY: [],
+        BLOCKS_AWAY: []
+    }
 
     stop_dict = get_csv(stops_csv_file)
     for s in stop_dict:
+
+        # step 1: get stop_id we're looking for in given feed_id
         stop_id = s['TRIMET_ID']
         feed_id = s['FEED_ID']
 
-        result = get_nearest_record(db, feed_id, stop_id, 0.00013, "inches away", src_feed_id)
+        # step 2: skip unsupported agencies
+        if feed_id in IGNORE_AGENCIES:
+            continue
+
+        # step 3: save off this shared stop (reporting)
+        ret_val['src'].append(s)
+
+        # step 4: progressively find nearest stops based on distance
+        result = get_nearest_record(db, feed_id, stop_id, 0.00013, INCHES_AWAY, src_feed_id, True)
         if result:
-            append_result(ret_val, result)
+            ret_val[INCHES_AWAY].append(result)
         else:
-            result = get_nearest_record(db, feed_id, stop_id, 0.00033, "feet away", src_feed_id)
+            result = get_nearest_record(db, feed_id, stop_id, 0.00033, FEET_AWAY, src_feed_id, True)
             if result:
-                append_result(ret_val, result)
+                ret_val[FEET_AWAY].append(result)
             else:
-                result = get_nearest_record(db, feed_id, stop_id, 0.00066, "yards away", src_feed_id)
+                result = get_nearest_record(db, feed_id, stop_id, 0.00066, YARDS_AWAY, src_feed_id, True)
                 if result:
-                    append_result(ret_val, result)
+                    ret_val[YARDS_AWAY].append(result)
                 else:
-                    result = get_nearest_record(db, feed_id, stop_id, 0.0055, "blocks away", src_feed_id)
+                    result = get_nearest_record(db, feed_id, stop_id, 0.0055, BLOCKS_AWAY, src_feed_id)
                     if result:
-                        append_result(ret_val, result)
+                        ret_val[BLOCKS_AWAY].append(result)
                     else:
-                        print(result)
+                        ret_val[NOT_FOUND].append({'feed_stop': mk_feed_stop(src_feed_id, stop_id), 'share': feed_id})
+    return ret_val
 
 
+def generate_report(ss):
+    url = "https://rtp.trimet.org/rtp/#/schedule"
 
-def xshared_stops_parser(stops_csv_file, db, cmp="TRIMET"):
-    ret_val = {}
-    tm = 'TRIMET:TRIMET'
+    print("There are {} shared stops defined in TRANS.".format(len(ss['src'])))
 
-    stop_dict = get_csv(stops_csv_file)
-    for s in stop_dict:
-        stop_id = s['TRIMET_ID']
-        feed_id = s['FEED_ID']
+    print("\nCould not find a matching stop for the following ({}):".format(len(ss[NOT_FOUND])))
+    for s in ss[NOT_FOUND]:
+        print("   {}: {}/{}".format(s['share'], url, s['feed_stop']))
 
-        result = nearest(db, feed_id, stop_id, 0.00013, cmp)
-        if result is not None:
-            if not result:
-                result = nearest(db, feed_id, stop_id, 0.00021, cmp)
-                if not result:
-                    result = nearest(db, feed_id, stop_id, 0.00033, cmp)
-                    if not result:
-                        result = nearest(db, feed_id, stop_id, 0.00055, cmp)
-                
-            if not result or len(result) > 1:
-                #import pdb; pdb.set_trace()
-                #other_stop_id = result[0]
-                print("{}:{} = {}".format(feed_id, stop_id, result))
-
-        faid = "{}:{}".format(feed_id, stop_id)
-        if ret_val.get(stop_id):
-            m = ret_val.get(stop_id)
-            ret_val[stop_id] = "{},{}".format(m, faid)
-        else:
-            ret_val[stop_id] = faid
-    #print(ret_val)
+    for d in [BLOCKS_AWAY, YARDS_AWAY, FEET_AWAY, INCHES_AWAY]:
+        print("\nThese stops are {} from the target stop ({}):".format(d, len(ss[d])))
+        for s in ss[d]:
+            print("   {}: {}/{}".format(s['share'], url, s['src']))
 
 
 def db_post_process():
-    #import pdb; pdb.set_trace()
     args, kwargs = get_args()
     db = Database(**kwargs)
-    shared_stops_parser(args.file, db)
-
-    """
-    with db.engine.connect() as conn:
-        t = text("select * from rideconnection.stops r where st_dwithin(r.geom, (select t.geom from trimet.stops t where stop_id = '35'), 0.0001)")
-        result = conn.execute(t).fetchall()
-    """
-
-    """
-    """
+    ss = shared_stops_parser(args.file, db)
+    generate_report(ss)
