@@ -32,6 +32,7 @@ class Stop(Base, StopBase):
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
+    shared_stops = Column(String(510))  # populated by external process; links different feeds ala agency_id:feed_id:stop_id
 
     stop_features = relationship(
         'StopFeature',
@@ -217,11 +218,7 @@ class CurrentStops(Base, StopBase):
     location_type = Column(Integer)
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
-    shared_stops = Column(String(1020))
-
-    # TODO: move to single colon and comma seps, ala OTP
-    # TODO: https://rtp.trimet.org/rtp/#/schedule/TRIMET:1607 (OTP uses feed_id:stop_id)
-    # TODO: shared stops feed_id:route_id:stop_id
+    shared_stops = Column(String(510))  # populated in external process; links feeds ala list of agency_id:feed_id:stop_id, ...
 
     stop = relationship(
         Stop.__name__,
@@ -241,6 +238,7 @@ class CurrentStops(Base, StopBase):
         self.location_type = stop.location_type
         self.stop_lon = stop.stop_lon
         self.stop_lat = stop.stop_lat
+        self.shared_stops = stop.shared_stops
 
         # copy the stop geom to CurrentStops (if we're in is_geospatial mode)
         if hasattr(stop, 'geom') and hasattr(self, 'geom'):

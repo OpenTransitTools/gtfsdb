@@ -37,7 +37,6 @@ setup(
             'gtfsdb-current-load = gtfsdb.scripts:current_tables_cmdline',
             'rs-test = gtfsdb.scripts:route_stop_load',
             'connect-tester = gtfsdb.scripts:db_connect_tester',
-            'db-post-process = gtfsdb.exe:db_post_process',
         ]
     },
     classifiers=(
@@ -46,7 +45,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.6',
     ),
 )
