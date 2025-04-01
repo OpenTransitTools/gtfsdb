@@ -19,10 +19,10 @@ class Stop(Base, StopBase):
 
     stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     stop_code = Column(String(50))
-    stop_name = Column(String(255), nullable=False)
-    stop_desc = Column(String(255))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
+    stop_name = Column(String(255), nullable=False)
+    stop_desc = Column(String(255))
     zone_id = Column(String(50))
     stop_url = Column(String(255))
     location_type = Column(Integer, index=True, default=0)
@@ -205,19 +205,22 @@ class CurrentStops(Base, StopBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
+    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    stop_code = Column(String(50))
+    stop_lat = Column(Numeric(12, 9), nullable=False)
+    stop_lon = Column(Numeric(12, 9), nullable=False)
+    stop_name = Column(String(255), nullable=False)
+
     agency_id = Column(String(255))
     agency_idz = Column(String(1020))
     route_idz  = Column(String(1020))
-
     route_short_names = Column(String(1020))
+
     route_type = Column(Integer)
     route_type_other = Column(Integer)
     route_mode = Column(String(255))
 
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
     location_type = Column(Integer)
-    stop_lat = Column(Numeric(12, 9), nullable=False)
-    stop_lon = Column(Numeric(12, 9), nullable=False)
     shared_stops = Column(String(510))  # populated in external process; links feeds ala list of agency_id:feed_id:stop_id, ...
 
     stop = relationship(
@@ -235,6 +238,8 @@ class CurrentStops(Base, StopBase):
         :param session:
         """
         self.stop_id = stop.stop_id
+        self.stop_code = stop.stop_code
+        self.stop_name = stop.stop_name
         self.location_type = stop.location_type
         self.stop_lon = stop.stop_lon
         self.stop_lat = stop.stop_lat
