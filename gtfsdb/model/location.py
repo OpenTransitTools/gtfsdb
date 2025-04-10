@@ -9,23 +9,9 @@ from gtfsdb.model.base import Base
 import logging
 log = logging.getLogger(__name__)
 
-"""
-TODO: below query unions all regions for an agency ... need to union by route instead
 
-drop table if exists sam.flex;
-CREATE TABLE sam.flex AS
-SELECT ST_UnaryUnion(ST_CollectionExtract(unnest(ST_ClusterIntersecting(geom)))) as geom
-FROM sam.locations;
-ALTER TABLE sam.flex ADD COLUMN id BIGSERIAL PRIMARY KEY;
-"""
-class Location(Base):
-    datasource = config.DATASOURCE_GTFS
-    filename = 'locations.geojson'
-
-    __tablename__ = 'locations'
-
+class LocationBase(object):
     id = Column(String(255), primary_key=True, index=True, nullable=False)
-
     region_color = Column(String(7), default=config.default_route_color)
     text_color = Column(String(7), default=config.default_text_color)
     route_id = Column(String(255))
@@ -38,6 +24,14 @@ class Location(Base):
             from geoalchemy2 import Geometry
             # TODO: the geom could be either a Polygon or Multi-Polygon 
             cls.geom = deferred(Column(Geometry('POLYGON', srid=config.SRID)))
+
+
+class Location(Base, LocationBase):
+    """ GTFS 'location' aka Flex regions """
+    datasource = config.DATASOURCE_GTFS
+    filename = 'locations.geojson'
+
+    __tablename__ = 'locations'
 
     @classmethod
     def make_record(cls, row, **kwargs):
@@ -69,3 +63,23 @@ class Location(Base):
                         l.region_name = stop_time.trip.route.route_name
         except Exception as e:
             log.error(e)
+
+
+class LocationCarto(Base, LocationBase):
+    """ a union of GTFS related (via stop_time.location_id) flex regions, that should look good on a map """
+    datasource = config.DATASOURCE_DERIVED
+    __tablename__ = 'locations_carto'
+
+    @classmethod
+    def post_process(cls, db, **kwargs):
+        """
+        TODO: below query unions all regions for an agency ... need to union by route instead
+
+        drop table if exists sam.flex;
+        CREATE TABLE sam.flex AS
+        SELECT ST_UnaryUnion(ST_CollectionExtract(unnest(ST_ClusterIntersecting(geom)))) as geom
+        FROM sam.locations;
+        ALTER TABLE sam.flex ADD COLUMN id BIGSERIAL PRIMARY KEY;
+        """
+        #import pdb; pdb.set_trace()
+        pass

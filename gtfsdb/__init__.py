@@ -55,4 +55,5 @@ CURRENT_CLASS_NAMES = [
     CurrentRoutes.__name__,
     CurrentRouteStops.__name__,
     CurrentStops.__name__,
+    LocationCarto.__name__,
 ]
