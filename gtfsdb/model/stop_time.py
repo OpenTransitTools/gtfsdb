@@ -18,8 +18,9 @@ class StopTime(Base):
     __tablename__ = 'stop_times'
 
     trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    stop_sequence = Column(Integer, primary_key=True, nullable=False)
     stop_id = Column(String(255), index=True)
+    location_id = Column(String(255))
+    stop_sequence = Column(Integer, primary_key=True, nullable=False)
     arrival_time = Column(String(9))
     departure_time = Column(String(9), index=True)
     stop_headsign = Column(String(255))
