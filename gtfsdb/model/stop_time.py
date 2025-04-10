@@ -87,8 +87,7 @@ class StopTime(Base):
                 if d.direction_name and not any([d.direction_name in s for s in banned]):
                     ret_val = d.direction_name.lstrip('to ').lstrip('To ')
         except Exception as e:
-            log.debug(e)
-            pass
+            log.error(e)
         return ret_val
 
     def is_boarding_stop(self):
@@ -160,7 +159,7 @@ class StopTime(Base):
                         count = 0
 
         except Exception as e:
-            log.warning(e)
+            log.error(e)
             session.rollback()
         finally:
             session.commit()

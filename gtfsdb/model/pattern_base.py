@@ -46,7 +46,7 @@ class PatternBase(object):
             # TODO q.filter(cls.agency_id == agency_id)
             ret_val = q.one()
         except Exception as e:
-            log.info(e)
+            log.warning(e)
         return ret_val
 
     @classmethod

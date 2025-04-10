@@ -68,4 +68,4 @@ class Location(Base):
                         l.text_color = stop_time.trip.route.route_text_color
                         l.region_name = stop_time.trip.route.route_name
         except Exception as e:
-            log.debug(e)
+            log.error(e)

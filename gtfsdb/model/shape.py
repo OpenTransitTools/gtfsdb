@@ -128,7 +128,7 @@ class Shape(Base):
                         count = 0
 
         except Exception as e:
-            log.warning(e)
+            log.error(e)
             session.rollback()
         finally:
             session.commit()
