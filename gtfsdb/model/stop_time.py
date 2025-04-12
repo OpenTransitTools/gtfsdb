@@ -130,6 +130,10 @@ class StopTime(Base):
                 distance = 0.0
                 count = 0
                 for s in stop_times:
+                    # step 0: check data exists
+                    if s is None or s.stop is None or s.trip_id is None:
+                        continue
+
                     # step 1: on first iteration or shape change, goto loop again (e.g., need 2 coords to calc distance)
                     if prev_lat is None or trip_id != s.trip_id:
                         prev_lat = s.stop.stop_lat
