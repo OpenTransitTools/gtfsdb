@@ -53,14 +53,16 @@ class Location(Base, LocationBase):
 
         session = db.session
         try:
+            rso = {}
             locs = session.query(Location).all()
             if locs and len(locs) > 0:
                 for i, l in enumerate(locs):
                     stop_time = session.query(StopTime).filter_by(location_id=l.id).first()
                     if stop_time:
                         #import pdb; pdb.set_trace()
+                        rso[l.route_id] = rso.get(l.route_id) or i  # for the 'default' route sort order below
                         l.route_id = stop_time.trip.route.route_id
-                        l.route_sort_order = stop_time.trip.route.route_sort_order or i
+                        l.route_sort_order = stop_time.trip.route.route_sort_order or rso.get(l.route_id) or 1
                         l.region_name = stop_time.trip.route.route_name
                         l.region_color = stop_time.trip.route.route_color
                         l.text_color = stop_time.trip.route.route_text_color
