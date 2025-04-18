@@ -3,8 +3,7 @@ import json
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import deferred
 
-from gtfsdb import config
-from gtfsdb.util import do_sql
+from gtfsdb import config, util
 from gtfsdb.model.base import Base
 
 import logging
@@ -41,7 +40,13 @@ class Location(Base, LocationBase):
     @classmethod
     def make_record(cls, row, **kwargs):
         if row.get('geometry') and hasattr(cls, 'geom'):
+            #import pdb; pdb.set_trace()
             row['geom'] = json.dumps(row['geometry'])
+
+            # the id attribute is often in the location_id; but for C-TRAN's pretty shapes, that id is in properties
+            if row.get('properties') and row.get('properties').get('location_id'):
+                row['id'] = row.get('properties').get('location_id')
+
         return row
 
     @classmethod
@@ -106,4 +111,4 @@ class FlexRegion(Base, LocationBase):
         "SELECT {route_columns}, ST_UnaryUnion(ST_CollectionExtract(unnest(ST_ClusterIntersecting(geom)))) as geom " \
         "FROM {schema}.locations " \
         "GROUP BY {route_columns}".format(schema=schema, route_columns=route_columns)
-        do_sql(db, sql)
+        util.do_sql(db, sql)
