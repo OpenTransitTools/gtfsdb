@@ -124,8 +124,7 @@ class Route(Base, RouteBase):
             if dir and dir.direction_name:
                 ret_val = dir.direction_name
         except Exception as e:
-            log.debug(e)
-            pass
+            log.error(e)
         return ret_val
 
     @property
@@ -284,7 +283,7 @@ class CurrentRoutes(Base, RouteBase):
             session.commit()
             session.flush()
         except Exception as e:
-            log.warning(e)
+            log.error(e)
             session.rollback()
         finally:
             session.flush()

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class StopBase(object):
     """
-    provides a generic set of stop query routines
+    StopBase provides a generic set of stop query routines
     """
 
     def active_stops(self, date=None):

@@ -44,9 +44,9 @@ class PatternBase(object):
             q = session.query(cls)
             q = q.filter(cls.shape_id == pattern_id)
             # TODO q.filter(cls.agency_id == agency_id)
-            ret_val = q.one()
+            ret_val = q.first()
         except Exception as e:
-            log.info(e)
+            log.warning(e)
         return ret_val
 
     @classmethod
@@ -58,7 +58,7 @@ class PatternBase(object):
         try:
             #import pdb; pdb.set_trace()
             pattern = cls.query_pattern(session, pattern_id, agency)
-            dblist = session.query(func.st_asgeojson(pattern.geom)).one()
+            dblist = session.query(func.st_asgeojson(pattern.geom)).first()
             ret_val = eval(dblist[0]) # query result comes back as list with one 'string' entry -- eval converts to dict
         except Exception as e:
             log.info(e)
@@ -77,7 +77,7 @@ class PatternBase(object):
         try:
             #import pdb; pdb.set_trace()
             pattern = cls.query_pattern(session, pattern_id, agency)
-            points = session.query(func.st_asencodedpolyline(pattern.geom)).one()
+            points = session.query(func.st_asencodedpolyline(pattern.geom)).first()
             length = session.query(func.st_npoints(pattern.geom)).one()
             ret_val['length'] = length[0]
             ret_val['points'] = points[0]

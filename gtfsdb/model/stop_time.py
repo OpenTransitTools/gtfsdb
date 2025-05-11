@@ -18,8 +18,9 @@ class StopTime(Base):
     __tablename__ = 'stop_times'
 
     trip_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    stop_sequence = Column(Integer, primary_key=True, nullable=False)
     stop_id = Column(String(255), index=True)
+    location_id = Column(String(255))
+    stop_sequence = Column(Integer, primary_key=True, nullable=False)
     arrival_time = Column(String(9))
     departure_time = Column(String(9), index=True)
     stop_headsign = Column(String(255))
@@ -86,8 +87,7 @@ class StopTime(Base):
                 if d.direction_name and not any([d.direction_name in s for s in banned]):
                     ret_val = d.direction_name.lstrip('to ').lstrip('To ')
         except Exception as e:
-            log.debug(e)
-            pass
+            log.error(e)
         return ret_val
 
     def is_boarding_stop(self):
@@ -130,6 +130,10 @@ class StopTime(Base):
                 distance = 0.0
                 count = 0
                 for s in stop_times:
+                    # step 0: check data exists
+                    if s is None or s.stop is None or s.trip_id is None:
+                        continue
+
                     # step 1: on first iteration or shape change, goto loop again (e.g., need 2 coords to calc distance)
                     if prev_lat is None or trip_id != s.trip_id:
                         prev_lat = s.stop.stop_lat
@@ -159,7 +163,7 @@ class StopTime(Base):
                         count = 0
 
         except Exception as e:
-            log.warning(e)
+            log.error(e)
             session.rollback()
         finally:
             session.commit()
