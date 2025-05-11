@@ -3,6 +3,9 @@ import sys
 import csv
 import math
 import datetime
+import calendar
+from datetime import date
+from datetime import timedelta
 import tempfile
 from sqlalchemy import text
 from gtfsdb import config
@@ -85,39 +88,6 @@ def safe_db_engine_load(db, table, records):
     except Exception as e:
         #import pdb; pdb.set_trace()
         log.warning(e)
-
-
-def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=None):
-    """
-    utility function to parse a request object for something that looks like a date object...
-    """
-    if def_val is None:
-        def_val = datetime.date.today()
-
-    if in_date is None:
-        ret_val = def_val
-    elif isinstance(in_date, datetime.date) or isinstance(in_date, datetime.datetime):
-        ret_val = in_date
-    else:
-        ret_val = def_val
-        for fmt in fmt_list:
-            try:
-                d = datetime.datetime.strptime(in_date, fmt).date()
-                if d is not None:
-                    ret_val = d
-                    break
-            except Exception as e:
-                #log.debug(e)
-                pass
-    return ret_val
-
-
-def fix_time_string(ts):
-    """ check that string time is HH:MM:SS (append zero if just H:MM:SS) """
-    ret_val = ts
-    if ts and type(ts) == str and ts[1] == ":":
-        ret_val = "0{0}".format(ts)
-    return ret_val
 
 
 class UTF8Recoder(object):
@@ -301,3 +271,77 @@ def do_sql(db, sql, echo=False):
     return ret_val
 
 
+def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=None):
+    """
+    utility function to parse a request object for something that looks like a date object...
+    """
+    if def_val is None:
+        def_val = date.today()
+
+    if in_date is None:
+        ret_val = def_val
+    elif isinstance(in_date, date) or isinstance(in_date, datetime.datetime):
+        ret_val = in_date
+    else:
+        ret_val = def_val
+        for fmt in fmt_list:
+            try:
+                d = datetime.datetime.strptime(in_date, fmt).date()
+                if d is not None:
+                    ret_val = d
+                    break
+            except Exception as e:
+                #log.debug(e)
+                pass
+    return ret_val
+
+
+def fix_time_string(ts):
+    """ check that string time is HH:MM:SS (append zero if just H:MM:SS) """
+    ret_val = ts
+    if ts and type(ts) == str and ts[1] == ":":
+        ret_val = "0{0}".format(ts)
+    return ret_val
+
+def todays_date(offset=0):
+    return date.today() + timedelta(days=offset)
+
+
+def get_dow():
+    """ returns {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} """
+    return {name: i for i, name in enumerate(calendar.day_name)}
+
+
+def last_date_of(from_date=None, target_weekday='Sunday'):
+    """
+    find the date of the preceeding target weekday, from the input date
+    e.g., if the input (or default today) is Monday 1-1-2112, and you target Sunday, you'll get 12-31-2111
+    note: if your date is the same weekday as the target, you get that date returned
+    """
+    if from_date is None or not isinstance(from_date, date):
+        from_date = date.today()
+    dow = get_dow()
+    offset = (from_date.weekday() - dow[target_weekday]) % 7
+    ret_val = from_date - timedelta(days=offset)
+    return ret_val
+
+
+def next_date_of(from_date=None, target_weekday='Saturday'):
+    """
+    find the future date of the target weekday, from the input date
+    e.g., if the input (or default today) is Thursday 12-30-2111, and you target Saturday, you'll get 1-1-2112
+    note: if your date is the same weekday as the target, you get that date returned (eg Sunday 12-31-2111)
+    """
+    if from_date is None or not isinstance(from_date, date):
+        from_date = date.today()
+    dow = get_dow()
+    offset = (dow[target_weekday] - from_date.weekday()) % 7
+    ret_val = from_date + timedelta(days=offset)
+    return ret_val
+
+
+def sunday_to_saturday_date_range(from_date=None):
+    """ return the dates of last Sunday and next Saturday """
+    sunday = last_date_of(from_date)
+    saturday = next_date_of(from_date)
+    return sunday, saturday
