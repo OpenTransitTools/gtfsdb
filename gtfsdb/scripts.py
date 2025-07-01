@@ -25,7 +25,7 @@ def make_kwargs(args):
     return kwargs
 
 
-def get_args(prog_name='gtfsdb-load', do_parse=True):
+def get_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATABASE_URL, def_schema=config.DEFAULT_SCHEMA):
     """
     database load command-line arg parser and help util...
     """
@@ -37,15 +37,14 @@ def get_args(prog_name='gtfsdb-load', do_parse=True):
     parser.add_argument('file', help='URL or local path to GTFS zip FILE')
     parser.add_argument('--batch_size', '-b', type=int, default=config.DEFAULT_BATCH_SIZE,
                         help='BATCH SIZE to use for memory management')
-    parser.add_argument('--database_url', '-d', default=config.DEFAULT_DATABASE_URL,
+    parser.add_argument('--database_url', '-d', default=def_db,
                         help='DATABASE URL with appropriate privileges')
     parser.add_argument('--is_geospatial', '-g', action='store_true',
                         default=config.DEFAULT_IS_GEOSPATIAL,
                         help='Database supports GEOSPATIAL functions')
     parser.add_argument('--feed_id', '-f', default=None,
                         help='GTFS Feed ID (often upper case version of schema name)')
-    parser.add_argument('--schema', '-s', default=config.DEFAULT_SCHEMA,
-                        help='Database SCHEMA name')
+    parser.add_argument('--schema', '-s', default=def_schema, help='Database SCHEMA name')
     parser.add_argument('--tables', choices=tables, default=None, nargs='*',
                         help='Limited list of TABLES to load, if blank, load all tables')
     parser.add_argument('--create', '-c', action="store_true",
@@ -63,8 +62,9 @@ def get_args(prog_name='gtfsdb-load', do_parse=True):
         kwargs = make_kwargs(args)
 
         # set the feed_id to the uppercase schema name by default
-        if kwargs.get('feed_id') is None and kwargs.get('schema') != config.DEFAULT_SCHEMA:
+        if kwargs.get('feed_id') is None and kwargs.get('schema') is not None:
             kwargs['feed_id'] = kwargs.get('schema').upper()
+            args.feed_id = kwargs.get('schema').upper()
     else:
         args = parser
         kwargs = None
