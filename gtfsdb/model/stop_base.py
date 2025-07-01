@@ -13,6 +13,21 @@ class StopBase(object):
     StopBase provides a generic set of stop query routines
     """
 
+    def get_stop_code(self):
+        """
+        should this method just return "" if no stop code, ala this blurb from GTFS:
+        'This field should be left empty for locations without a code presented to riders.'
+        """
+        ret_val = self.stop_id
+        try:
+            if self.stop_code and len(self.stop_code) > 0:
+                ret_val = self.stop_code
+            else:
+                ret_val = self.stop_id
+        except Exception as e:
+            log.warning(e)
+        return ret_val
+
     def active_stops(self, date=None):
         """
         this common method will call route.is_active(), which means it will probably be slow
