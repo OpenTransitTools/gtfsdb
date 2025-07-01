@@ -107,6 +107,22 @@ class Stop(Base, StopBase):
         return self._agencies
 
     @property
+    def agency_name(self):
+        """
+        return the agency name or "" (if stop has no routes or no agency.agency_name)
+        """
+        try:
+            self._agency_name
+        except AttributeError:
+            self._agency_name = ""
+            if self.routes:
+                for r in self.routes:
+                    if r.agency and r.agency.agency_name:
+                        self._agency_name = r.agency.agency_name
+                        break
+        return self._agency_name
+
+    @property
     def amenities(self):
         """
         return list of strings for the stop amenity (feature) names
