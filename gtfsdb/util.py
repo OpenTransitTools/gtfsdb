@@ -240,7 +240,7 @@ def get_resource_path(*args):
     return os.path.join(get_module_dir(), *args)
 
 
-def get_csv(csv_path, comment="#"):
+def get_csv(csv_path, comment="#", to_lower=True):
     """
     read csv file, skipping any line that begins with a comment (default to '#')
     note: the csv header (column) names are forced to lower-case
@@ -248,8 +248,9 @@ def get_csv(csv_path, comment="#"):
     csv_data = []
     with open(csv_path, 'r') as fp:
         reader = csv.DictReader(filter(lambda row: row[0]!=comment, fp))
-        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
-        # import pdb; pdb.set_trace()
+        if to_lower:
+            reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+            # import pdb; pdb.set_trace()
         for c in reader:
             csv_data.append(c)
     return csv_data
