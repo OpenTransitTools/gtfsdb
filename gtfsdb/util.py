@@ -237,15 +237,20 @@ def get_module_dir():
 
 
 def get_resource_path(*args):
-    # import pdb; pdb.set_trace()
     return os.path.join(get_module_dir(), *args)
 
 
 def get_csv(csv_path, comment="#"):
-    """ read csv file, skipping any line that begins with a comment (default to '#') """
+    """
+    read csv file, skipping any line that begins with a comment (default to '#')
+    note: the csv header (column) names are forced to lower-case
+    """
     csv_data = []
     with open(csv_path, 'r') as fp:
-        for c in csv.DictReader(filter(lambda row: row[0]!=comment, fp)):
+        reader = csv.DictReader(filter(lambda row: row[0]!=comment, fp))
+        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+        # import pdb; pdb.set_trace()
+        for c in reader:
             csv_data.append(c)
     return csv_data
 
