@@ -243,7 +243,7 @@ def get_resource_path(*args):
 def get_csv(csv_path, comment="#", to_lower=True):
     """
     read csv file, skipping any line that begins with a comment (default to '#')
-    note: the csv header (column) names are forced to lower-case
+    note: the csv header (column) names are forced to lower-case by default
     """
     csv_data = []
     with open(csv_path, 'r') as fp:

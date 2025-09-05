@@ -62,17 +62,18 @@ class RouteBase(object):
         return routes
 
     @classmethod
-    def query_active_routes(cls, session, date=None):
+    def query_active_routes(cls, session, date=None, do_filter=True):
         """
         :return list of *active* Route orm objects queried from the db
         :note 'active' is based on date ... this routine won't deal with holes in the
               schedule (e.g., when a route is not active for a period of time, due to construction)
         """
         # step 1: grab all routes
-        routes = cls.query_route_list(session)
+        ret_val = cls.query_route_list(session)
 
         # step 2: filter routes by active date
-        ret_val = cls.filter_active_routes(routes, date)
+        if do_filter:
+            ret_val = cls.filter_active_routes(ret_val, date)
         return ret_val
 
     @classmethod
@@ -157,6 +158,8 @@ class RouteBase(object):
                     q = q.filter(Pattern.trips.any(and_(Trip.route == route, Trip.universal_calendar.any(date=date))))
                 else:
                     q = q.filter(Pattern.trips.any((Trip.route == route)))
+
+                import pdb; pdb.set_trace()
                 route.geom = q.first().geom
                 session.merge(route)
             session.commit()

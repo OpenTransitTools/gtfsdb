@@ -268,16 +268,23 @@ class CurrentRoutes(Base, RouteBase):
         try:
             session.query(CurrentRoutes).delete()
 
+            # filter by date, or copy all
+            # import pdb; pdb.set_trace()
+            date = util.check_date(kwargs.get('date'))
+            filter = True
+            if kwargs.get('current_tables_all'):
+                date = None
+                filter = False
+
             cr_list = []
-            rte_list = Route.query_active_routes(session)
+            rte_list = Route.query_active_routes(session, date, filter)
             for i, r in enumerate(rte_list):
                 c = CurrentRoutes(r, SORT_ORDER_OFFSET + i)
                 cr_list.append(c)
                 session.add(c)
                 num_inserts += 1
             
-            # import pdb; pdb.set_trace()
-            date = util.check_date(kwargs.get('date'))
+            #import pdb; pdb.set_trace()
             cls._load_geoms(db, cr_list, date)
 
             session.commit()

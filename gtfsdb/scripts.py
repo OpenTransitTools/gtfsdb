@@ -15,6 +15,7 @@ def make_kwargs(args):
         schema=args.schema,
         is_geospatial=args.is_geospatial,
         current_tables=args.current_tables,
+        current_tables_all=args.current_tables_all,
 
         # less used params
         do_postprocess=not args.ignore_postprocess,
@@ -53,6 +54,8 @@ def get_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATAB
                         help='print results from some sql query or data transform to cmdline')
     parser.add_argument('--current_tables', '-ct', default=False, action='store_true',
                         help="create tables that represent 'current' service (e.g., views)")
+    parser.add_argument('--current_tables_all', '-cta', default=False, action='store_true',
+                        help="load current tables with everything in the load tables (don't bother calculating current service)")
     parser.add_argument('--ignore_postprocess', '-np', default=False, action='store_true',
                         help="don't run any postprocess model routines (will leave some tables empty ... but will load raw gtfs data)")
     parser.add_argument('--ignore_blocks', '-nb', default=False, action='store_true',
@@ -99,7 +102,7 @@ def current_tables_load(**kwargs):
 
 
 def current_tables_cmdline():
-    # import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     args, kwargs = get_args('gtfsdb-current-load')
     kwargs['date'] = args.file   # hack -- optionally send string date via the 'file' cmdline param
     current_tables_load(**kwargs)
