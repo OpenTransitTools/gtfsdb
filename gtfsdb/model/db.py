@@ -30,7 +30,7 @@ class Database(object):
         """Order list of class names, used for creating & populating tables"""
         from gtfsdb import SORTED_CLASS_NAMES, CURRENT_CLASS_NAMES
         self.sorted_class_names = SORTED_CLASS_NAMES
-        if kwargs.get('current_tables'):
+        if kwargs.get('current_tables') or kwargs.get('current_tables_all'):
             self.sorted_class_names.extend(CURRENT_CLASS_NAMES)
         # import pdb; pdb.set_trace()
 
