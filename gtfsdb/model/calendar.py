@@ -24,7 +24,7 @@ class Calendar(Base):
     __tablename__ = 'calendar'
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
-    service_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    service_id = Column(String(512), primary_key=True, index=True, nullable=False)
     monday = Column(SmallInteger, nullable=False)
     tuesday = Column(SmallInteger, nullable=False)
     wednesday = Column(SmallInteger, nullable=False)
@@ -34,7 +34,7 @@ class Calendar(Base):
     sunday = Column(SmallInteger, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
-    service_name = Column(String(255))  # Trillium extension, a human-readable name for the calendar.
+    service_name = Column(String(512))  # Trillium extension, a human-readable name for the calendar.
 
     def weekday_list(self):
         weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3, friday=4, saturday=5, sunday=6)
@@ -62,7 +62,7 @@ class CalendarDate(Base):
 
     __tablename__ = 'calendar_dates'
 
-    service_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    service_id = Column(String(512), primary_key=True, index=True, nullable=False)
     date = Column(Date, primary_key=True, index=True, nullable=False)
     exception_type = Column(Integer, nullable=False)
 
@@ -79,7 +79,7 @@ class UniversalCalendar(Base):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'universal_calendar'
 
-    service_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    service_id = Column(String(512), primary_key=True, index=True, nullable=False)
     date = Column(Date, primary_key=True, index=True, nullable=False)
 
     trips = relationship(

@@ -13,10 +13,10 @@ RSO_MAX=11111
 
 
 class LocationBase(object):
-    route_id = Column(String(255))
+    route_id = Column(String(512))
     route_sort_order = Column(Integer, index=True)
     render_order = Column(Integer, default=1)
-    region_name = Column(String(255))
+    region_name = Column(String(512))
     region_color = Column(String(7), default=config.default_route_color)
     text_color = Column(String(7), default=config.default_text_color)
 
@@ -35,7 +35,7 @@ class Location(Base, LocationBase):
 
     __tablename__ = 'locations'
 
-    id = Column(String(255), primary_key=True, index=True, nullable=False)
+    id = Column(String(512), primary_key=True, index=True, nullable=False)
 
     @classmethod
     def make_record(cls, row, **kwargs):

@@ -17,22 +17,22 @@ class Stop(Base, StopBase):
 
     __tablename__ = 'stops'
 
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    stop_code = Column(String(50))
+    stop_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    stop_code = Column(String(256))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
-    stop_name = Column(String(255), nullable=False)
-    stop_desc = Column(String(255))
-    zone_id = Column(String(50))
-    stop_url = Column(String(255))
+    stop_name = Column(String(512), nullable=False)
+    stop_desc = Column(String(1024))
+    zone_id = Column(String(512))
+    stop_url = Column(String(1024))
     location_type = Column(Integer, index=True, default=0)
-    parent_station = Column(String(255))
+    parent_station = Column(String(512))
     stop_timezone = Column(String(50))
     wheelchair_boarding = Column(Integer, default=0)
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
-    shared_stops = Column(String(510))  # populated by external process; links different feeds ala agency_id:feed_id:stop_id
+    shared_stops = Column(String(1024))  # populated by external process; links different feeds ala agency_id:feed_id:stop_id
 
     stop_features = relationship(
         'StopFeature',
@@ -221,23 +221,23 @@ class CurrentStops(Base, StopBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    stop_code = Column(String(50))
+    stop_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    stop_code = Column(String(512))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
-    stop_name = Column(String(255), nullable=False)
+    stop_name = Column(String(512), nullable=False)
 
-    agency_id = Column(String(255))
-    agency_idz = Column(String(1020))
-    route_idz  = Column(String(1020))
-    route_short_names = Column(String(1020))
+    agency_id = Column(String(512))
+    agency_idz = Column(String(1024))
+    route_idz  = Column(String(1024))
+    route_short_names = Column(String(1024))
 
     route_type = Column(Integer)
     route_type_other = Column(Integer)
-    route_mode = Column(String(255))
+    route_mode = Column(String(256))
 
     location_type = Column(Integer)
-    shared_stops = Column(String(510))  # populated in external process; links feeds ala list of agency_id:feed_id:stop_id, ...
+    shared_stops = Column(String(1024))  # populated in external process; links feeds ala list of agency_id:feed_id:stop_id, ...
 
     stop = relationship(
         Stop.__name__,

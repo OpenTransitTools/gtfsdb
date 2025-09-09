@@ -21,7 +21,7 @@ class Pattern(Base, PatternBase):
 
     __tablename__ = 'patterns'
 
-    shape_id = Column(String(255), primary_key=True, index=True)
+    shape_id = Column(String(512), primary_key=True, index=True)
     pattern_dist = Column(Numeric(20, 10))
 
     trips = relationship(

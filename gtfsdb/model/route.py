@@ -32,15 +32,15 @@ class Route(Base, RouteBase):
 
     __tablename__ = 'routes'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), index=True, nullable=True)
-    route_short_name = Column(String(255))
-    route_long_name = Column(String(255))
-    route_label = Column(String(511))
-    route_desc = Column(String(1023))
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    agency_id = Column(String(512), index=True, nullable=True)
+    route_short_name = Column(String(512))
+    route_long_name = Column(String(512))
+    route_label = Column(String(512))
+    route_desc = Column(String(1024))
     route_type = Column(Integer, index=True, nullable=False)
     service_type = Column(String(7))  # TODO: enum LRT, HRT, BUS, SC, AT, 
-    route_url = Column(String(255))
+    route_url = Column(String(1024))
     route_color = Column(String(7), default=config.default_route_color)
     route_alt_color = Column(String(7), default=config.default_route_color)
     route_text_color = Column(String(7), default=config.default_text_color)
@@ -200,7 +200,7 @@ class CurrentRoutes(Base, RouteBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_routes'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
     route = relationship(
         Route.__name__,
         primaryjoin='CurrentRoutes.route_id==Route.route_id',
@@ -305,9 +305,9 @@ class RouteDirection(Base):
 
     __tablename__ = 'route_directions'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    direction_name = Column(String(255))
+    direction_name = Column(String(512))
 
 
 class RouteType(Base):
@@ -321,9 +321,9 @@ class RouteType(Base):
     __tablename__ = 'route_type'
 
     route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
-    otp_type = Column(String(255))
-    route_type_name = Column(String(255))
-    route_type_desc = Column(String(1023))
+    otp_type = Column(String(256))
+    route_type_name = Column(String(512))
+    route_type_desc = Column(String(1024))
 
     def is_bus(self):
         return self.route_type == 3
@@ -357,9 +357,9 @@ class RouteFilter(Base):
     filename = 'route_filter.txt'
     __tablename__ = 'route_filters'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), index=True, nullable=True)
-    description = Column(String(1023))
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    agency_id = Column(String(512), index=True, nullable=True)
+    description = Column(String(1024))
 
 
 __all__ = [RouteType.__name__, Route.__name__, RouteDirection.__name__, RouteFilter.__name__, CurrentRoutes.__name__]

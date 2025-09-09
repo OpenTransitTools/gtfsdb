@@ -27,13 +27,13 @@ class Block(Base):
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
     sequence = Column(Integer)
-    block_id = Column(String(255), index=True, nullable=False)
-    service_id = Column(String(255), index=True, nullable=False)
-    trip_id = Column(String(255), index=True, nullable=False)
-    prev_trip_id = Column(String(255))
-    next_trip_id = Column(String(255))
-    start_stop_id = Column(String(255), index=True, nullable=False)
-    end_stop_id = Column(String(255), index=True, nullable=False)
+    block_id = Column(String(512), index=True, nullable=False)
+    service_id = Column(String(512), index=True, nullable=False)
+    trip_id = Column(String(512), index=True, nullable=False)
+    prev_trip_id = Column(String(512))
+    next_trip_id = Column(String(512))
+    start_stop_id = Column(String(512), index=True, nullable=False)
+    end_stop_id = Column(String(512), index=True, nullable=False)
 
     universal_calendar = relationship(
         'UniversalCalendar',

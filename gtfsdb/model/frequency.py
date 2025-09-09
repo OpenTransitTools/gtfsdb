@@ -12,7 +12,7 @@ class Frequency(Base):
 
     __tablename__ = 'frequencies'
 
-    trip_id = Column(String(255), primary_key=True)
+    trip_id = Column(String(512), primary_key=True)
     start_time = Column(String(8), primary_key=True)
     end_time = Column(String(8))
     headway_secs = Column(Integer)
