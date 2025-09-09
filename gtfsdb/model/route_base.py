@@ -62,7 +62,7 @@ class RouteBase(object):
         return routes
 
     @classmethod
-    def query_active_routes(cls, session, date=None, do_filter=True):
+    def query_active_routes(cls, session, date=None, active_filter=True):
         """
         :return list of *active* Route orm objects queried from the db
         :note 'active' is based on date ... this routine won't deal with holes in the
@@ -72,7 +72,7 @@ class RouteBase(object):
         ret_val = cls.query_route_list(session)
 
         # step 2: filter routes by active date
-        if do_filter:
+        if active_filter:
             ret_val = cls.filter_active_routes(ret_val, date)
         return ret_val
 
@@ -159,7 +159,7 @@ class RouteBase(object):
                 else:
                     q = q.filter(Pattern.trips.any((Trip.route == route)))
 
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 route.geom = q.first().geom
                 session.merge(route)
             session.commit()

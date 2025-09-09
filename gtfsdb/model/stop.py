@@ -316,8 +316,17 @@ class CurrentStops(Base, StopBase):
         session = db.session()
         try:
             session.query(CurrentStops).delete()
-            
-            for s in Stop.query_active_stops(session, date=kwargs.get('date')):
+
+            # filter by date, or copy all
+            # import pdb; pdb.set_trace()
+            date = util.check_date(kwargs.get('date'))
+            filter = True
+            if kwargs.get('current_tables_all'):
+                date = None
+                filter = False
+
+            stops = Stop.query_active_stops(session, date=date, active_filter=filter)
+            for s in stops:
                 c = CurrentStops(s, session)
                 session.add(c)
 

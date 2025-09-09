@@ -372,11 +372,21 @@ class CurrentRouteStops(Base, RouteStopBase):
         try:
             session.query(CurrentRouteStops).delete()
 
+            # filter by date, or copy all
+            # import pdb; pdb.set_trace()
+            date = util.check_date(kwargs.get('date'))
+            filter = True
+            if kwargs.get('current_tables_all'):
+                date = None
+                filter = False
+
             rs_list = session.query(RouteStop).all()
             for rs in rs_list:
-                if rs.is_active(date=kwargs.get('date')):
-                    c = CurrentRouteStops(rs)
-                    session.add(c)
+                if filter and not rs.is_active(date):
+                    continue
+
+                c = CurrentRouteStops(rs)
+                session.add(c)
 
             session.commit()
             session.flush()
