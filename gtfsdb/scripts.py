@@ -52,6 +52,8 @@ def get_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATAB
                         help='create new db tables (note: not currently used in gtfsdb, which always creates tables)')
     parser.add_argument('--print', '-p', action="store_true",
                         help='print results from some sql query or data transform to cmdline')
+    parser.add_argument('--ignore_stop_codes', '-nsc', default=False, action='store_true',
+                        help="no public stop codes or ids should be used, so don't publish stop codes to downstream systems")
     parser.add_argument('--current_tables', '-ct', default=False, action='store_true',
                         help="create tables that represent 'current' service (e.g., views)")
     parser.add_argument('--current_tables_all', '-cta', default=False, action='store_true',

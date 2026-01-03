@@ -199,14 +199,10 @@ class Stop(Base, StopBase):
     def post_make_record(cls, row, **kwargs):
         """  NOTE: this is a (derived from base.py) method to fix up stop records before committing the record to the db """
 
-        # SMART (5/2024) has a stop record w/out a stop name, so let's fix that here and prevent the 
+        # SMART (5/2024) has a stop record w/out a stop name, so let's fix that here and prevent an empty name
         if row.get('stop_name') is None:
-            row['stop_name'] = "Stop ID {}".format(row.get('stop_id'))
-            log.warning(row['stop_name'])
-
-        # seen a few feeeds w/out a stop_code -- fix that here
-        if row.get('stop_code') is None:
-            row['stop_code'] = row['stop_id']
+            code = row.get('stop_code', row.get('stop_id'))
+            row['stop_name'] = f"Stop ID {code}"
 
         return row
 

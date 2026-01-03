@@ -12,18 +12,15 @@ class StopBase(object):
     """
     StopBase provides a generic set of stop query routines
     """
-
-    def get_stop_code(self):
+    def get_stop_code(self, def_val=""):
         """
-        should this method just return "" if no stop code, ala this blurb from GTFS:
+        will return "" if no stop code in the data, per this blurb from GTFS:
         'This field should be left empty for locations without a code presented to riders.'
         """
-        ret_val = self.stop_id
+        ret_val = def_val
         try:
             if self.stop_code and len(self.stop_code) > 0:
                 ret_val = self.stop_code
-            else:
-                ret_val = self.stop_id
         except Exception as e:
             log.warning(e)
         return ret_val
@@ -121,8 +118,8 @@ class StopBase(object):
         will query the db for a stop, either via bbox, point & distance or just an id
         :return list of stops
         """
-        ret_val = []
         # import pdb; pdb.set_trace()
+        ret_val = []
         if kwargs.get('lat') or kwargs.get('min_lat'):
             bbox = BBox(**kwargs)
             if bbox.is_valid:
