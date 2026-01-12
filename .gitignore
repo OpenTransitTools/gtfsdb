@@ -15,6 +15,7 @@ COMMIT_EDITMSG
 gtfs.zip
 .DS_Store
 **/tests/*feed
+*.gtfs.zip
 
 # C extensions
 *.so

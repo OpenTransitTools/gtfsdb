@@ -19,9 +19,9 @@ class RouteStop(Base, RouteStopBase):
     __tablename__ = 'route_stops'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    route_id = Column(String(255), index=True, nullable=False)
+    route_id = Column(String(512), index=True, nullable=False)
     direction_id = Column(Integer, index=True, nullable=False)
-    stop_id = Column(String(255), index=True, nullable=False)
+    stop_id = Column(String(512), index=True, nullable=False)
     order = Column(Integer, index=True, nullable=False)
     start_date = Column(Date, index=True, nullable=False)
     end_date = Column(Date, index=True, nullable=False)
@@ -315,7 +315,7 @@ class CurrentRouteStops(Base, RouteStopBase):
         uselist=False, viewonly=True, lazy='joined'
     )
 
-    route_id = Column(String(255), index=True, nullable=False)
+    route_id = Column(String(512), index=True, nullable=False)
     route = relationship(
         'Route',
         primaryjoin='Route.route_id==CurrentRouteStops.route_id',
@@ -323,7 +323,7 @@ class CurrentRouteStops(Base, RouteStopBase):
         uselist=False, viewonly=True, lazy='joined'
     )
 
-    stop_id = Column(String(255), index=True, nullable=False)
+    stop_id = Column(String(512), index=True, nullable=False)
     stop = relationship(
         'Stop',
         primaryjoin='Stop.stop_id==CurrentRouteStops.stop_id',
@@ -372,11 +372,21 @@ class CurrentRouteStops(Base, RouteStopBase):
         try:
             session.query(CurrentRouteStops).delete()
 
+            # filter by date, or copy all
+            # import pdb; pdb.set_trace()
+            date = util.check_date(kwargs.get('date'))
+            filter = True
+            if kwargs.get('current_tables_all'):
+                date = None
+                filter = False
+
             rs_list = session.query(RouteStop).all()
             for rs in rs_list:
-                if rs.is_active():
-                    c = CurrentRouteStops(rs)
-                    session.add(c)
+                if filter and not rs.is_active(date):
+                    continue
+
+                c = CurrentRouteStops(rs)
+                session.add(c)
 
             session.commit()
             session.flush()

@@ -10,8 +10,20 @@ log = logging.getLogger(__name__)
 
 class StopBase(object):
     """
-    provides a generic set of stop query routines
+    StopBase provides a generic set of stop query routines
     """
+    def get_stop_code(self, def_val=""):
+        """
+        will return "" if no stop code in the data, per this blurb from GTFS:
+        'This field should be left empty for locations without a code presented to riders.'
+        """
+        ret_val = def_val
+        try:
+            if self.stop_code and len(self.stop_code) > 0:
+                ret_val = self.stop_code
+        except Exception as e:
+            log.warning(e)
+        return ret_val
 
     def active_stops(self, date=None):
         """
@@ -106,8 +118,8 @@ class StopBase(object):
         will query the db for a stop, either via bbox, point & distance or just an id
         :return list of stops
         """
-        ret_val = []
         # import pdb; pdb.set_trace()
+        ret_val = []
         if kwargs.get('lat') or kwargs.get('min_lat'):
             bbox = BBox(**kwargs)
             if bbox.is_valid:

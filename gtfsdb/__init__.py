@@ -1,3 +1,5 @@
+#  TODO?  __path__ = __import__('pkgutil').extend_path(__path__, __name__)
+
 from gtfsdb.model.db import Database
 from gtfsdb.model.gtfs import GTFS
 
@@ -6,6 +8,7 @@ from gtfsdb.model.calendar import *  # noqa
 from gtfsdb.model.fare import *  # noqa
 from gtfsdb.model.feed_info import FeedInfo  # noqa
 from gtfsdb.model.frequency import Frequency  # noqa
+from gtfsdb.model.location import *  # noqa
 from gtfsdb.model.route import *  # noqa
 from gtfsdb.model.route_stop import *  # noqa
 from gtfsdb.model.shape import *  # noqa
@@ -39,6 +42,7 @@ SORTED_CLASS_NAMES = [
     Trip.__name__,
     StopTime.__name__,
     RouteStop.__name__,
+    Location.__name__,
     Frequency.__name__,
     FareAttribute.__name__,
     FareRule.__name__,
@@ -51,4 +55,5 @@ CURRENT_CLASS_NAMES = [
     CurrentRoutes.__name__,
     CurrentRouteStops.__name__,
     CurrentStops.__name__,
+    FlexRegion.__name__,
 ]

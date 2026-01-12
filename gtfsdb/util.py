@@ -1,9 +1,13 @@
 import os
 import sys
+import csv
 import math
 import datetime
+import calendar
+from datetime import date
+from datetime import timedelta
 import tempfile
-
+from sqlalchemy import text
 from gtfsdb import config
 
 import logging
@@ -15,6 +19,13 @@ try:
     long = long
 except:
     long = int
+
+
+def is_string(s):
+    ret_val = False
+    if s and len(s.strip()) > 0:
+        ret_val = True
+    return ret_val
 
 
 def get_all_subclasses(cls):
@@ -71,36 +82,12 @@ def safe_get_any(obj, keys, def_val=None):
     return ret_val
 
 
-def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=None):
-    """
-    utility function to parse a request object for something that looks like a date object...
-    """
-    if def_val is None:
-        def_val = datetime.date.today()
-
-    if in_date is None:
-        ret_val = def_val
-    elif isinstance(in_date, datetime.date) or isinstance(in_date, datetime.datetime):
-        ret_val = in_date
-    else:
-        ret_val = def_val
-        for fmt in fmt_list:
-            try:
-                d = datetime.datetime.strptime(in_date, fmt).date()
-                if d is not None:
-                    ret_val = d
-                    break
-            except Exception as e:
-                log.debug(e)
-    return ret_val
-
-
-def fix_time_string(ts):
-    """ check that string time is HH:MM:SS (append zero if just H:MM:SS) """
-    ret_val = ts
-    if ts and type(ts) == str and ts[1] == ":":
-        ret_val = "0{0}".format(ts)
-    return ret_val
+def safe_db_engine_load(db, table, records):
+    try:
+        db.engine.execute(table.insert(), records)
+    except Exception as e:
+        #import pdb; pdb.set_trace()
+        log.warning(e)
 
 
 class UTF8Recoder(object):
@@ -243,3 +230,124 @@ def make_linestring_from_two_points(lon1, lat1, lon2, lat2, srid=config.SRID):
 def make_linestring_from_two_stops(stop1, stop2, srid=config.SRID):
     ls = make_linestring_from_two_points(stop1.stop_lon, stop1.stop_lat, stop2.stop_lon, stop2.stop_lat, srid)
     return ls
+
+
+def get_module_dir():
+    return os.path.dirname(__file__)
+
+
+def get_resource_path(*args):
+    return os.path.join(get_module_dir(), *args)
+
+
+def get_csv(csv_path, comment="#", to_lower=True):
+    """
+    read csv file, skipping any line that begins with a comment (default to '#')
+    note: the csv header (column) names are forced to lower-case by default
+    """
+    csv_data = []
+    with open(csv_path, 'r') as fp:
+        reader = csv.DictReader(filter(lambda row: row[0]!=comment, fp))
+        if to_lower:
+            reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+            # import pdb; pdb.set_trace()
+        for c in reader:
+            csv_data.append(c)
+    return csv_data
+
+
+def to_dict_hash(dicts=[], attribute_name='id'):
+    """ take an array of dicts, and return a hash based on the value of one of the dict's attributes """
+    ret_val = {}
+    for f in dicts:
+        if ret_val.get(f.get(attribute_name)) is None:
+            ret_val[f.get('attribute_name')] = f
+    return ret_val
+
+
+def do_sql(db, sql, echo=False):
+    ret_val = None
+    try:
+        with db.engine.connect() as conn:
+            t = text(sql)
+            ret_val = conn.execute(t).fetchall()
+    except Exception as e:
+        if echo:
+            print(e)
+    return ret_val
+
+
+def check_date(in_date, fmt_list=['%Y-%m-%d', '%m/%d/%Y', '%m-%d-%Y'], def_val=None):
+    """
+    utility function to parse a request object for something that looks like a date object...
+    """
+    if def_val is None:
+        def_val = date.today()
+
+    if in_date is None:
+        ret_val = def_val
+    elif isinstance(in_date, date) or isinstance(in_date, datetime.datetime):
+        ret_val = in_date
+    else:
+        ret_val = def_val
+        for fmt in fmt_list:
+            try:
+                d = datetime.datetime.strptime(in_date, fmt).date()
+                if d is not None:
+                    ret_val = d
+                    break
+            except Exception as e:
+                #log.debug(e)
+                pass
+    return ret_val
+
+
+def fix_time_string(ts):
+    """ check that string time is HH:MM:SS (append zero if just H:MM:SS) """
+    ret_val = ts
+    if ts and type(ts) == str and ts[1] == ":":
+        ret_val = "0{0}".format(ts)
+    return ret_val
+
+def todays_date(offset=0):
+    return date.today() + timedelta(days=offset)
+
+
+def get_dow():
+    """ returns {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} """
+    return {name: i for i, name in enumerate(calendar.day_name)}
+
+
+def last_date_of(from_date=None, target_weekday='Sunday'):
+    """
+    find the date of the preceeding target weekday, from the input date
+    e.g., if the input (or default today) is Monday 1-1-2112, and you target Sunday, you'll get 12-31-2111
+    note: if your date is the same weekday as the target, you get that date returned
+    """
+    if from_date is None or not isinstance(from_date, date):
+        from_date = date.today()
+    dow = get_dow()
+    offset = (from_date.weekday() - dow[target_weekday]) % 7
+    ret_val = from_date - timedelta(days=offset)
+    return ret_val
+
+
+def next_date_of(from_date=None, target_weekday='Saturday'):
+    """
+    find the future date of the target weekday, from the input date
+    e.g., if the input (or default today) is Thursday 12-30-2111, and you target Saturday, you'll get 1-1-2112
+    note: if your date is the same weekday as the target, you get that date returned (eg Sunday 12-31-2111)
+    """
+    if from_date is None or not isinstance(from_date, date):
+        from_date = date.today()
+    dow = get_dow()
+    offset = (dow[target_weekday] - from_date.weekday()) % 7
+    ret_val = from_date + timedelta(days=offset)
+    return ret_val
+
+
+def sunday_to_saturday_date_range(from_date=None):
+    """ return the dates of last Sunday and next Saturday """
+    sunday = last_date_of(from_date)
+    saturday = next_date_of(from_date)
+    return sunday, saturday

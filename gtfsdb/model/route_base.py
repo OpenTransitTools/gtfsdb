@@ -1,3 +1,9 @@
+import time
+
+from sqlalchemy import Column
+from sqlalchemy.sql import func, and_
+from sqlalchemy.orm import deferred
+
 from gtfsdb import util
 
 import logging
@@ -12,6 +18,16 @@ class RouteBase(object):
     def is_active(self, date=None):
         log.warning("calling abstract base class")
         return True
+
+    @property
+    def is_brt(self):
+        """ TODO: is this a Bus Rapid Transport (brt) route """
+        return False
+
+    @property
+    def is_bus(self):
+        """ is bus? https://developers.google.com/transit/gtfs/reference#routestxt """
+        return self.route_type == 3 and self.route_type == 11
 
     @classmethod
     def query_route(cls, session, route_id, detailed=False):
@@ -46,17 +62,18 @@ class RouteBase(object):
         return routes
 
     @classmethod
-    def query_active_routes(cls, session, date=None):
+    def query_active_routes(cls, session, date=None, active_filter=True):
         """
         :return list of *active* Route orm objects queried from the db
         :note 'active' is based on date ... this routine won't deal with holes in the
               schedule (e.g., when a route is not active for a period of time, due to construction)
         """
         # step 1: grab all routes
-        routes = cls.query_route_list(session)
+        ret_val = cls.query_route_list(session)
 
         # step 2: filter routes by active date
-        ret_val = cls.filter_active_routes(routes, date)
+        if active_filter:
+            ret_val = cls.filter_active_routes(ret_val, date)
         return ret_val
 
     @classmethod
@@ -117,3 +134,34 @@ class RouteBase(object):
 
         return ret_val
 
+    @classmethod
+    def add_geometry_column(cls):
+        if not hasattr(cls, 'geom'):
+            from geoalchemy2 import Geometry
+            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
+
+    @classmethod
+    def _load_geoms(cls, db, route_list, date=None):
+        """ load derived geometries, currently only written for PostgreSQL """
+        from gtfsdb.model.pattern import Pattern
+        from gtfsdb.model.trip import Trip
+
+        if db.is_geospatial and db.is_postgresql:
+            start_time = time.time()
+            session = db.session
+            for route in route_list:
+                s = func.st_collect(Pattern.geom)
+                s = func.st_multi(s)
+                s = func.st_astext(s).label('geom')
+                q = session.query(s)
+                if date:
+                    q = q.filter(Pattern.trips.any(and_(Trip.route == route, Trip.universal_calendar.any(date=date))))
+                else:
+                    q = q.filter(Pattern.trips.any((Trip.route == route)))
+
+                # import pdb; pdb.set_trace()
+                route.geom = q.first().geom
+                session.merge(route)
+            session.commit()
+            processing_time = time.time() - start_time
+            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))

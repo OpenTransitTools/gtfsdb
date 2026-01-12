@@ -1,10 +1,9 @@
-from pkg_resources import resource_filename  # @UnresolvedImport
-
 from gtfsdb import config, util
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_session
 
 import csv
+import json
 import datetime
 import os
 import sys
@@ -160,38 +159,47 @@ class _Base(object):
         if cls.datasource == config.DATASOURCE_GTFS:
             directory = kwargs.get('gtfs_directory')
         elif cls.datasource == config.DATASOURCE_LOOKUP:
-            directory = resource_filename('gtfsdb', 'data')
+            directory = util.get_resource_path('data')
 
-        # step 3: load the file
-        log.info("load {0}".format(cls.__name__))
-        records = []
+        # step 3: load the file (.geojson or .csv)
+        log.info("load {}".format(cls.__name__))
         file_path = os.path.join(directory, cls.filename)
         if os.path.exists(file_path):
-            if sys.version_info >= (3, 0):
-                f = open(file_path, 'rb')
-            else:
-                f = open(file_path, 'r')
-            utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
-            reader = csv.DictReader(utf8_file)
-            reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
             table = cls.__table__
             try:
                 db.engine.execute(table.delete())
             except:
                 log.debug("NOTE: couldn't delete this table")
 
-            i = 0
-            for row in reader:
-                records.append(cls.make_record(row))
-                i += 1
-                if i >= batch_size:
-                    db.engine.execute(table.insert(), records)
-                    sys.stdout.write('*')
-                    records = []
-                    i = 0
-            if len(records) > 0:
-                db.engine.execute(table.insert(), records)
-            f.close()
+            if 'geojson' in cls.filename:
+                log.debug('{}.load importing geojson data from {}'.format(cls.__name__, cls.filename))
+                #import pdb; pdb.set_trace()
+                with open(file_path) as f:
+                    data = json.load(f)
+                    for row in data['features']:
+                        rec = cls.make_record(row, **kwargs)
+                        db.engine.execute(table.insert(), rec)                    
+            else:
+                if sys.version_info >= (3, 0):
+                    f = open(file_path, 'rb')
+                else:
+                    f = open(file_path, 'r')
+                utf8_file = util.UTF8Recoder(f, 'utf-8-sig')
+                reader = csv.DictReader(utf8_file)
+                reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+                records = []
+                i = 0
+                for row in reader:
+                    records.append(cls.make_record(row, **kwargs))
+                    i += 1
+                    if i >= batch_size:
+                        util.safe_db_engine_load(db, table, records)
+                        sys.stdout.write('*')
+                        records = []
+                        i = 0
+                if len(records) > 0:
+                    util.safe_db_engine_load(db, table, records)
+                f.close()
 
         # step 4: done...
         process_time = time.time() - start_time
@@ -207,7 +215,7 @@ class _Base(object):
         pass
 
     @classmethod
-    def make_record(cls, row):
+    def make_record(cls, row, **kwargs):
         for k, v in row.copy().items():
             if isinstance(v, basestring):
                 row[k] = v.strip()
@@ -230,11 +238,11 @@ class _Base(object):
             cls.add_geom_to_dict(row)
 
         """ post make_record gives the calling class a chance to fix things up prior to being sent down to database """
-        row = cls.post_make_record(row)
+        row = cls.post_make_record(row, **kwargs)
         return row
 
     @classmethod
-    def post_make_record(cls, row):
+    def post_make_record(cls, row, **kwargs):
         """ Base does nothing, but a derived class now has a chance to clean up the record prior to db commit """
         return row
 

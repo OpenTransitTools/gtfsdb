@@ -24,7 +24,7 @@ class Calendar(Base):
     __tablename__ = 'calendar'
     __table_args__ = (Index('calendar_ix1', 'start_date', 'end_date'),)
 
-    service_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    service_id = Column(String(512), primary_key=True, index=True, nullable=False)
     monday = Column(SmallInteger, nullable=False)
     tuesday = Column(SmallInteger, nullable=False)
     wednesday = Column(SmallInteger, nullable=False)
@@ -34,7 +34,7 @@ class Calendar(Base):
     sunday = Column(SmallInteger, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
-    service_name = Column(String(255))  # Trillium extension, a human-readable name for the calendar.
+    service_name = Column(String(512))  # Trillium extension, a human-readable name for the calendar.
 
     def weekday_list(self):
         weekday_dict = dict(monday=0, tuesday=1, wednesday=2, thursday=3, friday=4, saturday=5, sunday=6)
@@ -62,7 +62,7 @@ class CalendarDate(Base):
 
     __tablename__ = 'calendar_dates'
 
-    service_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    service_id = Column(String(512), primary_key=True, index=True, nullable=False)
     date = Column(Date, primary_key=True, index=True, nullable=False)
     exception_type = Column(Integer, nullable=False)
 
@@ -79,7 +79,7 @@ class UniversalCalendar(Base):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'universal_calendar'
 
-    service_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    service_id = Column(String(512), primary_key=True, index=True, nullable=False)
     date = Column(Date, primary_key=True, index=True, nullable=False)
 
     trips = relationship(
@@ -97,12 +97,26 @@ class UniversalCalendar(Base):
         session.commit()
         q = session.query(CalendarDate)
         for calendar_date in q:
-            cd_kwargs = dict(date=calendar_date.date,
-                             service_id=calendar_date.service_id)
+            cd_kwargs = dict(date=calendar_date.date, service_id=calendar_date.service_id)
             if calendar_date.is_addition:
                 session.merge(cls(**cd_kwargs))
             if calendar_date.is_removal:
-                session.query(cls).filter_by(**cd_kwargs).delete()
+                try:
+                    # import pdb; pdb.set_trace()
+                    """
+                        TODO 11-1-2023 - exceptions thrown by executing this delete indicate that the ORM might be in a very funky state ... shows that former agency data is in ORM
+
+                        2023-10-30 12:21:23,341 - gtfsdb.model.calendar (line 109) - WARNING - (psycopg2.errors.UndefinedTable) invalid reference to FROM-clause entry for table "universal_calendar"
+                        LINE 1: DELETE FROM cat.universal_calendar WHERE canby.universal_cal...
+                        HINT:  There is an entry for table "universal_calendar", but it cannot be referenced from this part of the query.
+                        [SQL: DELETE FROM cat.universal_calendar WHERE canby.universal_calendar.date = %(date_1)s AND canby.universal_calendar.service_id = %(service_id_1)s]
+                        [parameters: {'date_1': datetime.date(2024, 1, 1), 'service_id_1': 'c_69855_b_81444_d_31'}]
+                    """
+                    session.query(cls).filter_by(**cd_kwargs).delete()
+                except Exception as e:
+                    log.warning(e)
+
         session.commit()
+        session.flush()
         process_time = time.time() - start_time
         log.debug('{0}.load ({1:.0f} seconds)'.format(cls.__name__, process_time))

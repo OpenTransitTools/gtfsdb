@@ -24,12 +24,13 @@ class Database(object):
             url = kwargs.get('database_url', config.DEFAULT_DATABASE_URL)
         self.url = url
         self.schema = kwargs.get('schema', config.DEFAULT_SCHEMA)
+        self.feed_id = kwargs.get('feed_id', None)
         self.is_geospatial = kwargs.get('is_geospatial', config.DEFAULT_IS_GEOSPATIAL)
 
         """Order list of class names, used for creating & populating tables"""
         from gtfsdb import SORTED_CLASS_NAMES, CURRENT_CLASS_NAMES
         self.sorted_class_names = SORTED_CLASS_NAMES
-        if kwargs.get('current_tables'):
+        if kwargs.get('current_tables') or kwargs.get('current_tables_all'):
             self.sorted_class_names.extend(CURRENT_CLASS_NAMES)
         # import pdb; pdb.set_trace()
 

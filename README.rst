@@ -41,7 +41,9 @@ Install from source via github (if you want the latest code) :
 
    * bin/gtfsdb-load --database_url sqlite:///gtfs.db http://developer.trimet.org/schedule/gtfs.zip
 
-   * bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432 --is_geospatial http://developer.trimet.org/schedule/gtfs.zip
+   * bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432/ott --is_geospatial -s flex gtfsdb/tests/flex-feed.zip
+
+   * bin/gtfsdb-load --database_url postgresql://postgres@localhost:5432/ott --is_geospatial http://developer.trimet.org/schedule/gtfs.zip
 
      .. note:: adding the `is_geospatial` cmdline flag, when paired with a spatial-database ala PostGIS (e.g., is_spatial is meaningless with sqlite), will take longer to load...but will create geometry columns for both rendering and calculating nearest distances, etc...
 

@@ -15,7 +15,7 @@ extras_require = dict(
 
 install_requires = [
     'geoalchemy2',
-    'sqlalchemy',
+    'sqlalchemy == 1.4.49',
 ]
 
 setup(
@@ -45,7 +45,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.6',
     ),
 )

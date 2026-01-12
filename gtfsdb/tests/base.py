@@ -2,7 +2,6 @@ from gtfsdb import util
 from gtfsdb.model.db import Database
 from gtfsdb.api import database_load
 
-from pkg_resources import resource_filename
 import os
 import logging
 log = logging.getLogger(__name__)
@@ -10,7 +9,7 @@ log = logging.getLogger(__name__)
 
 def get_test_directory_path():
     """ will return current path ... tries to handle c:\\ windows junk """
-    path = resource_filename('gtfsdb', 'tests')
+    path = util.get_resource_path('tests')
     path = path.replace('c:\\', '/').replace('\\', '/')
     return path
 

@@ -17,21 +17,22 @@ class Stop(Base, StopBase):
 
     __tablename__ = 'stops'
 
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    stop_code = Column(String(50))
-    stop_name = Column(String(255), nullable=False)
-    stop_desc = Column(String(255))
+    stop_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    stop_code = Column(String(256))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
-    zone_id = Column(String(50))
-    stop_url = Column(String(255))
+    stop_name = Column(String(512), nullable=False)
+    stop_desc = Column(String(1024))
+    zone_id = Column(String(512))
+    stop_url = Column(String(1024))
     location_type = Column(Integer, index=True, default=0)
-    parent_station = Column(String(255))
+    parent_station = Column(String(512))
     stop_timezone = Column(String(50))
     wheelchair_boarding = Column(Integer, default=0)
     platform_code = Column(String(50))
     direction = Column(String(50))
     position = Column(String(50))
+    shared_stops = Column(String(1024))  # populated by external process; links different feeds ala agency_id:feed_id:stop_id
 
     stop_features = relationship(
         'StopFeature',
@@ -106,6 +107,22 @@ class Stop(Base, StopBase):
         return self._agencies
 
     @property
+    def agency_name(self):
+        """
+        return the agency name or "" (if stop has no routes or no agency.agency_name)
+        """
+        try:
+            self._agency_name
+        except AttributeError:
+            self._agency_name = ""
+            if self.routes:
+                for r in self.routes:
+                    if r.agency and r.agency.agency_name:
+                        self._agency_name = r.agency.agency_name
+                        break
+        return self._agency_name
+
+    @property
     def amenities(self):
         """
         return list of strings for the stop amenity (feature) names
@@ -178,25 +195,45 @@ class Stop(Base, StopBase):
             ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val
 
+    @classmethod
+    def post_make_record(cls, row, **kwargs):
+        """  NOTE: this is a (derived from base.py) method to fix up stop records before committing the record to the db """
+
+        # SMART (5/2024) has a stop record w/out a stop name, so let's fix that here and prevent an empty name
+        if row.get('stop_name') is None:
+            code = row.get('stop_code', row.get('stop_id'))
+            row['stop_name'] = f"Stop ID {code}"
+
+        return row
+
 
 class CurrentStops(Base, StopBase):
     """
-    this table is (optionally) used as a view into the currently active routes
-    it is pre-calculated to list routes that are currently running service
+    this table is (optionally) used as a view into the currently active stops
+    it is pre-calculated to list stops that are currently running service
     (GTFS can have multiple instances of the same route, with different aspects like name and direction)
+    TODO: this all needs a lot better documentation and description, etc... (both here and GS, etc...)
     """
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_stops'
 
-    route_short_names = Column(String(1023))
-    route_type = Column(Integer)
-    route_type_other = Column(Integer)
-    route_mode = Column(String(255))
-
-    stop_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    location_type = Column(Integer)
+    stop_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    stop_code = Column(String(512))
     stop_lat = Column(Numeric(12, 9), nullable=False)
     stop_lon = Column(Numeric(12, 9), nullable=False)
+    stop_name = Column(String(512), nullable=False)
+
+    agency_id = Column(String(512))
+    agency_idz = Column(String(1024))
+    route_idz  = Column(String(1024))
+    route_short_names = Column(String(1024))
+
+    route_type = Column(Integer)
+    route_type_other = Column(Integer)
+    route_mode = Column(String(256))
+
+    location_type = Column(Integer)
+    shared_stops = Column(String(1024))  # populated in external process; links feeds ala list of agency_id:feed_id:stop_id, ...
 
     stop = relationship(
         Stop.__name__,
@@ -213,33 +250,59 @@ class CurrentStops(Base, StopBase):
         :param session:
         """
         self.stop_id = stop.stop_id
+        self.stop_code = stop.stop_code
+        self.stop_name = stop.stop_name
         self.location_type = stop.location_type
         self.stop_lon = stop.stop_lon
         self.stop_lat = stop.stop_lat
+        self.shared_stops = stop.shared_stops
 
         # copy the stop geom to CurrentStops (if we're in is_geospatial mode)
         if hasattr(stop, 'geom') and hasattr(self, 'geom'):
             self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
 
-        # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
-        # import pdb; pdb.set_trace()
         from .route_stop import CurrentRouteStops
         rs_list = CurrentRouteStops.query_route_short_names(session, stop, filter_active=True)
+        self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
+        self._set_route_info(rs_list)
+
+    def _set_route_info(self, rs_list):
+        agencyz = ""
+        routez  = ""
+
         for rs in rs_list:
-            type = rs.get('type')
-            if self.route_mode is None:
-                self.route_type = type.route_type
-                self.route_mode = type.otp_type
-            elif type.is_different_mode(self.route_type):
-                if type.is_lower_priority(self.route_type):
-                    self.route_type_other = self.route_type
+            # import pdb; pdb.set_trace()
+            try:
+                type = rs.get('type')
+                route = rs.get('route')
+
+                # capture agency and route id(s)
+                if self.agency_id is None:
+                    self.agency_id = route.agency_id
+                    agencyz = route.agency_id
+                    routez  = "{}:{}".format(route.agency_id, route.route_id)
+                else:
+                    routez  = "{},{}:{}".format(routez, route.agency_id, route.route_id)
+                    if route.agency_id not in agencyz:
+                        agencyz = "{},{}".format(agencyz, route.agency_id)
+
+                # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
+                if self.route_mode is None:
                     self.route_type = type.route_type
                     self.route_mode = type.otp_type
-                else:
-                    self.route_type_other = type.route_type
+                elif type.is_different_mode(self.route_type):
+                    if type.is_lower_priority(self.route_type):
+                        self.route_type_other = self.route_type
+                        self.route_type = type.route_type
+                        self.route_mode = type.otp_type
+                    else:
+                        self.route_type_other = type.route_type
+            except Exception as e:
+                log.warning(e)
 
-        # route short names
-        self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
+        # set additional attributes after looping thru routes above
+        self.agency_idz = agencyz
+        self.route_idz = routez
 
     @classmethod
     def post_process(cls, db, **kwargs):
@@ -250,8 +313,16 @@ class CurrentStops(Base, StopBase):
         try:
             session.query(CurrentStops).delete()
 
+            # filter by date, or copy all
             # import pdb; pdb.set_trace()
-            for s in Stop.query_active_stops(session):
+            date = util.check_date(kwargs.get('date'))
+            filter = True
+            if kwargs.get('current_tables_all'):
+                date = None
+                filter = False
+
+            stops = Stop.query_active_stops(session, date=date, active_filter=filter)
+            for s in stops:
                 c = CurrentStops(s, session)
                 session.add(c)
 

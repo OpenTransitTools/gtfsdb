@@ -5,13 +5,26 @@ from gtfsdb.model.base import Base
 from .route_base import RouteBase
 
 from sqlalchemy import Column
-from sqlalchemy.orm import deferred, relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy.types import Integer, String
+from sqlalchemy.types import Integer, String, Boolean
 
 import logging
 log = logging.getLogger(__name__)
 
+
+"""
+TODO: 
+service_type = LRT (MAX), HRT (WES), BUS, OWL?, SC, AT, CC (Community Circ.) etc...
+service_type = Column(String(7)) 
+ - add service_type enum w/another table
+ - add a scheme to customize things based on agency
+ - so customize/trimet.py and customize/ctran.py, etc...
+ - this would do route_type=1 + route_id=100/192 = service_type MAX, etc... per agency
+ - would also customize the route_label formatting per agency
+ - https://www.itsmarta.com/uploadedFiles/MARTA_101/Why_MARTA/ServiceTypesMatrix.pdf
+ - etc...
+"""
 
 class Route(Base, RouteBase):
     datasource = config.DATASOURCE_GTFS
@@ -19,17 +32,21 @@ class Route(Base, RouteBase):
 
     __tablename__ = 'routes'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), index=True, nullable=True)
-    route_short_name = Column(String(255))
-    route_long_name = Column(String(255))
-    route_desc = Column(String(1023))
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    agency_id = Column(String(512), index=True, nullable=True)
+    route_short_name = Column(String(512))
+    route_long_name = Column(String(512))
+    route_label = Column(String(512))
+    route_desc = Column(String(1024))
     route_type = Column(Integer, index=True, nullable=False)
-    route_url = Column(String(255))
-    route_color = Column(String(6))
-    route_text_color = Column(String(6))
+    service_type = Column(String(7))  # TODO: enum LRT, HRT, BUS, SC, AT, 
+    route_url = Column(String(1024))
+    route_color = Column(String(7), default=config.default_route_color)
+    route_alt_color = Column(String(7), default=config.default_route_color)
+    route_text_color = Column(String(7), default=config.default_text_color)
     route_sort_order = Column(Integer, index=True)
     min_headway_minutes = Column(Integer)  # Trillium extension.
+    is_frequent = Column(Boolean, default=False)
 
     agency = relationship(
         'Agency',
@@ -85,14 +102,18 @@ class Route(Base, RouteBase):
         build a route name out of long and short names...
         """
         if not self.is_cached_data_valid('_route_name'):
-            log.warning("query route name")
+            log.info("query route name")
             ret_val = self.route_long_name
-            if self.route_long_name and self.route_short_name:
+            if self.route_long_name and self.route_short_name and self.route_long_name != self.route_short_name:
                 ret_val = fmt.format(self=self)
             elif self.route_long_name is None:
                 ret_val = self.route_short_name
             self._route_name = ret_val
             self.update_cached_data('_route_name')
+
+        # add the route_name to db's route_label column so it's available by non-ORM clients (GeoServer)
+        if self.route_label is None:
+            self.route_label = self._route_name
 
         return self._route_name
 
@@ -103,8 +124,7 @@ class Route(Base, RouteBase):
             if dir and dir.direction_name:
                 ret_val = dir.direction_name
         except Exception as e:
-            log.debug(e)
-            pass
+            log.error(e)
         return ret_val
 
     @property
@@ -114,6 +134,30 @@ class Route(Base, RouteBase):
     @property
     def end_date(self):
         return self._get_start_end_dates[1]
+
+    def _calc_frequency(self):
+        # TODO: do better here...
+        self.is_frequent = len(self.trips) > 50
+
+    def _fix_colors(self):
+        # step 0: default colors
+        if not util.is_string(self.route_color): self.route_color = config.default_route_color
+        if not util.is_string(self.route_text_color): self.route_text_color = config.default_text_color
+
+        # step 1: fix (add) a '#' to the route color
+        if self.route_color[0] != '#':
+            self.route_color = '#' + self.route_color
+        if self.route_text_color[0] != '#':
+            self.route_text_color = '#' + self.route_text_color
+
+        # step 2: figure out the alt colors
+        self.route_alt_color = self.route_color
+        if not self.is_bus or self.is_brt or self.is_frequent:
+            if self.route_color == config.default_route_color:
+                self.route_color = config.default_frequent_color
+                self.route_alt_color = config.default_frequent_color
+
+        #print(self.agency_id, self.route_id, self.route_color)
 
     @property
     def _get_start_end_dates(self):
@@ -128,37 +172,23 @@ class Route(Base, RouteBase):
         return self._start_date, self._end_date
 
     @classmethod
-    def add_geometry_column(cls):
-        if not hasattr(cls, 'geom'):
-            from geoalchemy2 import Geometry
-            cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
-
-    @classmethod
-    def load_geoms(cls, db):
-        """ load derived geometries, currently only written for PostgreSQL """
-        from gtfsdb.model.pattern import Pattern
-        from gtfsdb.model.trip import Trip
-
-        if db.is_geospatial and db.is_postgresql:
-            start_time = time.time()
-            session = db.session
-            routes = session.query(Route).all()
-            for route in routes:
-                s = func.st_collect(Pattern.geom)
-                s = func.st_multi(s)
-                s = func.st_astext(s).label('geom')
-                q = session.query(s)
-                q = q.filter(Pattern.trips.any((Trip.route == route)))
-                route.geom = q.first().geom
-                session.merge(route)
-            session.commit()
-            processing_time = time.time() - start_time
-            log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
-
-    @classmethod
     def post_process(cls, db, **kwargs):
+        # import pdb; pdb.set_trace()
         log.debug('{0}.post_process'.format(cls.__name__))
-        cls.load_geoms(db)
+        start_time = time.time()
+        session = db.session
+
+        route_list = session.query(Route).all()
+        cls._load_geoms(db, route_list)
+        for route in route_list:
+            route.route_name  # populate route_label column
+            route._calc_frequency()
+            route._fix_colors()
+            session.merge(route)
+        session.commit()
+        session.flush()
+        processing_time = time.time() - start_time
+        log.debug('{0}.load_geoms ({1:.0f} seconds)'.format(cls.__name__, processing_time))
 
 
 class CurrentRoutes(Base, RouteBase):
@@ -170,7 +200,7 @@ class CurrentRoutes(Base, RouteBase):
     datasource = config.DATASOURCE_DERIVED
     __tablename__ = 'current_routes'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
     route = relationship(
         Route.__name__,
         primaryjoin='CurrentRoutes.route_id==Route.route_id',
@@ -232,21 +262,35 @@ class CurrentRoutes(Base, RouteBase):
           7. close transaction
         """
         session = db.session()
-        num_inserts = 0
+        SORT_ORDER_OFFSET = 1000001
+
+        num_inserts = 0        
         try:
             session.query(CurrentRoutes).delete()
 
+            # filter by date, or copy all
             # import pdb; pdb.set_trace()
-            rte_list = Route.query_active_routes(session)
+            date = util.check_date(kwargs.get('date'))
+            filter = True
+            if kwargs.get('current_tables_all'):
+                date = None
+                filter = False
+
+            cr_list = []
+            rte_list = Route.query_active_routes(session, date, filter)
             for i, r in enumerate(rte_list):
-                c = CurrentRoutes(r, i+1)
+                c = CurrentRoutes(r, SORT_ORDER_OFFSET + i)
+                cr_list.append(c)
                 session.add(c)
                 num_inserts += 1
+            
+            #import pdb; pdb.set_trace()
+            cls._load_geoms(db, cr_list, date)
 
             session.commit()
             session.flush()
         except Exception as e:
-            log.warning(e)
+            log.error(e)
             session.rollback()
         finally:
             session.flush()
@@ -261,9 +305,9 @@ class RouteDirection(Base):
 
     __tablename__ = 'route_directions'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
     direction_id = Column(Integer, primary_key=True, index=True, nullable=False)
-    direction_name = Column(String(255))
+    direction_name = Column(String(512))
 
 
 class RouteType(Base):
@@ -277,9 +321,9 @@ class RouteType(Base):
     __tablename__ = 'route_type'
 
     route_type = Column(Integer, primary_key=True, index=True, autoincrement=False)
-    otp_type = Column(String(255))
-    route_type_name = Column(String(255))
-    route_type_desc = Column(String(1023))
+    otp_type = Column(String(256))
+    route_type_name = Column(String(512))
+    route_type_desc = Column(String(1024))
 
     def is_bus(self):
         return self.route_type == 3
@@ -313,9 +357,9 @@ class RouteFilter(Base):
     filename = 'route_filter.txt'
     __tablename__ = 'route_filters'
 
-    route_id = Column(String(255), primary_key=True, index=True, nullable=False)
-    agency_id = Column(String(255), index=True, nullable=True)
-    description = Column(String(1023))
+    route_id = Column(String(512), primary_key=True, index=True, nullable=False)
+    agency_id = Column(String(512), index=True, nullable=True)
+    description = Column(String(1024))
 
 
 __all__ = [RouteType.__name__, Route.__name__, RouteDirection.__name__, RouteFilter.__name__, CurrentRoutes.__name__]

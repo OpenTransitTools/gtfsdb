@@ -14,13 +14,13 @@ class FareAttribute(Base):
 
     __tablename__ = 'fare_attributes'
 
-    fare_id = Column(String(255), primary_key=True)
+    agency_id = Column(String(512))
+    fare_id = Column(String(512), primary_key=True)
     price = Column(Numeric(10, 2), nullable=False)
-    currency_type = Column(String(255), nullable=False)
+    currency_type = Column(String(256), nullable=False)
     payment_method = Column(Integer, nullable=False)
     transfers = Column(Integer)
     transfer_duration = Column(Integer)
-    agency_id = Column(String(255))
 
 
 class FareRule(Base):
@@ -30,9 +30,9 @@ class FareRule(Base):
     __tablename__ = 'fare_rules'
 
     id = Column(Integer, Sequence(None, optional=True), primary_key=True)
-    fare_id = Column(String(255), index=True, nullable=False)
-    route_id = Column(String(255))
-    origin_id = Column(String(255))
-    destination_id = Column(String(255))
-    contains_id = Column(String(255))
-    service_id = Column(String(255))
+    fare_id = Column(String(512), index=True, nullable=False)
+    route_id = Column(String(512))
+    origin_id = Column(String(512))
+    destination_id = Column(String(512))
+    contains_id = Column(String(512))
+    service_id = Column(String(512))

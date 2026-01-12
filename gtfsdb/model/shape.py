@@ -17,7 +17,7 @@ class Shape(Base):
 
     __tablename__ = 'shapes'
 
-    shape_id = Column(String(255), primary_key=True, index=True)
+    shape_id = Column(String(512), primary_key=True, index=True)
     shape_pt_lat = Column(Numeric(12, 9))
     shape_pt_lon = Column(Numeric(12, 9))
     shape_pt_sequence = Column(Integer, primary_key=True, index=True)
@@ -128,7 +128,7 @@ class Shape(Base):
                         count = 0
 
         except Exception as e:
-            log.warning(e)
+            log.error(e)
             session.rollback()
         finally:
             session.commit()
