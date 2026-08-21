@@ -20,7 +20,7 @@ install_requires = [
 
 setup(
     name='gtfsdb',
-    version='0.6.0',
+    version='1.0.1',
     description='GTFS Database',
     long_description=open('README.rst').read(),
     keywords='GTFS',
