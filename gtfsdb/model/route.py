@@ -287,6 +287,12 @@ class CurrentRoutes(Base, RouteBase):
             #import pdb; pdb.set_trace()
             cls._load_geoms(db, cr_list, date)
 
+            # strip chars from route_id (e.g., can remove the appended route junk ala 200a -> 200, 57b -> 57)
+            if kwargs.get('current_tables_rid'):
+                for remove in kwargs.get('current_tables_rid'):
+                    for rte in cr_list:
+                        rte.route_id = rte.route_id.strip(remove)
+
             session.commit()
             session.flush()
         except Exception as e:
