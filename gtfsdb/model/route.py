@@ -209,11 +209,15 @@ class CurrentRoutes(Base, RouteBase):
         lazy="joined", innerjoin=True,
     )
 
+    id = Column(String(512), index=True)
+    feed_id = Column(String(512), index=True)
     route_sort_order = Column(Integer)
 
-    def __init__(self, route, def_order):
+    def __init__(self, route, def_order, def_feed_id="UNKNOWN"):
         self.route_id = route.route_id
-        self.route_sort_order = route.route_sort_order if route.route_sort_order else def_order
+        self.route_sort_order = route.route_sort_order or def_order
+        self.feed_id = route.agency.feed_id or def_feed_id
+        self.id = f"{self.feed_id}:{self.route_id}"
 
     def is_active(self, date=None):
         ret_val = True
@@ -291,7 +295,7 @@ class CurrentRoutes(Base, RouteBase):
             if kwargs.get('current_tables_rid'):
                 for remove in kwargs.get('current_tables_rid'):
                     for rte in cr_list:
-                        rte.route_id = rte.route_id.strip(remove)
+                        rte.id = rte.id.strip(remove)
 
             session.commit()
             session.flush()
