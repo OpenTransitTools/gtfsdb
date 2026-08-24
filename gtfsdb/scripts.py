@@ -16,6 +16,7 @@ def make_kwargs(args):
         is_geospatial=args.is_geospatial,
         current_tables=args.current_tables,
         current_tables_all=args.current_tables_all,
+        current_tables_rid=args.current_tables_route_id,
 
         # less used params
         do_postprocess=not args.ignore_postprocess,
@@ -26,7 +27,7 @@ def make_kwargs(args):
     return kwargs
 
 
-def get_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATABASE_URL, def_schema=config.DEFAULT_SCHEMA):
+def make_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATABASE_URL, def_schema=config.DEFAULT_SCHEMA):
     """
     database load command-line arg parser and help util...
     """
@@ -58,6 +59,8 @@ def get_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATAB
                         help="create tables that represent 'current' service (e.g., views)")
     parser.add_argument('--current_tables_all', '-cta', default=False, action='store_true',
                         help="load current tables with everything in the load tables (don't bother calculating current service)")
+    parser.add_argument('--current_tables_route_id', '-ctrid', '-rid', default=None, nargs='*',
+                        help="strip these characters from the end of a route id")
     parser.add_argument('--ignore_postprocess', '-np', default=False, action='store_true',
                         help="don't run any postprocess model routines (will leave some tables empty ... but will load raw gtfs data)")
     parser.add_argument('--ignore_blocks', '-nb', default=False, action='store_true',
@@ -78,7 +81,7 @@ def get_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATAB
 
 
 def gtfsdb_load():
-    args, kwargs = get_args()
+    args, kwargs = make_args()
     database_load(args.file, **kwargs)
 
 
@@ -87,7 +90,7 @@ def route_stop_load():
     written as a test / debug method for RS table loader
     """
     from gtfsdb import Database, RouteStop
-    kwargs = get_args()[1]
+    kwargs = make_args()[1]
     db = Database(**kwargs)
     RouteStop.load(db, **kwargs)
 
@@ -104,9 +107,9 @@ def current_tables_load(**kwargs):
 
 
 def current_tables_cmdline():
-    #import pdb; pdb.set_trace()
-    args, kwargs = get_args('gtfsdb-current-load')
+    args, kwargs = make_args('gtfsdb-current-load')
     kwargs['date'] = args.file   # hack -- optionally send string date via the 'file' cmdline param
+    #import pdb; pdb.set_trace()
     current_tables_load(**kwargs)
 
 
@@ -116,7 +119,7 @@ def db_connect_tester():
     bin/connect-tester --database_url sqlite:///gtfs.db _no_gtfs_zip_needed_
     """
     from gtfsdb import Database, Stop, Route, StopTime
-    args, kwargs = get_args('connect-tester')
+    args, kwargs = make_args('connect-tester')
     db = Database(**kwargs)
     for s in db.session.query(Stop).limit(2):
         print(s.stop_name)
