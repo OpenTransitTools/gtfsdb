@@ -3,6 +3,7 @@ from __future__ import print_function
 import argparse
 
 from gtfsdb import config
+from gtfsdb import util
 from gtfsdb.model.base import Base
 from gtfsdb.api import database_load
 
@@ -55,16 +56,22 @@ def make_args(prog_name='gtfsdb-load', do_parse=True, def_db=config.DEFAULT_DATA
                         help='print results from some sql query or data transform to cmdline')
     parser.add_argument('--ignore_stop_codes', '-nsc', default=False, action='store_true',
                         help="no public stop codes or ids should be used, so don't publish stop codes to downstream systems")
+    parser.add_argument('--ignore_postprocess', '-np', default=False, action='store_true',
+                        help="don't run any postprocess model routines (will leave some tables empty ... but will load raw gtfs data)")
+    parser.add_argument('--ignore_blocks', '-nb', default=False, action='store_true',
+                        help="don't bother populating the derived block table")
+
     parser.add_argument('--current_tables', '-ct', default=False, action='store_true',
                         help="create tables that represent 'current' service (e.g., views)")
     parser.add_argument('--current_tables_all', '-cta', default=False, action='store_true',
                         help="load current tables with everything in the load tables (don't bother calculating current service)")
     parser.add_argument('--current_tables_route_id', '-ctrid', '-rid', default=None, nargs='*',
                         help="strip these characters from the end of a route id")
-    parser.add_argument('--ignore_postprocess', '-np', default=False, action='store_true',
-                        help="don't run any postprocess model routines (will leave some tables empty ... but will load raw gtfs data)")
-    parser.add_argument('--ignore_blocks', '-nb', default=False, action='store_true',
-                        help="don't bother populating the derived block table")
+    parser.add_argument('--current_start_date', '-csd', default=None, help="optional start date for the current tables")
+    parser.add_argument('--current_end_date',   '-ced', default=None, help="optional end date for the current tables")
+    parser.add_argument('--current_start_dow', '-sdow', default="Sunday", help="dow for start of the current calculation")
+    parser.add_argument('--current_end_dow',   '-edow', default="Saturday", help="dow for ending the current calculation")
+
     if do_parse:
         args = parser.parse_args()
         kwargs = make_kwargs(args)
@@ -107,9 +114,18 @@ def current_tables_load(**kwargs):
 
 
 def current_tables_cmdline():
-    args, kwargs = make_args('gtfsdb-current-load')
-    kwargs['date'] = args.file   # hack -- optionally send string date via the 'file' cmdline param
     #import pdb; pdb.set_trace()
+    args, kwargs = make_args('gtfsdb-current-load')
+    if args.current_start_date and args.current_end_date:
+        from_date,to_date = util.check_date_range(args.current_start_date, args.current_end_date)
+    else:
+        d = args.current_start_date or args.file
+        in_date,from_date,to_date = util.get_date_range(d, args.current_start_dow, args.current_end_dow)
+
+    kwargs['from_date'] = from_date
+    kwargs['to_date'] = to_date
+    print(f"range: {kwargs.get('from_date')} to {kwargs.get('to_date')}")
+    return
     current_tables_load(**kwargs)
 
 

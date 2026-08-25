@@ -309,45 +309,59 @@ def fix_time_string(ts):
         ret_val = "0{0}".format(ts)
     return ret_val
 
+
 def todays_date(offset=0):
     return date.today() + timedelta(days=offset)
 
 
-def get_dow():
-    """ returns {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6} """
-    return {name: i for i, name in enumerate(calendar.day_name)}
+def get_dow(target_dow, def_val=6, DOW={name: i for i, name in enumerate(calendar.day_name)}):
+    """
+    returns an integer for the target_dow string
+    defaults to 6 (Sunday)
+    DOW = {'Monday': 0, ... 'Sunday': 6} 
+    """
+    return DOW.get(target_dow, def_val)
 
 
-def last_date_of(from_date=None, target_weekday='Sunday'):
+def last_date_of(date=None, target_dow='Sunday'):
     """
     find the date of the preceeding target weekday, from the input date
     e.g., if the input (or default today) is Monday 1-1-2112, and you target Sunday, you'll get 12-31-2111
     note: if your date is the same weekday as the target, you get that date returned
     """
-    if from_date is None or not isinstance(from_date, date):
-        from_date = date.today()
-    dow = get_dow()
-    offset = (from_date.weekday() - dow[target_weekday]) % 7
-    ret_val = from_date - timedelta(days=offset)
+    date = check_date(date)
+    offset = (date.weekday() - get_dow(target_dow, 6)) % 7
+    ret_val = date - timedelta(days=offset)
     return ret_val
 
 
-def next_date_of(from_date=None, target_weekday='Saturday'):
+def next_date_of(date=None, target_dow='Saturday'):
     """
     find the future date of the target weekday, from the input date
     e.g., if the input (or default today) is Thursday 12-30-2111, and you target Saturday, you'll get 1-1-2112
     note: if your date is the same weekday as the target, you get that date returned (eg Sunday 12-31-2111)
     """
-    if from_date is None or not isinstance(from_date, date):
-        from_date = date.today()
-    dow = get_dow()
-    offset = (dow[target_weekday] - from_date.weekday()) % 7
-    ret_val = from_date + timedelta(days=offset)
+    date = check_date(date)
+    offset = (get_dow(target_dow, 5) - date.weekday()) % 7
+    ret_val = date + timedelta(days=offset)
     return ret_val
 
 
-def sunday_to_saturday_date_range(from_date=None):
+def get_date_range(from_date=None, start_dow="Sunday", end_dow="Saturday"):
     """ return the dates of last Sunday and next Saturday """
-    sunday = last_date_of(from_date)
-    saturday = next_date_of(from_date)
-    return sunday, saturday
+    in_date = check_date(from_date)
+    # TODO capture a date range rather than 7 day Sun-Sat
+    from_date = last_date_of(in_date, start_dow)
+    to_date = next_date_of(in_date, end_dow)
+    print(f"N-day range for {in_date}: {from_date} ({start_dow}) to {to_date} ({end_dow})")
+    return in_date, from_date, to_date
+
+
+def check_date_range(from_date=None, to_date=None):
+    from_date = check_date(from_date)
+    to_date = check_date(to_date)
+    if from_date > to_date:
+        print(f"from date is after to date, so getting a range based on from_date")
+        in_date, from_date, to_date = get_date_range(from_date)
+    return from_date, to_date
+ 
