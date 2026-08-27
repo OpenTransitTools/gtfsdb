@@ -56,17 +56,28 @@ class RouteStop(Base, RouteStopBase):
         foreign_keys='(RouteStop.end_date)',
         uselist=True, viewonly=True)
 
-    def is_active(self, date=None):
+    def is_active(self, from_date=None, to_date=None):
         """
-        :return False whenever we see that the route_stop's start and end date are
-                outside the input date (where the input date defaults to 'today')
+        return False whenever we see that the route_stop's start and end date don't overlap the 
+        input dates, we check that the routes dates overlap with the input active from/to date range
+        also provide a check if the route only has start or end date (which is strange)
         """
-        _is_active = False
-        if self.start_date and self.end_date:
-            date = util.check_date(date)
-            if self.start_date <= date <= self.end_date:
-                _is_active = True
-        return _is_active
+        def ck_start(date): return self.start_date and self.start_date <= date
+        def ck_end(date):   return self.end_date   and date <= self.end_date
+
+        ret_val = True
+        if self.start_date or self.end_date:
+            ret_val = False
+            from_date = util.check_date(from_date)
+            to_date = util.check_date(to_date)
+            if self.start_date and self.end_date:  # keep this as nested if (don't combine due to below)
+                if self.start_date <= to_date and self.end_date >= from_date:  # range overlaps route active dates
+                    ret_val = True
+            elif ck_start(from_date) or ck_start(to_date):
+                ret_val = True
+            elif ck_end(from_date) or ck_end(to_date):
+                ret_val = True
+        return ret_val
 
     def is_valid(self):
         ret_val = True
@@ -373,16 +384,16 @@ class CurrentRouteStops(Base, RouteStopBase):
             session.query(CurrentRouteStops).delete()
 
             # filter by date, or copy all
-            # import pdb; pdb.set_trace()
-            date = util.check_date(kwargs.get('date'))
+            from_date = util.check_date(kwargs.get('from_date'))
+            to_date = util.check_date(kwargs.get('to_date'), def_val=from_date)
             filter = True
             if kwargs.get('current_tables_all'):
-                date = None
+                from_date = to_date = None
                 filter = False
 
             rs_list = session.query(RouteStop).all()
             for rs in rs_list:
-                if filter and not rs.is_active(date):
+                if filter and not rs.is_active(from_date, to_date):
                     continue
 
                 c = CurrentRouteStops(rs)

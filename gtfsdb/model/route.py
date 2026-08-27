@@ -78,23 +78,28 @@ class Route(Base, RouteBase):
         uselist=True, viewonly=True
     )
 
-    def is_active(self, date=None):
+    def is_active(self, from_date=None, to_date=None):
         """
-        :return False whenever we see that the route start and end date are outside the
-                input date (where the input date defaults to 'today')
+        return False whenever we see that the route start and end date don't overlap the input dates
+        we check that the routes dates overlap with the input active from/to date range
+        also provide a check if the route only has start or end date (which is strange)
         """
-        _is_active = True
+        def ck_start(date): return self.start_date and self.start_date <= date
+        def ck_end(date):   return self.end_date   and date <= self.end_date
+
+        ret_val = True
         if self.start_date or self.end_date:
-            _is_active = False
-            date = util.check_date(date)
+            ret_val = False
+            from_date = util.check_date(from_date)
+            to_date = util.check_date(to_date)
             if self.start_date and self.end_date:  # keep this as nested if (don't combine due to below)
-                if self.start_date <= date <= self.end_date:
-                    _is_active = True
-            elif self.start_date and self.start_date <= date:
-                _is_active = True
-            elif self.end_date and date <= self.end_date:
-                _is_active = True
-        return _is_active
+                if self.start_date <= to_date and self.end_date >= from_date:  # range overlaps route active dates
+                    ret_val = True
+            elif ck_start(from_date) or ck_start(to_date):
+                ret_val = True
+            elif ck_end(from_date) or ck_end(to_date):
+                ret_val = True
+        return ret_val
 
     @property
     def route_name(self, fmt="{self.route_short_name}-{self.route_long_name}"):
@@ -219,11 +224,11 @@ class CurrentRoutes(Base, RouteBase):
         self.feed_id = route.agency.feed_id or def_feed_id
         self.id = f"{self.feed_id}:{self.route_id}"
 
-    def is_active(self, date=None):
+    def is_active(self, from_date=None, to_date=None):
         ret_val = True
-        if date:
-            log.warning("you're calling CurrentRoutes.is_active with a date, which is both slow and redundant...")
-            ret_val = self.route.is_active(date)
+        if from_date or to_date:
+            log.warning("you're calling CurrentRoutes.is_active with date(s), which is both slow and redundant...")
+            ret_val = self.route.is_active(from_date, to_date)
         return ret_val
 
     @classmethod
@@ -233,17 +238,21 @@ class CurrentRoutes(Base, RouteBase):
         return r.route
 
     @classmethod
-    def query_active_routes(cls, session, date=None):
+    def query_active_routes(cls, session, from_date=None, to_date=None):
         """
-        wrap base active route query
-        :return list of Route orm objects
+        wrap base active routes query
+        when passed a date range, this routine will recalcuate what is active and not active from the Route table
+        (when passed a date range, this can be used to help populate the CurrentRoutes table)
+        return list of Route orm objects that look to be 'active'
         """
         ret_val = []
-        if date:
-            log.warning("you're calling CurrentRoutes.active_routes with a date, which is slow...")
-            ret_val = Route.query_active_routes(session, date)
+        if from_date or to_date:
+            log.warning("you're calling CurrentRoutes.active_routes with a date range - slow /Q because it recalcuates active routes")
+            ret_val = Route.query_active_routes(session, from_date, to_date)
         else:
             try:
+                # here we just pull what's in the CurrentRoutes table
+                # (it is 'active' in the sense of when it was last published and with what date range)
                 clist = session.query(CurrentRoutes).order_by(CurrentRoutes.route_sort_order).all()
                 for r in clist:
                     ret_val.append(r.route)
@@ -273,15 +282,15 @@ class CurrentRoutes(Base, RouteBase):
             session.query(CurrentRoutes).delete()
 
             # filter by date, or copy all
-            # import pdb; pdb.set_trace()
-            date = util.check_date(kwargs.get('date'))
+            from_date = util.check_date(kwargs.get('from_date'))
+            to_date = util.check_date(kwargs.get('to_date'), def_val=from_date)
             filter = True
             if kwargs.get('current_tables_all'):
-                date = None
+                from_date = to_date = None
                 filter = False
 
             cr_list = []
-            rte_list = Route.query_active_routes(session, date, filter)
+            rte_list = Route.query_active_routes(session, from_date, to_date, filter)
             for i, r in enumerate(rte_list):
                 c = CurrentRoutes(r, SORT_ORDER_OFFSET + i)
                 cr_list.append(c)
@@ -289,7 +298,7 @@ class CurrentRoutes(Base, RouteBase):
                 num_inserts += 1
             
             #import pdb; pdb.set_trace()
-            cls._load_geoms(db, cr_list, date)
+            cls._load_geoms(db, cr_list, from_date, to_date)
 
             # strip chars from route_id (e.g., can remove the appended route junk ala 200a -> 200, 57b -> 57)
             if kwargs.get('current_tables_rid'):

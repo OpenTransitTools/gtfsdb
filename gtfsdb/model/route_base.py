@@ -14,8 +14,7 @@ class RouteBase(object):
     """
     provides a generic set of route query routines
     """
-
-    def is_active(self, date=None):
+    def is_active(self, from_date=None, to_date=None):
         log.warning("calling abstract base class")
         return True
 
@@ -62,30 +61,30 @@ class RouteBase(object):
         return routes
 
     @classmethod
-    def query_active_routes(cls, session, date=None, active_filter=True):
+    def query_active_routes(cls, session, from_date=None, to_date=None, active_filter=True):
         """
         :return list of *active* Route orm objects queried from the db
         :note 'active' is based on date ... this routine won't deal with holes in the
               schedule (e.g., when a route is not active for a period of time, due to construction)
         """
+        # import pdb; pdb.set_trace()
         # step 1: grab all routes
         ret_val = cls.query_route_list(session)
 
         # step 2: filter routes by active date
         if active_filter:
-            ret_val = cls.filter_active_routes(ret_val, date)
+            ret_val = cls.filter_active_routes(ret_val, from_date, to_date)
         return ret_val
 
     @classmethod
-    def filter_active_routes(cls, route_list, date=None):
+    def filter_active_routes(cls, route_list, from_date=None, to_date=None):
         """
         filter an input list of route (orm) objects via is_active
-        :return new list of routes filtered by date
+        return new list of routes filtered by a date range
         """
-        # import pdb; pdb.set_trace()
         ret_val = []
         for r in route_list:
-            if r and r.is_active(date):
+            if r and r.is_active(from_date, to_date):
                 ret_val.append(r)
         return ret_val
 
@@ -95,6 +94,8 @@ class RouteBase(object):
         simple utility for quering a route from gtfsdb
         """
         ret_val = None
+        print("TBD...")
+        return ret_val
 
     @classmethod
     def query_active_route_ids(cls, session):
@@ -141,10 +142,11 @@ class RouteBase(object):
             cls.geom = deferred(Column(Geometry('MULTILINESTRING')))
 
     @classmethod
-    def _load_geoms(cls, db, route_list, date=None):
+    def _load_geoms(cls, db, route_list, from_date=None, to_date=None):
         """ load derived geometries, currently only written for PostgreSQL """
         from gtfsdb.model.pattern import Pattern
         from gtfsdb.model.trip import Trip
+        from gtfsdb.model.calendar import UniversalCalendar
 
         if db.is_geospatial and db.is_postgresql:
             start_time = time.time()
@@ -154,12 +156,11 @@ class RouteBase(object):
                 s = func.st_multi(s)
                 s = func.st_astext(s).label('geom')
                 q = session.query(s)
-                if date:
-                    q = q.filter(Pattern.trips.any(and_(Trip.route == route, Trip.universal_calendar.any(date=date))))
+                if from_date and to_date:
+                    q = q.filter(Pattern.trips.any(and_(Trip.route == route, Trip.universal_calendar.any(UniversalCalendar.date.between(from_date, to_date)))))
                 else:
                     q = q.filter(Pattern.trips.any((Trip.route == route)))
 
-                # import pdb; pdb.set_trace()
                 route.geom = q.first().geom
                 session.merge(route)
             session.commit()
