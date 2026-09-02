@@ -25,24 +25,6 @@ class StopBase(object):
             log.warning(e)
         return ret_val
 
-    """ TODO - rename / remove?
-    def active_routes(self, from_date=None, to_date=None, return_all_routes=True):
-        '''
-        this common method will call route.is_active(), which means it will probably be slow
-        note: this method, even when called from ActiveRoutes or ActiveStops, will probably be *slow*
-        '''
-        ret_val = []
-        try:
-            for r in self.routes:
-                if r.is_active(from_date, to_date):
-                    ret_val.append(r)
-                    if not return_all_routes:
-                        break
-        except Exception as e:
-            log.warning(e)
-        return ret_val
-    """
-
     @classmethod
     def add_geometry_column(cls):
         if not hasattr(cls, 'geom'):

@@ -188,21 +188,6 @@ class Stop(Base, StopBase):
             ret_val = stops
         return ret_val
 
-    """
-    TODO NEEDED?
-    @classmethod
-    def query_active_stop_ids(cls, session, limit=None, active_filter=True):
-        '''
-        return an array of stop_id / agencies pairs
-        {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
-        '''
-        ret_val = []
-        stops = cls.query_active_routes(session, limit, active_filter)
-        for s in stops:
-            ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
-        return ret_val
-    """
-
     @classmethod
     def post_make_record(cls, row, **kwargs):
         """  NOTE: this is a (derived from base.py) method to fix up stop records before committing the record to the db """
