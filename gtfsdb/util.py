@@ -364,4 +364,3 @@ def check_date_range(from_date=None, to_date=None):
         print(f"from date is after to date, so getting a range based on from_date")
         in_date, from_date, to_date = get_date_range(from_date)
     return from_date, to_date
- 

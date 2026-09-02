@@ -125,7 +125,6 @@ def current_tables_cmdline():
     kwargs['from_date'] = from_date
     kwargs['to_date'] = to_date
     print(f"range: {kwargs.get('from_date')} to {kwargs.get('to_date')}")
-    return
     current_tables_load(**kwargs)
 
 

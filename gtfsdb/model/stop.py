@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import timedelta
 
 from sqlalchemy import Column, Integer, Numeric, String
 from sqlalchemy.orm import joinedload, object_session, relationship
@@ -139,28 +140,32 @@ class Stop(Base, StopBase):
                 self._amenities = sorted(self._amenities)
         return self._amenities
 
-    def is_active(self, date=None):
+    def is_active(self, from_date=None, to_date=None):
         """
-        :return False whenever we see that the stop has zero stop_times on the given input date
-                (which defaults to 'today')
+        return False whenever we see that the stop has zero stop_times on the given input date range
 
         @NOTE: use caution with this routine.  calling this for multiple stops can really slow things down,
-               since you're querying large trip and stop_time tables, and asking for a schedule of each stop
-               I used to call this multiple times via route_stop to make sure each stop was active ... that
+               since you're querying large trip and stop_time tables over a range of dates, and asking for a schedule
+               of each stop. I used to call this multiple times via route_stop to make sure each stop was active ... that
                was really bad performance wise.
         """
+        #import pdb; pdb.set_trace()
         from gtfsdb.model.stop_time import StopTime
+        ret_val = False
 
-        # import pdb; pdb.set_trace()
-        _is_active = False
-        date = util.check_date(date)
-        st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
-        if st and len(st) > 0:
-            _is_active = True
-        return _is_active
+        from_date, to_date = util.check_date_range(from_date, to_date)
+        date = from_date
+        while date <= to_date:
+            st = StopTime.get_departure_schedule(self.session, self.stop_id, date, limit=1)
+            if st and len(st) > 0:
+                ret_val = True
+                break
+            date += timedelta(days=1)
+
+        return ret_val
 
     @classmethod
-    def query_active_stops(cls, session, limit=None, location_types=[0], active_filter=True, date=None):
+    def query_active_stops(cls, session, limit=None, location_types=[0], active_filter=True, from_date=None, to_date=None):
         """
         check for active stops
         """
@@ -177,23 +182,26 @@ class Stop(Base, StopBase):
         if active_filter:
             ret_val = []
             for s in stops:
-                if s.is_active(date):
+                if s.is_active(from_date, to_date):
                     ret_val.append(s)
         else:
             ret_val = stops
         return ret_val
 
+    """
+    TODO NEEDED?
     @classmethod
     def query_active_stop_ids(cls, session, limit=None, active_filter=True):
-        """
+        '''
         return an array of stop_id / agencies pairs
         {stop_id:'2112', agencies:['C-TRAN', 'TRIMET']}
-        """
+        '''
         ret_val = []
-        stops = cls.query_active_stops(session, limit, active_filter)
+        stops = cls.query_active_routes(session, limit, active_filter)
         for s in stops:
             ret_val.append({"stop_id": s.stop_id, "agencies": s.agencies})
         return ret_val
+    """
 
     @classmethod
     def post_make_record(cls, row, **kwargs):
@@ -223,6 +231,8 @@ class CurrentStops(Base, StopBase):
     stop_lon = Column(Numeric(12, 9), nullable=False)
     stop_name = Column(String(512), nullable=False)
 
+    id = Column(String(512))
+    feed_id = Column(String(512))
     agency_id = Column(String(512))
     agency_idz = Column(String(1024))
     route_idz  = Column(String(1024))
@@ -243,13 +253,15 @@ class CurrentStops(Base, StopBase):
         lazy="joined", innerjoin=True,
     )
 
-    def __init__(self, stop, session):
+    def __init__(self, stop, session, feed_id="UNKNOWN"):
         """
         create a CurrentStop record from a stop record
         :param stop:
         :param session:
         """
         self.stop_id = stop.stop_id
+        self.feed_id = feed_id
+        self.id = f"{self.feed_id}:{self.stop_id}"
         self.stop_code = stop.stop_code
         self.stop_name = stop.stop_name
         self.location_type = stop.location_type
@@ -315,13 +327,14 @@ class CurrentStops(Base, StopBase):
 
             # filter by date, or copy all
             # import pdb; pdb.set_trace()
-            date = util.check_date(kwargs.get('date'))
+            from_date = util.check_date(kwargs.get('from_date'))
+            to_date = util.check_date(kwargs.get('to_date'), def_val=from_date)
             filter = True
             if kwargs.get('current_tables_all'):
-                date = None
+                from_date = to_date = None
                 filter = False
 
-            stops = Stop.query_active_stops(session, date=date, active_filter=filter)
+            stops = Stop.query_active_stops(session, from_date=from_date, to_date=to_date, active_filter=filter)
             for s in stops:
                 c = CurrentStops(s, session)
                 session.add(c)
