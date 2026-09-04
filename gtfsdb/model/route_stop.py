@@ -90,30 +90,30 @@ class RouteStop(Base, RouteStopBase):
         return ret_val
 
     @classmethod
-    def is_stop_active(cls, session, stop_id, agency_id=None, date=None):
+    def is_stop_active(cls, session, stop_id, date=None):
         """
         returns boolean whether given stop id is active for a given date
         """
         ret_val = False
-        rs = RouteStop.query_by_stop(session, stop_id, agency_id, date, 1)
+        rs = RouteStop.query_by_stop(session, stop_id, date, 1)
         if rs and len(rs) > 0:
             ret_val = True
         return ret_val
 
     @classmethod
-    def active_unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
+    def active_unique_routes_at_stop(cls, session, stop_id, date=None, route_name_filter=False):
         """
         to filter active routes, just provide a date to the above unique_routes_at_stop method
         """
         ret_val = []
-        routes = cls.unique_routes_at_stop(session, stop_id, agency_id, date, route_name_filter)
+        routes = cls.unique_routes_at_stop(session, stop_id, date, route_name_filter)
         for r in routes:
             if r.is_active(date):
                 ret_val.append(r)
         return ret_val
 
     @classmethod
-    def query_active_stops(cls, session, route_id, direction_id=None, agency_id=None, date=None):
+    def query_active_stops(cls, session, route_id, direction_id=None, date=None):
         """
         returns list of routes that are seen as 'active' based on dates and filters
         """
@@ -122,14 +122,10 @@ class RouteStop(Base, RouteStopBase):
         # step 1: default date
         date = util.check_date(date)
 
-        # step 2a: query all route stops by route (and maybe direction and agency
+        # step 2a: query all route stops by route (and maybe direction
         q = session.query(RouteStop).filter(RouteStop.route_id == route_id)
         if direction_id is not None:
             q = q.filter(RouteStop.direction_id == direction_id)
-        if agency_id is not None:
-            pass
-            # TODO ... agency_id not in RouteStop -- should this even be here?
-            # q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2b: filter based on date
         q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
@@ -328,9 +324,9 @@ class CurrentRouteStops(Base, RouteStopBase):
 
     route_id = Column(String(512), index=True, nullable=False)
     route = relationship(
-        'Route',
-        primaryjoin='Route.route_id==CurrentRouteStops.route_id',
-        foreign_keys='(Route.route_id)',
+        'CurrentRoutes',
+        primaryjoin='CurrentRoutes.route_id==CurrentRouteStops.route_id',
+        foreign_keys='(CurrentRoutes.route_id)',
         uselist=False, viewonly=True, lazy='joined'
     )
 
@@ -351,17 +347,13 @@ class CurrentRouteStops(Base, RouteStopBase):
         self.order = route_stop.order
 
     @classmethod
-    def query_by_stop(cls, session, stop_id, agency_id=None, date=None, count=None, sort=False):
+    def query_by_stop(cls, session, stop_id, count=None, sort=False):
         """
         get all route stop records by looking for a given stop_id.
-        further filtering can be had by providing an active date and agency id
+        further filtering can be had by providing an active date
         """
         # step 1: query stop id
         q = session.query(CurrentRouteStops).filter(CurrentRouteStops.stop_id == stop_id)
-        if agency_id is not None:
-            pass
-            # TODO ... agency_id not in RouteStop -- should this even be here?
-            # q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2: sort the results based on order column
         if sort:

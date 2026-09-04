@@ -23,7 +23,6 @@ class RouteStopBase(object):
                     break
         return _is_arrival
 
-
     @classmethod
     def query_route_short_names(cls, session, stop, filter_active=False):
         """
@@ -31,7 +30,7 @@ class RouteStopBase(object):
         """
         from .route_stop import RouteStop
 
-        # import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         # step 1: create a short_names list
         short_names = []
 
@@ -45,7 +44,7 @@ class RouteStopBase(object):
         for r in routes:
             if filter_active and r.is_active() is False:
                 continue
-            sn = {'route': r, 'route_id': r.route_id, 'type': r.type, 'route_type': r.type.route_type, 'otp_type': r.type.otp_type, 'route_short_name': r.make_route_short_name(r)}
+            sn = r.get_info()
             short_names.append(sn)
 
         return short_names
@@ -66,17 +65,15 @@ class RouteStopBase(object):
         return ret_val
 
     @classmethod
-    def query_by_stop(cls, session, stop_id, agency_id=None, date=None, count=None, sort=False):
+    def query_by_stop(cls, session, stop_id, date=None, count=None, sort=False):
         """
         get all route stop records by looking for a given stop_id.
-        further filtering can be had by providing an active date and agency id
+        further filtering can be had by providing an active date
         """
         from .route_stop import RouteStop
 
-        # step 1: query all route stops by stop id (and maybe agency)
+        # step 1: query all route stops by stop id
         q = session.query(RouteStop).filter(RouteStop.stop_id == stop_id)
-        if agency_id is not None:
-            q = q.filter(RouteStop.agency_id == agency_id)
 
         # step 2: filter based on date
         if date:
@@ -95,17 +92,17 @@ class RouteStopBase(object):
         return ret_val
 
     @classmethod
-    def unique_routes_at_stop(cls, session, stop_id, agency_id=None, date=None, route_name_filter=False):
+    def unique_routes_at_stop(cls, session, stop_id, date=None, route_name_filter=False):
         """
         get a unique set of route records by looking for a given stop_id.
-        further filtering can be had by providing an active date and agency id, and route name
+        further filtering can be had by providing an active date, and route name
         """
         ret_val = []
 
         route_ids = []
         route_names = []
 
-        route_stops = cls.query_by_stop(session, stop_id, agency_id, date, sort=True)
+        route_stops = cls.query_by_stop(session, stop_id, date, sort=True)
         for rs in route_stops:
             # step 1: filter(s) check against hashtable
             if rs.route_id in route_ids:

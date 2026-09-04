@@ -48,7 +48,7 @@ class RouteBase(object):
         return ret_val
 
     @classmethod
-    def query_route_list(cls, session):
+    def query_route_list(cls, session, num_routes=-111):
         """
         :return list of *all* Route orm objects queried from the db
         """
@@ -56,9 +56,13 @@ class RouteBase(object):
         from .route import RouteFilter
         routes = session.query(cls)\
             .filter(~cls.route_id.in_(session.query(RouteFilter.route_id)))\
-            .order_by(cls.route_sort_order)\
-            .all()
-        return routes
+            .order_by(cls.route_sort_order)
+
+        # optionally limit the number of routes returned
+        if num_routes > 0 and num_routes < 10000:
+            routes = routes.limit(num_routes)
+
+        return routes.all()
 
     @classmethod
     def query_active_routes(cls, session, from_date=None, to_date=None, active_filter=True):
@@ -129,11 +133,23 @@ class RouteBase(object):
                 ret_val = "WES"
             # fix Portland Aerial Tram
             if ret_val and ret_val == 'Portland Aerial Tram':
-                ret_val = "Aerial Tram"
+                ret_val = "AT"
         except Exception as e:
             log.warning(e)
 
         return ret_val
+
+    @classmethod
+    def get_route_info(cls, route):
+        info = {
+            'route': route, 'route_id': route.route_id,
+            'type': route.type, 'route_type': route.type.route_type, 'otp_type': route.type.otp_type,
+            'route_short_name': route.make_route_short_name(route)
+        }
+        return info
+
+    def get_info(self):
+        return self.get_route_info(self)
 
     @classmethod
     def add_geometry_column(cls):

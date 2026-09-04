@@ -104,7 +104,8 @@ class Stop(Base, StopBase):
             if self.routes:
                 for r in self.routes:
                     if r.agency_id not in self._agencies:
-                        self.agencies.append(r.agency_id)
+                        self._agencies.append(r.agency_id)
+
         return self._agencies
 
     @property
@@ -153,6 +154,7 @@ class Stop(Base, StopBase):
         from gtfsdb.model.stop_time import StopTime
         ret_val = False
 
+        # loop thru the date range, looking for some stop time to figure if this stop is active
         from_date, to_date = util.check_date_range(from_date, to_date)
         date = from_date
         while date <= to_date:
@@ -238,12 +240,13 @@ class CurrentStops(Base, StopBase):
         lazy="joined", innerjoin=True,
     )
 
-    def __init__(self, stop, session, feed_id="UNKNOWN"):
+    def __init__(self, stop, feed_id="UNKNOWN"):
         """
         create a CurrentStop record from a stop record
         :param stop:
         :param session:
         """
+        self.stop = stop
         self.stop_id = stop.stop_id
         self.feed_id = feed_id
         self.id = f"{self.feed_id}:{self.stop_id}"
@@ -258,14 +261,14 @@ class CurrentStops(Base, StopBase):
         if hasattr(stop, 'geom') and hasattr(self, 'geom'):
             self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
 
-        from .route_stop import CurrentRouteStops
-        rs_list = CurrentRouteStops.query_route_short_names(session, stop, filter_active=True)
-        self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
-        self._set_route_info(rs_list)
-
-    def _set_route_info(self, rs_list):
+    def set_route_info(self, session, from_date=None, to_date=None):
         agencyz = ""
         routez  = ""
+
+        # TODO ... needs to be date based, so we can look back / forward
+        from .route_stop import CurrentRouteStops
+        rs_list = CurrentRouteStops.query_route_short_names(session, self.stop, filter_active=True)
+        self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
 
         for rs in rs_list:
             # import pdb; pdb.set_trace()
@@ -310,8 +313,14 @@ class CurrentStops(Base, StopBase):
         try:
             session.query(CurrentStops).delete()
 
-            # filter by date, or copy all
-            # import pdb; pdb.set_trace()
+            # get feed id (from routes)
+            #import pdb; pdb.set_trace()
+            from .route import CurrentRoutes
+            rte = CurrentRoutes.query_route_list(session, 1)
+            feed_id = rte[0].feed_id
+
+            # filter by date range, or copy all stops to current table
+            #import pdb; pdb.set_trace()
             from_date = util.check_date(kwargs.get('from_date'))
             to_date = util.check_date(kwargs.get('to_date'), def_val=from_date)
             filter = True
@@ -321,7 +330,8 @@ class CurrentStops(Base, StopBase):
 
             stops = Stop.query_active_stops(session, from_date=from_date, to_date=to_date, active_filter=filter)
             for s in stops:
-                c = CurrentStops(s, session)
+                c = CurrentStops(s, feed_id)
+                c.set_route_info(session)
                 session.add(c)
 
             session.commit()

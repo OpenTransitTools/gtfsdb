@@ -231,6 +231,12 @@ class CurrentRoutes(Base, RouteBase):
             ret_val = self.route.is_active(from_date, to_date)
         return ret_val
 
+    def get_info(self):
+        ret_val = self.get_route_info(self)
+        ret_val['id'] = self.id
+        ret_val['feed_id'] = self.feed_id
+        return ret_val
+
     @classmethod
     def query_route(cls, session, route_id, detailed=False):
         """ get a gtfsdb Route object from the db """
