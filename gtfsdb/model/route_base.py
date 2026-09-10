@@ -141,7 +141,12 @@ class RouteBase(object):
 
     @classmethod
     def get_route_info(cls, route):
+        id = route.id if hasattr(route, 'id') else route.route_id
+        if hasattr(route, 'route'):
+            route = route.route  # this looks like a route subclass, ala CurrentRoute
+
         info = {
+            'id': id,
             'route': route, 'route_id': route.route_id,
             'type': route.type, 'route_type': route.type.route_type, 'otp_type': route.type.otp_type,
             'route_short_name': route.make_route_short_name(route)
@@ -150,6 +155,20 @@ class RouteBase(object):
 
     def get_info(self):
         return self.get_route_info(self)
+
+    def get_id(self, stripz=None):
+        #import pdb; pdb.set_trace()
+        if not hasattr(self, 'id'):
+            route_id = self.route_id
+
+            # strip chars from route_id (e.g., remove any appended route id junk ala 200a -> 200, 57b -> 57)
+            if stripz and isinstance(stripz, list):
+                for s in stripz:
+                    route_id = route_id.strip(s)
+
+            self.id = f"{self.agency.feed_id}:{route_id}"
+
+        return self.id
 
     @classmethod
     def add_geometry_column(cls):

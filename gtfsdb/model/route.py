@@ -218,11 +218,11 @@ class CurrentRoutes(Base, RouteBase):
     feed_id = Column(String(512), index=True)
     route_sort_order = Column(Integer)
 
-    def __init__(self, route, def_order, def_feed_id="UNKNOWN"):
+    def __init__(self, route, def_order, def_feed_id="UNKNOWN", stripz=None):
         self.route_id = route.route_id
         self.route_sort_order = route.route_sort_order or def_order
         self.feed_id = route.agency.feed_id or def_feed_id
-        self.id = f"{self.feed_id}:{self.route_id}"
+        self.id = route.get_id(stripz)
 
     def is_active(self, from_date=None, to_date=None):
         ret_val = True
@@ -298,19 +298,13 @@ class CurrentRoutes(Base, RouteBase):
             cr_list = []
             rte_list = Route.query_active_routes(session, from_date, to_date, filter)
             for i, r in enumerate(rte_list):
-                c = CurrentRoutes(r, SORT_ORDER_OFFSET + i)
+                c = CurrentRoutes(r, SORT_ORDER_OFFSET + i, stripz=kwargs.get('current_tables_rid'))
                 cr_list.append(c)
                 session.add(c)
                 num_inserts += 1
             
             #import pdb; pdb.set_trace()
             cls._load_geoms(db, cr_list, from_date, to_date)
-
-            # strip chars from route_id (e.g., can remove the appended route junk ala 200a -> 200, 57b -> 57)
-            if kwargs.get('current_tables_rid'):
-                for remove in kwargs.get('current_tables_rid'):
-                    for rte in cr_list:
-                        rte.id = rte.id.strip(remove)
 
             session.commit()
             session.flush()

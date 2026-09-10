@@ -86,7 +86,7 @@ class RouteStop(Base, RouteStopBase):
         return ret_val
 
     def get_id(self):
-        ret_val = "r:{0} d:{1} s:{2}".format(self.route_id, self.direction_id, self.stop_id)
+        ret_val = f"r:{self.route_id} d:{self.direction_id} s:{self.stop_id}"
         return ret_val
 
     @classmethod
@@ -95,7 +95,7 @@ class RouteStop(Base, RouteStopBase):
         returns boolean whether given stop id is active for a given date
         """
         ret_val = False
-        rs = RouteStop.query_by_stop(session, stop_id, date, 1)
+        rs = cls.query_by_stop(session, stop_id, date, 1)
         if rs and len(rs) > 0:
             ret_val = True
         return ret_val
@@ -124,11 +124,12 @@ class RouteStop(Base, RouteStopBase):
 
         # step 2a: query all route stops by route (and maybe direction
         q = session.query(RouteStop).filter(RouteStop.route_id == route_id)
-        if direction_id is not None:
+        if direction_id:
             q = q.filter(RouteStop.direction_id == direction_id)
 
         # step 2b: filter based on date
-        q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
+        if date:
+            q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
 
         # step 2c: add some stop order
         q = q.order_by(RouteStop.order)
@@ -347,7 +348,7 @@ class CurrentRouteStops(Base, RouteStopBase):
         self.order = route_stop.order
 
     @classmethod
-    def query_by_stop(cls, session, stop_id, count=None, sort=False):
+    def query_by_stop(cls, session, stop_id, date=None, count=None, sort=False):
         """
         get all route stop records by looking for a given stop_id.
         further filtering can be had by providing an active date

@@ -261,30 +261,30 @@ class CurrentStops(Base, StopBase):
         if hasattr(stop, 'geom') and hasattr(self, 'geom'):
             self.geom = util.Point.make_geo(stop.stop_lon, stop.stop_lat, config.SRID)
 
-    def set_route_info(self, session, from_date=None, to_date=None):
+    def set_route_info(self, session, stripz=None, sep=","):
         agencyz = ""
         routez  = ""
 
-        # TODO ... needs to be date based, so we can look back / forward
         from .route_stop import CurrentRouteStops
-        rs_list = CurrentRouteStops.query_route_short_names(session, self.stop, filter_active=True)
+        rs_list = CurrentRouteStops.query_route_short_names(session, self.stop, filter_active=False)  # filter_active false, since CurrentStops already calc'd active
         self.route_short_names = CurrentRouteStops.to_route_short_names_as_string(rs_list)
 
         for rs in rs_list:
-            # import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             try:
                 type = rs.get('type')
                 route = rs.get('route')
+                id = rs.get('id') or route.get_id(stripz)
 
                 # capture agency and route id(s)
                 if self.agency_id is None:
                     self.agency_id = route.agency_id
                     agencyz = route.agency_id
-                    routez  = "{}:{}".format(route.agency_id, route.route_id)
+                    routez  = id
                 else:
-                    routez  = "{},{}:{}".format(routez, route.agency_id, route.route_id)
+                    routez  = f"{routez}{sep}{id}"
                     if route.agency_id not in agencyz:
-                        agencyz = "{},{}".format(agencyz, route.agency_id)
+                        agencyz = f"{agencyz}{sep}{route.agency_id}"
 
                 # convoluted route type assignment ... handle conditon where multiple modes (limited to 2) serve same stop
                 if self.route_mode is None:
@@ -331,7 +331,7 @@ class CurrentStops(Base, StopBase):
             stops = Stop.query_active_stops(session, from_date=from_date, to_date=to_date, active_filter=filter)
             for s in stops:
                 c = CurrentStops(s, feed_id)
-                c.set_route_info(session)
+                c.set_route_info(session, stripz=kwargs.get('current_tables_rid'))
                 session.add(c)
 
             session.commit()

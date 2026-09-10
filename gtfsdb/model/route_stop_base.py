@@ -28,17 +28,13 @@ class RouteStopBase(object):
         """
         :return an array of short names and types
         """
-        from .route_stop import RouteStop
-
         #import pdb; pdb.set_trace()
         # step 1: create a short_names list
         short_names = []
 
         # step 2: use either route-dao list or find the active stops
-        routes = stop.routes
-        if routes is None or len(routes) == 0:
-            routes = RouteStop.active_unique_routes_at_stop(session, stop_id=stop.stop_id)
-            routes.sort(key=lambda x: x.route_sort_order, reverse=False)
+        routes = cls.unique_routes_at_stop(session, stop_id=stop.stop_id)
+        routes.sort(key=lambda x: x.route_sort_order, reverse=False)
 
         # step 3: build the short names list
         for r in routes:
@@ -70,19 +66,18 @@ class RouteStopBase(object):
         get all route stop records by looking for a given stop_id.
         further filtering can be had by providing an active date
         """
-        from .route_stop import RouteStop
-
+        #import pdb; pdb.set_trace()
         # step 1: query all route stops by stop id
-        q = session.query(RouteStop).filter(RouteStop.stop_id == stop_id)
+        q = session.query(cls).filter(cls.stop_id == stop_id)
 
         # step 2: filter based on date
-        if date:
+        if date and hasattr(cls, 'start_date') and hasattr(cls, 'end_date'):
             date = util.check_date(date)
-            q = q.filter(RouteStop.start_date <= date).filter(date <= RouteStop.end_date)
+            q = q.filter(cls.start_date <= date).filter(date <= cls.end_date)
 
         # step 3: sort the results based on order column
         if sort:
-            q = q.order_by(RouteStop.order)
+            q = q.order_by(cls.order)
 
         # step 4: limit the number of objects returned by query
         if count:
@@ -104,15 +99,18 @@ class RouteStopBase(object):
 
         route_stops = cls.query_by_stop(session, stop_id, date, sort=True)
         for rs in route_stops:
-            # step 1: filter(s) check against hashtable
+            # step 1: filter against hashtable of route ids (no dupes)
             if rs.route_id in route_ids:
                 continue
-            if route_name_filter and rs.route.route_name in route_names:
-                continue
+
+            # step 2: filter route names (no dupe of routes by name)
+            if route_name_filter and hasattr(rs.route, 'route_name'):
+                if rs.route.route_name in route_names:
+                    continue
+                route_names.append(rs.route.route_name)
 
             # step 2: add route attributes to cache hash-tables for later filtering (e.g. see filters above)
             route_ids.append(rs.route_id)
-            route_names.append(rs.route.route_name)
 
             # step 3: this route is unique, so append route object to results
             ret_val.append(rs.route)
